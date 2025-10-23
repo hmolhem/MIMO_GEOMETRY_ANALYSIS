@@ -1,0 +1,32 @@
+# analysis_scripts/run_ula_demo.py
+
+import os
+import sys
+# Add the project root to the path to enable absolute imports
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Import the specific processor class
+from geometry_processors.ula_processor import ULArrayProcessor
+
+def main():
+    """Initializes and runs the analysis for a ULA."""
+    
+    print("--- Starting ULA (N=4) Analysis Demo ---")
+    
+    # Instantiate the processor: ULA with N=4 sensors, spacing d=1.0
+    ula_processor = ULArrayProcessor(M=4, d=1.0)
+    
+    # Run the full analysis pipeline
+    analysis_results = ula_processor.run_full_analysis()
+    
+    # Display the final summary
+    print("\n" + "="*40)
+    print("      FINAL PERFORMANCE SUMMARY")
+    print("="*40)
+    print(analysis_results.performance_summary_table.to_markdown(index=False))
+    
+    # (Optional: Code to save plots or summary table to the 'results/' folder would go here)
+    
+
+if __name__ == "__main__":
+    main()
