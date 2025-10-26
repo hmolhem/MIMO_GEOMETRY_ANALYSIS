@@ -11,7 +11,7 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
     Key Properties: w(1)=0, w(2)=1, w(3)=2 (for N>=5).
     Aperture: 4N-8.
     """
-    def __init__(self, N: int, d: float = 1.0):
+    def __init__(self, N: int, d: int = 1):
         if N < 5:
             raise ValueError("Z3(2) Array requires N >= 5 sensors.")
             

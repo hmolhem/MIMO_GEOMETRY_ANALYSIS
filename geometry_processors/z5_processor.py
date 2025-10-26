@@ -11,7 +11,7 @@ class Z5ArrayProcessor(BaseArrayProcessor):
     Key Properties: w(1)=0, w(2)=0. Designed to minimize w(3), w(4).
     Aperture: 4N-5.
     """
-    def __init__(self, N: int, d: float = 1.0):
+    def __init__(self, N: int, d: int = 1):
         # The paper assumes N >= 5 for general expressions to be valid
         if N < 5:
             raise ValueError("Z5 Array requires N >= 5 sensors for a valid construction.")

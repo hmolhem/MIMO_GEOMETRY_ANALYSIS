@@ -5,10 +5,11 @@
 This project analyzes MIMO radar array geometries through a **difference coarray analysis pipeline**. The core concept: compute pairwise differences between sensor positions to derive virtual sensor arrays with enhanced degrees of freedom.
 
 **Key Components:**
-- `geometry_processors/bases_classes.py` - Abstract framework defining the 7-step analysis pipeline
-- `geometry_processors/ula_processors.py` - Concrete ULA (Uniform Linear Array) implementation  
-- `analysis_scripts/` - Entry points for running specific array configurations
-- `results/plots/` & `results/summaries/` - Output directories for visualizations and data
+- `geometry_processors/bases_classes.py` - Abstract framework with `ArraySpec` data container (47 attributes) and `BaseArrayProcessor` (7 abstract methods)
+- `geometry_processors/*.py` - 8+ concrete array implementations (ULA, Nested, Z1-Z6 specialized arrays)
+- `analysis_scripts/` - Standalone demos with proper Python path setup
+- `results/` - Auto-generated outputs (plots/, summaries/, method_test_log.txt)
+- `mimo-geom-dev/` - Local Python virtual environment (Python 3.13.0)
 
 ## Core Analysis Pipeline
 
@@ -37,26 +38,32 @@ The `ArraySpec` class serves as a structured data container with **47 pre-define
 All processors return `ArraySpec` objects. Access results via the `.data` attribute:
 
 ```python
-processor = ULArrayProcessor(M=4, d=1.0)
+processor = ULArrayProcessor(M=4, d=1)
 results = processor.run_full_analysis()
 print(results.performance_summary_table.to_markdown(index=False))
 ```
 
-## Critical Dependencies
+## Critical Dependencies & Environment
 
-**Missing Import Declarations:** The codebase uses NumPy (`np.`) and Pandas (`pd.`) extensively but lacks explicit imports in `ula_processors.py`. Always add:
+**Environment Setup:** Project uses local virtual environment `mimo-geom-dev/` with Python 3.13.0. Key dependencies:
+```python
+numpy>=1.21.0  # Core array operations
+pandas>=1.3.0  # Performance summary tables
+matplotlib>=3.5.0  # Visualization (minimal usage)
+```
 
+**Import Patterns:** All concrete processors already include required imports:
 ```python
 import numpy as np
 import pandas as pd
+from .bases_classes import BaseArrayProcessor
 ```
 
-**Path Setup Pattern:** Analysis scripts use relative imports via sys.path manipulation:
-
+**Path Setup Pattern:** All analysis scripts use standardized relative import setup:
 ```python
-import sys
-import os
+import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from geometry_processors.{processor_name} import {ProcessorClass}
 ```
 
 ## Radar Domain Specifics
@@ -75,24 +82,38 @@ Key metrics in `performance_summary_table`:
 
 ## Development Workflows
 
+### Available Array Types (8 Implementations)
+- **ULA** (`ULArrayProcessor`) - `ULArrayProcessor(M=4, d=1)`
+- **Nested** (`NestedArrayProcessor`) - `NestedArrayProcessor(N1=2, N2=3, d=1)`
+- **Z1-Z6 Specialized Arrays** (`Z1ArrayProcessor`, `Z3_1ArrayProcessor`, etc.)
+
 ### Adding New Array Types
 1. Inherit from `BaseArrayProcessor` in `geometry_processors/`
-2. Implement all 7 abstract methods (see ULA example)
+2. Implement all 7 abstract methods following this pattern:
+   ```python
+   class NewArrayProcessor(BaseArrayProcessor):
+       def __init__(self, custom_params):
+           positions = # compute sensor positions
+           super().__init__(name="CustomArray", array_type="Custom", sensor_positions=positions)
+   ```
 3. Focus on `compute_all_differences()` - core algorithm varies by geometry
-4. Create analysis script in `analysis_scripts/` with proper path setup
+4. Create demo script in `analysis_scripts/` with standardized path setup
 
-### Running Analysis
+### Running Analysis & Testing
 ```python
 # Standard pattern for all array types
-processor = ArrayProcessor(params)
-results = processor.run_full_analysis() 
-# Results automatically saved to results.data.performance_summary_table
+processor = ProcessorClass(params)
+results = processor.run_full_analysis()  # Returns ArraySpec with .data attribute
+print(results.performance_summary_table.to_markdown(index=False))
 ```
 
+**Method Testing:** Use `analysis_scripts/methods_demo.py` for comprehensive method validation - generates `results/method_test_log.txt` with detailed test results for all abstract method implementations.
+
 ### Output Management
-- Use `results/plots/` for matplotlib visualizations
-- Use `results/summaries/` for CSV/Excel exports of performance tables
-- The `plot_coarray()` method currently shows console visualization - extend for matplotlib
+- `results/plots/` - For matplotlib visualizations (currently minimal)
+- `results/summaries/` - For CSV/Excel exports of performance tables  
+- `results/method_test_log.txt` - Automated testing log from methods_demo.py
+- `plot_coarray()` uses console ASCII visualization - extend for matplotlib as needed
 
 ## Extension Points
 
