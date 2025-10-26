@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import the specific processor class
-from geometry_processors.ula_processor import ULArrayProcessor
+from geometry_processors.ula_processors import ULArrayProcessor
 
 def main():
     """Initializes and runs the analysis for a ULA."""
@@ -14,7 +14,7 @@ def main():
     print("--- Starting ULA (N=4) Analysis Demo ---")
     
     # Instantiate the processor: ULA with N=4 sensors, spacing d=1.0
-    ula_processor = ULArrayProcessor(M=4, d=1.0)
+    ula_processor = ULArrayProcessor(M=4, d=1)
     
     # Run the full analysis pipeline
     analysis_results = ula_processor.run_full_analysis()
@@ -26,7 +26,7 @@ def main():
     print(analysis_results.performance_summary_table.to_markdown(index=False))
     
     # (Optional: Code to save plots or summary table to the 'results/' folder would go here)
-    
+    print(ula_processor.data.all_differences_table)
 
 if __name__ == "__main__":
     main()
