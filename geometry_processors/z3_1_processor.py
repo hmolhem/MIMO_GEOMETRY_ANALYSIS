@@ -10,7 +10,7 @@ class Z3_1ArrayProcessor(BaseArrayProcessor):
     Z3(1) Array: 4-Sparse ULA of (N-3) sensors + 3 Augmented Sensors.
     Key Properties: w(1)=0, w(2)=2, w(3)=1 (for N>=5).
     """
-    def __init__(self, N: int, d: float = 1.0):
+    def __init__(self, N: int, d: int = 1):
         if N < 5:
             raise ValueError("Z3(1) Array requires N >= 5 sensors.")
             

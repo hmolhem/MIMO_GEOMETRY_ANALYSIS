@@ -10,7 +10,7 @@ class Z1ArrayProcessor(BaseArrayProcessor):
     Z1 Array: 2-Sparse ULA of (N-1) sensors + 1 Augmented Sensor.
     Key Property: w(1) = 0.
     """
-    def __init__(self, N: int, d: float = 1.0):
+    def __init__(self, N: int, d: int = 1):
         if N < 3:
             raise ValueError("Z1 Array requires N >= 3 sensors for meaningful sparse definition.")
             

@@ -10,7 +10,7 @@ class NestedArrayProcessor(BaseArrayProcessor):
     Concrete implementation for a standard Nested Array (NA).
     Achieves O(N^2) degrees of freedom with a contiguous coarray.
     """
-    def __init__(self, N1: int, N2: int, d: int = 1.0):
+    def __init__(self, N1: int, N2: int, d: int = 1):
         
         # 1. Calculate the sensor positions
         self.N1 = N1

@@ -41,6 +41,9 @@ results/plots/*.jpg
 results/summaries/*.csv
 results/summaries/*.xlsx
 
+# Mini scripts folder (ignored from tracking)
+miniScript/
+
 # Data files (if large)
 data/*.dat
 data/*.bin

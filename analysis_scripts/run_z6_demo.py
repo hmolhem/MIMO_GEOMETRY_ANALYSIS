@@ -20,7 +20,7 @@ def main():
     print(f"--- Starting Array Z6 (N={N_sensors}) Analysis Demo ---")
     
     # Instantiate the processor: Array Z6
-    z6_processor = Z6ArrayProcessor(N=N_sensors, d=1.0)
+    z6_processor = Z6ArrayProcessor(N=N_sensors, d=1)
     
     # Run the full analysis pipeline
     analysis_results = z6_processor.run_full_analysis()

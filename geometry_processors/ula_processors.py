@@ -7,7 +7,7 @@ class ULArrayProcessor(BaseArrayProcessor):
     Concrete implementation for a Uniform Linear Array (ULA).
     Inherits from BaseArrayProcessor and implements all abstract methods.
     """
-    def __init__(self, M: int, d: int = 1.0):
+    def __init__(self, M: int, d: int = 1):
         # Generate ULA positions: [0, d, 2d, ..., (M-1)d]
         positions = np.arange(M) * d
         super().__init__(
