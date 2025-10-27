@@ -128,39 +128,65 @@ class NestedArrayProcessor(BaseArrayProcessor):
         print("-" * 50)
         
     def compute_weight_distribution(self):
-        """4.1, 4.2. Calculates the weight (count) of each unique lag."""
-        all_diffs = self.data.all_differences_with_duplicates
-        lags, counts = np.unique(all_diffs, return_counts=True)
-        
-        # Create a dictionary for quick lookup
-        weight_dict = dict(zip(lags, counts))
-        
-        # Match weights to the sorted unique_differences array
-        weights = [weight_dict.get(lag, 0) for lag in self.data.unique_differences]
-        self.data.coarray_weight_distribution = np.array(weights)
-        
-        # 4.1. weight_table 
+        """
+        Count the occurrences of each integer lag (w(k)).
+        For ULA, the closed form is w(k) = N_total - |k| for k in [-(N-1)..(N-1)].
+        """
+
+        lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
+        uniq, counts = np.unique(lags, return_counts=True)
+
+        # Store a weight vector aligned to unique_differences
+        weight_dict = dict(zip(uniq.tolist(), counts.tolist()))
+        weights = [weight_dict.get(int(k), 0) for k in self.data.unique_differences]
+        self.data.coarray_weight_distribution = np.asarray(weights, dtype=int)
+
+        # Also keep a small table (named columns for robustness)
         self.data.weight_table = pd.DataFrame({
-            'Lag (Difference)': lags, 
-            'Count (Weight)': counts
+            "Lag": uniq.astype(int),
+            "Weight": counts.astype(int)
         })
 
+
     def analyze_contiguous_segments(self):
-        """5.1-5.7. Identifies the contiguous segment and K_max."""
-        coarray = self.data.coarray_positions
-        L = len(coarray)
-        
-        self.data.all_contiguous_segments = [coarray]
-        self.data.largest_contiguous_segment = coarray 
-        self.data.shortest_contiguous_segment = coarray
-        self.data.segment_lengths = [L]
-        self.data.max_detectable_sources = np.floor(L / 2.0).astype(int)
-        self.data.segment_ranges = [(coarray[0], coarray[-1])]
+        lags = np.asarray(self.data.unique_differences, dtype=int)
+        lpos = np.sort(lags[lags >= 0])
+
+        if lpos.size:
+            dif = np.diff(lpos)
+            br = np.where(dif != 1)[0]
+            starts = np.insert(br + 1, 0, 0)
+            ends = np.append(br, lpos.size - 1)
+            segments = [lpos[s:e+1] for s, e in zip(starts, ends)]
+        else:
+            segments = []
+
+        self.data.all_contiguous_segments = segments
+        largest = max(segments, key=len) if segments else np.array([], dtype=int)
+        self.data.largest_contiguous_segment = largest
+        self.data.shortest_contiguous_segment = min(segments, key=len) if segments else np.array([], dtype=int)
+        self.data.segment_lengths = [int(len(s)) for s in segments]
+
+        L = int(len(largest))
+        self.data.max_detectable_sources = L // 2
+        self.data.segment_ranges = [(int(largest[0]), int(largest[-1]))] if L > 0 else []
+
 
     def analyze_holes(self):
-        """6.1, 6.2. Analyzes the missing positions."""
-        self.data.missing_virtual_positions = self.data.coarray_holes
-        self.data.num_holes = len(self.data.coarray_holes)
+        lags = np.asarray(self.data.unique_differences, dtype=int)
+        lpos = np.sort(lags[lags >= 0])
+
+        if lpos.size == 0:
+            self.data.missing_virtual_positions = np.array([], dtype=int)
+            self.data.num_holes = 0
+            return
+
+        ideal = np.arange(lpos.min(), lpos.max() + 1, dtype=int)
+        holes = np.setdiff1d(ideal, lpos, assume_unique=False)
+
+        self.data.missing_virtual_positions = holes
+        self.data.num_holes = int(holes.size)
+
 
     def generate_performance_summary(self):
         """7. Generates the final performance summary table."""

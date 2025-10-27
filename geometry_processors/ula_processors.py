@@ -1,237 +1,244 @@
+# geometry_processors/ula_processors.py
+
 import numpy as np
 import pandas as pd
 from .bases_classes import BaseArrayProcessor
 
 class ULArrayProcessor(BaseArrayProcessor):
     """
-    Concrete implementation for a Uniform Linear Array (ULA).
-    Inherits from BaseArrayProcessor and implements all abstract methods.
+    Uniform Linear Array (ULA) processor (refactored).
+
+    Conventions:
+      - sensor positions are stored in **grid units** (integers): [0, 1, 2, ..., N_total-1]
+      - physical spacing is `self.d` (float/int). Physical positions = grid_positions * d.
+      - all difference/coarray computations are done on the integer lag grid
+        so formulas like w(1), segment L1/L2, and K_max are exact and d-independent.
     """
-    def __init__(self, M: int, d: int = 1):
-        # Generate ULA positions: [0, d, 2d, ..., (M-1)d]
-        positions = np.arange(M) * d
+
+    def __init__(self, N: int, d: float = 1):
+        """
+        Parameters
+        ----------
+        N : int
+            Number of physical sensors (>= 2).
+        d : float
+            Physical inter-sensor spacing (default 1). Does not affect lag math.
+        """
+        if N < 2:
+            raise ValueError("ULA requires N >= 2 sensors.")
+
+        # Grid positions (integers). Physical positions are grid*d if needed for plotting.
+        positions_grid = np.arange(N, dtype=int)
+
         super().__init__(
-            name="ULA_M{}".format(M),
+            name=f"ULA_N{N}",
             array_type="Uniform Linear Array",
-            sensor_positions=positions.tolist() # Store as list in ArraySpec
+            sensor_positions=positions_grid.tolist()
         )
-        self.d = d # Unit spacing
-        self.M = M # Number of sensors
+
+        self.N_total = N
+        self.d = d
 
     # ------------------------------------------------------------------
-    # 2. Physical Array Specification
+    # 2) Physical Array Specification
     # ------------------------------------------------------------------
     def compute_array_spacing(self):
-        """Sets the sensor spacing."""
+        """Sets the (physical) sensor spacing."""
         self.data.sensor_spacing = self.d
 
     # ------------------------------------------------------------------
-    # 3. Difference Coarray Computation
+    # 3) Difference Coarray Computation  (on integer lag grid)
     # ------------------------------------------------------------------
     def compute_all_differences(self):
-        """Computes all N^2 difference elements and the associated table."""
-        positions = np.array(self.data.sensors_positions)
-        M = self.M
+        """
+        Computes all N^2 difference elements and the associated table (on grid).
+        Since positions are in grid units, the differences are integer lags.
+        """
+        pos_grid = np.asarray(self.data.sensors_positions, dtype=int)
+        N = self.N_total
 
-        # Create all pairs (n_i, n_j)
-        n_i, n_j = np.meshgrid(positions, positions)
-        
-        # Compute differences (n_i - n_j)
-        differences = n_i - n_j
+        # Create all pairs (n_i, n_j) on the grid
+        n_i, n_j = np.meshgrid(pos_grid, pos_grid, indexing="ij")
 
-        # Flatten arrays for table generation
-        diff_flat = differences.flatten()
-        ni_flat = n_i.flatten()
-        nj_flat = n_j.flatten()
-        
-        # Generate S_i and S_j indices (1-based for S_i, S_j columns)
-        s_i = np.repeat(np.arange(1, M + 1), M)
-        s_j = np.tile(np.arange(1, M + 1), M)
+        # Integer lag grid (differences)
+        diffs = n_i - n_j
 
-        # 3.1. all_differences_table
-        table_data = {
-            'S_i': s_i,
-            'S_j': s_j,
-            'n_i': ni_flat,
-            'n_j': nj_flat,
-            'Difference (n_i - n_j)': diff_flat
-        }
-        self.data.all_differences_table = pd.DataFrame(table_data)
+        # Flatten for tables
+        diff_flat = diffs.ravel()
+        ni_flat = n_i.ravel()
+        nj_flat = n_j.ravel()
+
+        # 3.1. all_differences_table (grid units)
+        self.data.all_differences_table = pd.DataFrame({
+            "S_i": np.repeat(np.arange(1, N + 1), N),
+            "S_j": np.tile(np.arange(1, N + 1), N),
+            "n_i(grid)": ni_flat,
+            "n_j(grid)": nj_flat,
+            "Lag (n_i - n_j)": diff_flat
+        })
 
         # 3.2. all_differences_with_duplicates
         self.data.all_differences_with_duplicates = diff_flat
 
         # 3.3. total_diff_computations
-        self.data.total_diff_computations = M * M
+        self.data.total_diff_computations = int(N * N)
 
     def analyze_coarray(self):
-        """Processes the differences to find unique elements, physical, and virtual-only positions."""
-        all_diffs = self.data.all_differences_with_duplicates
+        """
+        3.4–3.11. Build coarray sets on the integer lag grid.
+        For a ULA, the coarray is contiguous from -(N-1) to (N-1).
+        """
+        all_diffs = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
 
-        # 3.4. unique_differences (Coarray positions)
+        # 3.4. unique_differences (sorted integer lags)
         unique_diffs = np.unique(all_diffs)
         self.data.unique_differences = unique_diffs
 
         # 3.5. num_unique_positions
-        self.data.num_unique_positions = len(unique_diffs)
+        self.data.num_unique_positions = int(unique_diffs.size)
 
-        # 3.6. physical_positions
-        self.data.physical_positions = np.array(self.data.sensors_positions)
+        # 3.6. physical_positions (grid)
+        self.data.physical_positions = np.asarray(self.data.sensors_positions, dtype=int)
 
-        # 3.8. coarray_positions (Same as unique_differences for ULA)
+        # 3.8. coarray_positions = unique lags
         self.data.coarray_positions = unique_diffs
 
-        # 3.7. virtual_only_positions
-        # Set difference: Coarray - Physical
+        # 3.7. virtual_only_positions = coarray \ physical (on lag grid)
         self.data.virtual_only_positions = np.setdiff1d(
-            self.data.coarray_positions, 
+            self.data.coarray_positions,
             self.data.physical_positions
         )
 
-        # ULA is always contiguous, so holes and segmentation are simple here
-        self.data.coarray_holes = np.array([]) # 3.9.
-        self.data.segmentation = [unique_diffs] # 3.10.
-        self.data.num_segmentation = 1 # 3.11.
+        # 3.9–3.11. Holes & segmentation
+        # ULA coarray is contiguous on the *two-sided* grid; no holes.
+        self.data.coarray_holes = np.array([], dtype=int)
+        self.data.segmentation = [unique_diffs]            # one contiguous block (two-sided)
+        self.data.num_segmentation = 1
 
     def plot_coarray(self):
         """
-        3.12. Placeholder for plotting the physical, virtual-only, 
-        and coarray positions with labels.
+        Placeholder plot. Keep side-effect-free for batch runs.
+        Return None to stay compatible with your current runners.
+        (Optional) You can implement a matplotlib figure here.
         """
-        # In a real implementation, you would use Matplotlib here.
-        
-        print("\n[Plotting Placeholder]: Coarray Visualization")
-        # Example representation:
-        coarray = self.data.coarray_positions
-        physical = set(self.data.physical_positions)
-        
-        vis_str = "Position: "
-        label_str = "Label:    "
-        
-        for pos in coarray:
-            vis_str += f"{pos:^4}"
-            if pos in physical:
-                label_str += " P  "
-            else:
-                label_str += " V  "
-        
-        print(vis_str)
-        print(label_str)
-        print("Legend: P = Physical Sensor, V = Virtual-Only Position")
-        print("-" * 50)
-
+        # No-op (your graphical_demo handles plotting comprehensively)
+        return None
 
     # ------------------------------------------------------------------
-    # 4. Weight Distribution
+    # 4) Weight Distribution
     # ------------------------------------------------------------------
     def compute_weight_distribution(self):
-        """Calculates the weight (count) of each unique lag."""
-        all_diffs = self.data.all_differences_with_duplicates
-        unique_diffs = self.data.unique_differences
-        M = self.M
-        
-        # Count the frequency of each difference (weight)
-        lags, counts = np.unique(all_diffs, return_counts=True)
-        weight_dist = dict(zip(lags, counts))
-        
-        # 4.2. coarray_weight_distribution (sorted by lag)
-        weights = [weight_dist.get(lag, 0) for lag in unique_diffs]
-        self.data.coarray_weight_distribution = np.array(weights)
-        
-        # 4.1. weight_table (Simplified: without sensor pairs for brevity)
-        table_data = {'Differences (Lag)': lags, 'Count (Weight)': counts}
-        # Note: Sensor Pairs column requires looping through all_differences_table, 
-        # which is complex. Simplifying to show essential data.
-        self.data.weight_table = pd.DataFrame(table_data)
+        """
+        Count the occurrences of each integer lag (w(k)).
+        For ULA, the expected closed form is w(k) = N_total - |k| for k in [-(N-1),...,N-1].
+        """
+        lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
+        uniq, counts = np.unique(lags, return_counts=True)
+
+        # Store a weight vector aligned to unique_differences
+        weight_dict = dict(zip(uniq.tolist(), counts.tolist()))
+        weights = [weight_dict.get(int(k), 0) for k in self.data.unique_differences]
+        self.data.coarray_weight_distribution = np.asarray(weights, dtype=int)
+
+        # Also keep a small table (named columns for robustness)
+        self.data.weight_table = pd.DataFrame({
+            "Lag": uniq.astype(int),
+            "Weight": counts.astype(int)
+        })
 
     # ------------------------------------------------------------------
-    # 5. Contiguous Segment Analysis
+    # 5) Contiguous Segment Analysis (use one-sided lags for DOF)
     # ------------------------------------------------------------------
     def analyze_contiguous_segments(self):
-        """Identifies the contiguous segments and max detectable sources."""
-        coarray = self.data.coarray_positions
-        
-        # For ULA, the entire coarray is contiguous
-        if len(coarray) > 0 and (coarray[-1] - coarray[0] + 1) == len(coarray):
-            segment = coarray
-            self.data.all_contiguous_segments = [segment] # 5.1.
-            self.data.largest_contiguous_segment = segment # 5.2.
-            self.data.shortest_contiguous_segment = segment # 5.3.
-            segment_length = len(segment)
-        else: # Should not happen for ULA, but good for robustness
-            segment_length = 0 
-            self.data.all_contiguous_segments = [] 
-            self.data.largest_contiguous_segment = np.array([])
-            self.data.shortest_contiguous_segment = np.array([])
-        
-        # 5.4. Length of segments
-        self.data.segment_lengths = [len(s) for s in self.data.all_contiguous_segments]
-        
-        # 5.5. Maximum detectable sources
-        self.data.max_detectable_sources = np.floor(segment_length / 2.0).astype(int)
-        
-        # 5.6/5.7. Range of each segments
-        self.data.segment_ranges = [(s[0], s[-1]) for s in self.data.all_contiguous_segments]
+        """
+        Define the MUSIC-relevant one-sided contiguous segment on non-negative lags.
+        For ULA: non-negative lags are {0, 1, ..., N_total-1}, length L = N_total.
+        Then max identifiable sources K_max = floor(L/2).
+        """
+        lags = np.asarray(self.data.unique_differences, dtype=int)
+        lags_pos = lags[lags >= 0]
+        lags_pos.sort()
+
+        # Identify contiguous runs on non-negative lags (should be a single run for ULA)
+        if lags_pos.size > 0:
+            # Check contiguity
+            dif = np.diff(lags_pos)
+            breaks = np.where(dif != 1)[0]
+            starts = np.insert(breaks + 1, 0, 0)
+            ends = np.append(breaks, lags_pos.size - 1)
+
+            segments = [lags_pos[s:e + 1] for s, e in zip(starts, ends)]
+        else:
+            segments = []
+
+        self.data.all_contiguous_segments = segments
+        largest = max(segments, key=len) if segments else np.array([], dtype=int)
+        self.data.largest_contiguous_segment = largest
+        self.data.shortest_contiguous_segment = min(segments, key=len) if segments else np.array([], dtype=int)
+        self.data.segment_lengths = [int(len(s)) for s in segments]
+
+        L = int(len(largest))
+        self.data.max_detectable_sources = L // 2
+        self.data.segment_ranges = [(int(largest[0]), int(largest[-1]))] if L > 0 else []
 
     # ------------------------------------------------------------------
-    # 6. Holes Analysis
+    # 6) Holes Analysis
     # ------------------------------------------------------------------
     def analyze_holes(self):
-        """Analyzes the missing positions in the coarray."""
-        coarray = self.data.coarray_positions
-        
-        if len(coarray) == 0:
-            self.data.missing_virtual_positions = np.array([])
-            self.data.num_holes = 0
-            return
+        """
+        On the one-sided lag grid, ULA has no holes in {0..N_total-1}.
+        """
+        lags = np.asarray(self.data.unique_differences, dtype=int)
+        lags_pos = lags[lags >= 0]
+        ideal = np.arange(0, self.N_total, dtype=int)
+        holes = np.setdiff1d(ideal, lags_pos, assume_unique=False)
 
-        min_pos = coarray[0]
-        max_pos = coarray[-1]
-        
-        # Ideal contiguous range
-        ideal_range = np.arange(min_pos, max_pos + 1)
-        
-        # 6.1. missing_virtual_positions (Holes)
-        holes = np.setdiff1d(ideal_range, coarray)
         self.data.missing_virtual_positions = holes
-        
-        # 6.2. number of holes
-        self.data.num_holes = len(holes)
+        self.data.num_holes = int(holes.size)
 
     # ------------------------------------------------------------------
-    # 7. Performance Summary
+    # 7) Performance Summary
     # ------------------------------------------------------------------
     def generate_performance_summary(self):
-        """Generates the final performance summary table."""
+        """
+        Summarize key geometry/coarray metrics.
+        Aperture is reported on the lag grid (integer units). Multiply by d if physical units are needed.
+        """
         data = self.data
-        weights_dict = dict(zip(data.unique_differences, data.coarray_weight_distribution))
-        
-        # Max - Min positions for aperture
-        aperture = data.coarray_positions[-1] - data.coarray_positions[0] if data.num_unique_positions > 0 else 0
-        
+
+        # Build a dict for quick w(k) lookups
+        wd = dict(zip(data.weight_table["Lag"].astype(int), data.weight_table["Weight"].astype(int)))
+
+        # Aperture on lag grid (two-sided range)
+        aperture_lag = int(data.coarray_positions[-1] - data.coarray_positions[0]) if data.num_unique_positions else 0
+
+        # One-sided largest segment length (L) already computed
+        L = int(len(data.largest_contiguous_segment)) if data.largest_contiguous_segment is not None else 0
+
         metrics = [
-            'Physical Sensors (N)',
-            'Virtual Elements (Unique Lags)',
-            'Virtual-only Elements',
-            'Coarray Aperture',
-            'Contiguous Segment Length (L)',
-            'Maximum Detectable Sources (K_max)',
-            'Holes',
-            'Weight at Lag 1 (w(1))',
-            'Weight at Lag 2 (w(2))',
-            'Weight at Lag 3 (w(3))'
-        ]
-        values = [
-            self.M,
-            data.num_unique_positions,
-            len(data.virtual_only_positions),
-            aperture,
-            len(data.largest_contiguous_segment),
-            data.max_detectable_sources,
-            data.num_holes,
-            weights_dict.get(1, 0),
-            weights_dict.get(2, 0),
-            weights_dict.get(3, 0)
+            "Physical Sensors (N)",
+            "Virtual Elements (Unique Lags)",
+            "Virtual-only Elements",
+            "Coarray Aperture (lags)",          # two-sided span in lag units
+            "Contiguous Segment Length (L)",    # one-sided (non-negative)
+            "Maximum Detectable Sources (K_max)",
+            "Holes (one-sided)",
+            "Weight at Lag 0 (w(0))",
+            "Weight at Lag 1 (w(1))",
+            "Weight at Lag 2 (w(2))"
         ]
 
-        self.data.performance_summary_table = pd.DataFrame({'Metrics': metrics, 'Value': values})
+        values = [
+            self.N_total,
+            data.num_unique_positions,
+            int(len(data.virtual_only_positions)) if data.virtual_only_positions is not None else 0,
+            aperture_lag,
+            L,
+            int(data.max_detectable_sources) if data.max_detectable_sources is not None else 0,
+            int(data.num_holes) if data.num_holes is not None else 0,
+            wd.get(0, 0),
+            wd.get(1, 0),
+            wd.get(2, 0),
+        ]
+
+        self.data.performance_summary_table = pd.DataFrame({"Metrics": metrics, "Value": values})
