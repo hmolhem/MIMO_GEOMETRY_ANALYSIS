@@ -39,12 +39,23 @@ def main():
     print("="*40)
     print(analysis_results.performance_summary_table.to_markdown(index=False))
     
-    print("\n--- Key Coarray Data ---")
-    print(f"Coarray Positions (Unique Lags): {analysis_results.coarray_positions}")
-    print(f"Coarray Weights (w(l)): {analysis_results.coarray_weight_distribution}")
-    print(f"Max Detectable Sources (K_max): {analysis_results.max_detectable_sources}")
-    print(f"Coarray Aperture: {analysis_results.coarray_positions[-1]}")
-    
+    # --- KEY COARRAY DATA (integer lag grid) ---
+    import numpy as np
+
+    lags = np.asarray(analysis_results.coarray_positions, dtype=int)                 # two-sided, sorted
+    segment = np.asarray(analysis_results.largest_contiguous_segment, dtype=int)     # one-sided (>=0)
+    holes = np.asarray(analysis_results.missing_virtual_positions, dtype=int)        # one-sided (>=0)
+
+    L = int(len(segment))
+    seg_range = f"[{int(segment[0])}:{int(segment[-1])}]" if L > 0 else "[]"
+
+    print("\n" + "="*50)
+    print("KEY COARRAY DATA (integer lag grid)")
+    print("="*50)
+    print(f"Unique lags (two-sided): {lags.tolist()}")
+    print(f"Largest one-sided contiguous segment: {segment.tolist()}  (L = {L}, range = {seg_range})")
+    print(f"K_max (floor(L/2)): {analysis_results.max_detectable_sources}")
+    print(f"Holes (one-sided): {holes.tolist()}  (count = {int(holes.size)})")
 
 if __name__ == "__main__":
     main()
