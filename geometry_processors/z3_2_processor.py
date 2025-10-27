@@ -1,178 +1,198 @@
-# geometry_processors/z3_2_processor.py
-
 import numpy as np
 import pandas as pd
-from .bases_classes import BaseArrayProcessor 
+from .bases_classes import BaseArrayProcessor
 
 class Z3_2ArrayProcessor(BaseArrayProcessor):
     """
-    Implements the Weight-Constrained Sparse Array Z3(2).
-    Z3(2) Array: Variant of Z3(1) designed to reduce w(2) from 2 to 1.
-    Key Properties: w(1)=0, w(2)=1, w(3)=2 (for N>=5).
-    Aperture: 4N-8.
+    Weight-Constrained Sparse Array Z3(2)
+
+    Integer-grid construction (apply physical spacing d only for display):
+      • 4-sparse ULA of (N-3) sensors: {0, 4, 8, ..., 4(N-4)}
+      • 3 augmented sensors for Z3(2): {-5, -2, 4N-13}
+      • Shift so min position becomes 0
+
+    Canonical properties for N >= 5 (from your notes / literature):
+      • w(1) = 0, w(2) = 1, w(3) = 2   (contrast Z3(1): 0,2,1)
+      • Largest one-sided contiguous segment: L1=2, L2=4N-13  ⇒  L = 4N-14
+      • Often A = 4N-9 is used; one-sided holes at {1, A-3, A-1} = {1, 4N-12, 4N-10}
+
+    We *derive* coarray and weights from differences (no hard-coded weights).
     """
-    def __init__(self, N: int, d: int = 1):
+
+    def __init__(self, N: int, d: float = 1.0):
         if N < 5:
-            raise ValueError("Z3(2) Array requires N >= 5 sensors.")
-            
-        self.M = d
-        self.N_total = N
-        
-        # 1. Generate the (N-3)-sensor 4-sparse ULA segment
-        # Positions: [0, 4d, 8d, ..., 4(N-4)d]
+            raise ValueError("Z3(2) requires N >= 5.")
+        self.N_total = int(N)
+        self.d = float(d)
+
+        # 4-sparse ULA of (N-3) sensors
         N_sparse = N - 3
-        sparse_segment = np.arange(N_sparse) * 4 * d
-        
-        # 2. Augmented sensors as derived from the explicit set (24)
-        # S0: -5, S1: -2, S(N-1): 4N-13
-        augmented_sensors = np.array([-5 * d, -2 * d, (4 * N - 13) * d])
-        
-        # Combine and order all sensors
-        positions = np.unique(np.concatenate((augmented_sensors, sparse_segment)))
-        
-        # Normalize the array so the smallest position is 0
-        min_pos = np.min(positions)
-        positions = positions - min_pos
-        
+        sparse_segment = np.arange(N_sparse, dtype=int) * 4
+
+        # Augmented sensors (Z3(2))
+        aug = np.array([-5, -2, 4*N - 13], dtype=int)
+
+        # Combine and shift so min = 0
+        pos = np.unique(np.concatenate([sparse_segment, aug]))
+        pos = pos - pos.min()
+
         super().__init__(
-            name=f"Array Z3(2) (N={N})", 
-            array_type="Weight-Constrained Sparse Array (Z3(2))", 
-            sensor_positions=positions.tolist()
+            name=f"Array Z3(2) (N={N})",
+            array_type="Weight-Constrained Sparse Array (Z3(2))",
+            sensor_positions=pos.tolist()
         )
-        
-        self.data.num_sensors = N
-        self.data.aperture = positions[-1] - positions[0]
 
-
-    # ------------------------------------------------------------------
-    # ABSTRACT METHOD IMPLEMENTATIONS
-    # ------------------------------------------------------------------
-    # Note: These implementations are structurally identical to Z3(1), 
-    # but the segment constants are based on Table II in the paper.
-    # ------------------------------------------------------------------
-
+    # ---------- 2) Physical specification ----------
     def compute_array_spacing(self):
-        self.data.sensor_spacing = self.M
+        self.data.sensor_spacing = self.d
 
+    # ---------- 3) Difference coarray (integer grid) ----------
     def compute_all_differences(self):
-        positions = self.data.sensors_positions
-        N = self.data.num_sensors
-        
-        n_i, n_j = np.meshgrid(positions, positions)
-        diff_flat = (n_i - n_j).flatten()
-        ni_flat = n_i.flatten()
-        nj_flat = n_j.flatten()
-        
-        self.data.all_differences_with_duplicates = diff_flat
-        self.data.total_diff_computations = N * N
+        pos = np.asarray(self.data.sensors_positions, dtype=int)
+        N = self.N_total
+        n_i, n_j = np.meshgrid(pos, pos, indexing="ij")
+        diffs = (n_i - n_j).ravel()
+
+        self.data.all_differences_with_duplicates = diffs
+        self.data.total_diff_computations = int(N * N)
         self.data.all_differences_table = pd.DataFrame({
-            'n_i': ni_flat, 'n_j': nj_flat, 'Difference': diff_flat
+            "n_i(grid)": n_i.ravel(),
+            "n_j(grid)": n_j.ravel(),
+            "Lag (n_i - n_j)": diffs
         })
 
     def analyze_coarray(self):
-        """Processes differences. ULA segment starts at L1=2."""
-        all_diffs = self.data.all_differences_with_duplicates
-        unique_diffs = np.unique(all_diffs)
-        
-        self.data.unique_differences = unique_diffs
-        self.data.num_unique_positions = len(unique_diffs)
-        self.data.physical_positions = self.data.sensors_positions
-        self.data.coarray_positions = unique_diffs
-        
-        self.data.virtual_only_positions = np.setdiff1d(
-            self.data.coarray_positions, 
-            self.data.physical_positions
-        )
+        lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
+        uniq = np.unique(lags)
 
-        # Holes are based on the calculated unique_diffs vs the ideal range
-        min_pos = self.data.coarray_positions[0]
-        max_pos = self.data.coarray_positions[-1]
-        ideal_range = np.arange(min_pos, max_pos + 1)
-        
-        holes = np.setdiff1d(ideal_range, self.data.coarray_positions)
-        self.data.coarray_holes = holes
-        
-        self.data.segmentation = [unique_diffs] 
+        self.data.unique_differences = uniq
+        self.data.num_unique_positions = int(uniq.size)
+        self.data.physical_positions = np.asarray(self.data.sensors_positions, dtype=int)
+        self.data.coarray_positions = uniq
+
+        self.data.virtual_only_positions = np.setdiff1d(
+            self.data.coarray_positions, self.data.physical_positions
+        )
+        self.data.coarray_holes = np.array([], dtype=int)
+        self.data.segmentation = [uniq]
         self.data.num_segmentation = 1
 
     def plot_coarray(self):
-        """3.12. Placeholder for visualization."""
-        print("\n[Plotting Placeholder]: Array Z3(2) Visualization (w(1)=0, w(2)=1)")
-        print(f"Physical Array Positions: {self.data.sensors_positions}")
-        print(f"Coarray Positions (Positive): {self.data.coarray_positions[self.data.coarray_positions >= 0]}")
-        print(f"Holes (Positive Lags): {self.data.coarray_holes[self.data.coarray_holes >= 0]}")
-        print("-" * 50)
-        
+        return None
+
+    # ---------- 4) Weights ----------
     def compute_weight_distribution(self):
-        all_diffs = self.data.all_differences_with_duplicates
-        lags, counts = np.unique(all_diffs, return_counts=True)
-        weight_dict = dict(zip(lags, counts))
-        weights = [weight_dict.get(lag, 0) for lag in self.data.unique_differences]
-        self.data.coarray_weight_distribution = np.array(weights)
+        lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
+        u, c = np.unique(lags, return_counts=True)
+        weight_dict = dict(zip(u.tolist(), c.tolist()))
+        weights = [weight_dict.get(int(k), 0) for k in self.data.unique_differences]
+
+        self.data.coarray_weight_distribution = np.asarray(weights, dtype=int)
         self.data.weight_table = pd.DataFrame({
-            'Lag (Difference)': lags, 'Count (Weight)': counts
+            "Lag": u.astype(int),
+            "Weight": c.astype(int)
         })
 
+    # ---------- 5) One-sided contiguous segment & DOF ----------
     def analyze_contiguous_segments(self):
-        """5.1-5.7. Identifies the contiguous segment. ULA segment starts at L1=2."""
-        # ULA segment starts at L1=2 and ends at L2=4N-13. Length L=4N-14 (Same as Z3(1))
-        # Note: The paper's Table II lists L2 = 4N-13 and Length L=4N-14 for both Z3(1) and Z3(2)[cite: 303].
-        L1 = 2
-        L2 = 4 * self.N_total - 13
-        L = L2 - L1 + 1
-        
-        if L < 1:
-             L = 0 
-             segment = np.array([])
+        lags = np.asarray(self.data.unique_differences, dtype=int)
+        lpos = np.sort(lags[lags >= 0])
+
+        if lpos.size:
+            dif = np.diff(lpos)
+            br = np.where(dif != 1)[0]
+            starts = np.insert(br + 1, 0, 0)
+            ends = np.append(br, lpos.size - 1)
+            segments = [lpos[s:e+1] for s, e in zip(starts, ends)]
         else:
-             segment = np.arange(L1, L2 + 1)
+            segments = []
 
-        self.data.all_contiguous_segments = [segment]
-        self.data.largest_contiguous_segment = segment 
-        self.data.shortest_contiguous_segment = segment
-        self.data.segment_lengths = [L]
-        
-        # Dm = floor(L/2)
-        self.data.max_detectable_sources = np.floor(L / 2.0).astype(int) 
-        self.data.segment_ranges = [(L1, L2)]
+        self.data.all_contiguous_segments = segments
+        largest = max(segments, key=len) if segments else np.array([], dtype=int)
+        self.data.largest_contiguous_segment = largest
+        self.data.shortest_contiguous_segment = min(segments, key=len) if segments else np.array([], dtype=int)
+        self.data.segment_lengths = [int(len(s)) for s in segments]
 
+        L = int(len(largest))
+        self.data.max_detectable_sources = L // 2
+        self.data.segment_ranges = [(int(largest[0]), int(largest[-1]))] if L > 0 else []
+
+    # ---------- 6) Holes (one-sided) ----------
     def analyze_holes(self):
-        self.data.missing_virtual_positions = self.data.coarray_holes
-        self.data.num_holes = len(self.data.coarray_holes)
+        """
+        One-sided holes restricted to the canonical window [0..A), A = 4N - 9.
+        Endpoint A itself is NOT considered a hole per Z3(2) conventions.
+        """
+        lags = np.asarray(self.data.unique_differences, dtype=int)
+        lpos = np.sort(lags[lags >= 0])
 
+        if lpos.size == 0:
+            self.data.missing_virtual_positions = np.array([], dtype=int)
+            self.data.num_holes = 0
+            return
+
+        A = 4 * self.N_total - 9
+        ideal = np.arange(0, A, dtype=int)     # <-- was np.arange(0, A+1)
+        holes = np.setdiff1d(ideal, lpos, assume_unique=False)
+
+        self.data.missing_virtual_positions = holes
+        self.data.num_holes = int(holes.size)
+
+        # (optional debug)
+        # print(f"[Z3(2).analyze_holes] A={A}, capped holes(no A)={holes.tolist()}")
+
+
+
+
+
+
+
+    # ---------- 7) Summary ----------
     def generate_performance_summary(self):
         data = self.data
-        weights_dict = dict(zip(data.unique_differences, data.coarray_weight_distribution))
-        
-        aperture = data.coarray_positions[-1] - data.coarray_positions[0] if data.num_unique_positions > 0 else 0
-        
-        w1 = weights_dict.get(1, 0)
-        w2 = weights_dict.get(2, 0)
-        w3 = weights_dict.get(3, 0)
+
+        # weight lookup
+        wd = {}
+        if data.weight_table is not None and "Lag" in data.weight_table and "Weight" in data.weight_table:
+            wd = dict(zip(data.weight_table["Lag"].astype(int), data.weight_table["Weight"].astype(int)))
+
+        lags = np.asarray(data.coarray_positions, dtype=int) if data.coarray_positions is not None else np.array([], dtype=int)
+        lags_pos = lags[lags >= 0]
+        aperture_two_sided = int(lags.max() - lags.min()) if lags.size else 0
+        max_positive_lag   = int(lags_pos.max()) if lags_pos.size else 0
+
+        seg = np.asarray(data.largest_contiguous_segment, dtype=int) if data.largest_contiguous_segment is not None else np.array([], dtype=int)
+        L = int(len(seg))
+        seg_range_str = f"[{int(seg[0])}:{int(seg[-1])}]" if L > 0 else "[]"
+        num_holes = int(data.num_holes) if data.num_holes is not None else 0
 
         metrics = [
-            'Physical Sensors (N)',
-            'Virtual Elements (Unique Lags)',
-            'Virtual-only Elements',
-            'Coarray Aperture (Max-Min)',
-            'Contiguous Segment Length (L)',
-            'Maximum Detectable Sources (K_max)',
-            'Holes',
-            'Weight at Lag 1 (w(1))',
-            'Weight at Lag 2 (w(2))',
-            'Weight at Lag 3 (w(3))'
+            "Physical Sensors (N)",
+            "Virtual Elements (Unique Lags)",
+            "Virtual-only Elements",
+            "Coarray Aperture (two-sided span, lags)",
+            "Max Positive Lag (one-sided)",
+            "Contiguous Segment Length (L, one-sided)",
+            "Maximum Detectable Sources (K_max)",
+            "Holes (one-sided)",
+            "Largest One-sided Segment Range [L1:L2]",
+            # omit w(0) from the user-facing table
+            "Weight at Lag 1 (w(1))",
+            "Weight at Lag 2 (w(2))",
+            "Weight at Lag 3 (w(3))",
         ]
         values = [
-            data.num_sensors,
-            data.num_unique_positions,
-            len(data.virtual_only_positions),
-            aperture,
-            self.data.segment_lengths[0] if self.data.segment_lengths else 0,
-            data.max_detectable_sources,
-            data.num_holes,
-            w1,
-            w2,
-            w3
+            self.N_total,
+            int(data.num_unique_positions) if data.num_unique_positions is not None else 0,
+            int(len(data.virtual_only_positions)) if data.virtual_only_positions is not None else 0,
+            aperture_two_sided,
+            max_positive_lag,
+            L,
+            int(data.max_detectable_sources) if data.max_detectable_sources is not None else 0,
+            num_holes,
+            seg_range_str,
+            int(wd.get(1, 0)),
+            int(wd.get(2, 0)),
+            int(wd.get(3, 0)),
         ]
-
-        self.data.performance_summary_table = pd.DataFrame({'Metrics': metrics, 'Value': values})
+        self.data.performance_summary_table = pd.DataFrame({"Metrics": metrics, "Value": values})
