@@ -40,6 +40,9 @@ def main():
     z4 = Z4ArrayProcessor(N=args.N, d=args.d)
     data = z4.run_full_analysis()
 
+    print(f"--- Starting analysis for Array Z4 (N={args.N}) (Weight-Constrained Sparse Array (Z4)) ---")
+    print("--- Analysis Complete ---\n")
+
     # Physical positions
     grid = np.asarray(data.sensors_positions, dtype=int)
     phys = pretty_phys_positions(grid, args.d)
@@ -100,12 +103,14 @@ def main():
     print(f"Max positive lag (observed): {int(np.max(lags_2s)) if lags_2s.size else 0}")
 
     # Optional: show weight table
-    wt_df = getattr(data, "weight_table", None)
-    if args.show_weights and wt_df is not None and not wt_df.empty:
-        print("\n" + "="*40)
-        print("      WEIGHT TABLE (Lag, Weight)")
-        print("="*40)
-        print(wt_df.to_string(index=False))
+    if args.show_weights:
+        wt_df = getattr(data, "weight_table", None)
+        if wt_df is not None and len(wt_df) > 0:
+            print("\n========================================")
+            print("      WEIGHT TABLE (Lag, Weight)")
+            print("========================================")
+            # Reference by column names; avoid duplicate prints
+            print(wt_df[["Lag", "Weight"]].to_string(index=False))
 
     # Optional artifacts
     if args.save_csv:
