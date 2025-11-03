@@ -33,6 +33,8 @@ def main():
                         help="Print holes as one-sided (<A) or two-sided.")
     parser.add_argument("--assert", dest="do_asserts", action="store_true",
                         help="Run Z4 invariants: w(1)=w(2)=0, L1=3, L2=3N-7 (only for N>=7).")
+    parser.add_argument("--latex", action="store_true",
+                        help="Output single LaTeX table row: N & |S| & |Λ| & L & K_max & A_obs & holes_1s \\\\")
     args = parser.parse_args()
 
     print(f"--- Starting Array Z4 (N={args.N}, d={args.d}) Analysis Demo ---")
@@ -135,6 +137,20 @@ def main():
         with open(out_json, "w", encoding="utf-8") as f:
             json.dump(run_json, f, indent=2)
         print(f"[Saved] Run JSON → {out_json}")
+
+    # LaTeX table row output
+    if args.latex:
+        # Extract key metrics: N & |S| & |Λ| & L & K_max & A_obs & holes_1s \\
+        N_val = int(args.N)
+        S_val = int(data.num_sensors)  # |S|
+        Lambda_val = int(len(lags_2s)) if lags_2s.size else 0  # |Λ| (unique lags)
+        L_val = int(L)  # L (contiguous segment length)
+        K_max_val = int(data.max_detectable_sources)  # K_max
+        A_obs_val = int(np.max(lags_2s)) if lags_2s.size else 0  # A_obs (max positive lag)
+        holes_1s_val = int(len(holes_one))  # holes count (one-sided)
+        
+        latex_row = f"{N_val} & {S_val} & {Lambda_val} & {L_val} & {K_max_val} & {A_obs_val} & {holes_1s_val} \\\\"
+        print(latex_row)
 
     # Optional Z4 invariants (only meaningful for N >= 7)
     if args.do_asserts and args.N >= 7:

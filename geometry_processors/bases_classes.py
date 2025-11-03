@@ -80,7 +80,10 @@ class BaseArrayProcessor(abc.ABC):
 
     def run_full_analysis(self, verbose: bool = True) -> ArraySpec:
         if verbose:
-            print(f"--- Starting analysis for {self.data.name} ({self.data.array_type}) ---")
+            # Safety guard: fall back to processor's own attributes if data class missing fields
+            name = getattr(self.data, "name", None) or getattr(self, "name", "Array")
+            atype = getattr(self.data, "array_type", None) or getattr(self, "array_type", "Array")
+            print(f"--- Starting analysis for {name} ({atype}) ---")
         self.compute_array_spacing()
         self.compute_all_differences()
         self.analyze_coarray()
