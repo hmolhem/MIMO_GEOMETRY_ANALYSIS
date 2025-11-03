@@ -28,7 +28,7 @@ from geometry_processors.z1_processor import Z1ArrayProcessor
 from geometry_processors.z3_1_processor_ import Z3_1ArrayProcessor
 from geometry_processors.z3_2_processor import Z3_2ArrayProcessor
 from geometry_processors.z4_processor_ import Z4ArrayProcessor
-from geometry_processors.z5_processor import Z5ArrayProcessor
+from geometry_processors.z5_processor_ import Z5ArrayProcessor
 from geometry_processors.z6_processor import Z6ArrayProcessor
 
 def print_text_analysis(processor, processor_name):
