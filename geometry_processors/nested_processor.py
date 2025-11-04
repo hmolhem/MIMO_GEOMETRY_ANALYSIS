@@ -33,12 +33,17 @@ class NestedArrayProcessor(BaseArrayProcessor):
         super().__init__(
             name=f"Nested Array N={N}", 
             array_type="Nested Array", 
-            sensor_positions=positions.tolist()
+            sensor_positions=positions.tolist(),
+            d=d
         )
         
         # Recalculate N based on unique positions if necessary, but typically N=N1+N2
         self.data.num_sensors = N 
         self.data.aperture = positions[-1] - positions[0]
+
+    def __repr__(self):
+        """String representation of the Nested Array processor."""
+        return f"NestedArrayProcessor(N1={self.N1}, N2={self.N2}, d={self.M})"
 
     # ------------------------------------------------------------------
     # ABSTRACT METHOD IMPLEMENTATIONS

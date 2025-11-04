@@ -33,11 +33,16 @@ class ULArrayProcessor(BaseArrayProcessor):
         super().__init__(
             name=f"ULA_N{N}",
             array_type="Uniform Linear Array",
-            sensor_positions=positions_grid.tolist()
+            sensor_positions=positions_grid.tolist(),
+            d=d
         )
 
         self.N_total = N
         self.d = d
+
+    def __repr__(self):
+        """String representation of the ULA processor."""
+        return f"ULArrayProcessor(N={self.N_total}, d={self.d})"
 
     # ------------------------------------------------------------------
     # 2) Physical Array Specification
