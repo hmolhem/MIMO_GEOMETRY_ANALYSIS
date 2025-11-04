@@ -39,8 +39,13 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
         super().__init__(
             name=f"Array Z3(2) (N={N})",
             array_type="Weight-Constrained Sparse Array (Z3(2))",
-            sensor_positions=pos.tolist()
+            sensor_positions=pos.tolist(),
+            d=d
         )
+
+    def __repr__(self):
+        """String representation of the Z3_2 processor."""
+        return f"Z3_2ArrayProcessor(N={self.N_total}, d={self.d})"
 
     # ---------- 2) Physical specification ----------
     def compute_array_spacing(self):

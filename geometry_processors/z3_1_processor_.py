@@ -41,12 +41,16 @@ class Z3_1ArrayProcessor(BaseArrayProcessor):
         super().__init__(
             name=f"Array Z3(1) (N={N})", 
             array_type="Weight-Constrained Sparse Array (Z3(1))", 
-            sensor_positions=positions.tolist()
+            sensor_positions=positions.tolist(),
+            d=d
         )
         
         self.data.num_sensors = N
         self.data.aperture = positions[-1] - positions[0]
 
+    def __repr__(self):
+        """String representation of the Z3_1 processor."""
+        return f"Z3_1ArrayProcessor(N={self.N_total}, d={self.M})"
 
     # ------------------------------------------------------------------
     # ABSTRACT METHOD IMPLEMENTATIONS (Reusing logic from Z1/ULA, since the core analysis steps are the same)
