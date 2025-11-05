@@ -1,0 +1,13 @@
+Metrics,Value
+Physical Sensors (N),6
+Virtual Elements (Unique Lags),25
+Virtual-only Elements,19
+"Coarray Aperture (two-sided span, lags)",32
+Max Positive Lag (one-sided),16
+"Contiguous Segment Length (L, one-sided)",10
+Maximum Detectable Sources (K_max),5
+Holes (one-sided),3
+Largest One-sided Segment Range [L1:L2],[2:11]
+Weight at Lag 1 (w(1)),0
+Weight at Lag 2 (w(2)),1
+Weight at Lag 3 (w(3)),2

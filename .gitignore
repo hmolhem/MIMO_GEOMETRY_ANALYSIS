@@ -24,7 +24,7 @@ share/python-wheels/
 MANIFEST
 
 # Virtual environments
-mimo-geom-dev/
+envs/
 venv/
 env/
 ENV/
@@ -47,6 +47,15 @@ miniScript/
 # Data files (if large)
 data/*.dat
 data/*.bin
+
+# Datasets folder (large experimental data)
+datasets/
+
+# Paper outputs (generated files)
+papers/*/outputs/bench/*.csv
+papers/*/outputs/logs/*.txt
+papers/*/figs/*.png
+papers/*/figs/*.pdf
 
 # OS generated files
 .DS_Store
