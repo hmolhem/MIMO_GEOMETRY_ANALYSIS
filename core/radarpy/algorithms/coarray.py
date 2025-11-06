@@ -1,7 +1,10 @@
 # util/coarray.py
 import numpy as np
+from .alss import apply_alss
 
-def build_virtual_ula_covariance(Rxx, positions, d_phys):
+def build_virtual_ula_covariance(Rxx, positions, d_phys, *, 
+                                 alss_enabled=False, alss_mode="zero",
+                                 alss_tau=1.0, alss_coreL=3, M=None):
     """
     Build virtual ULA covariance from spatial covariance via lag averaging.
     
@@ -95,19 +98,38 @@ def build_virtual_ula_covariance(Rxx, positions, d_phys):
     
     # Build virtual covariance via UNBIASED lag averaging
     # Key: divide by actual pair count w(l) for each lag, not uniform averaging
-    Rv = np.zeros((Lv, Lv), dtype=complex)
     
-    # Sanity check: log lag weights for debugging
-    lag_weights = {lag: len(lag_map[lag]) for lag in sorted(lag_map.keys()) if abs(lag) <= 15}
-    # Uncomment for debugging: print(f"[DBG] Lag weights: {lag_weights}")
+    # First compute lag-based autocorrelation estimates
+    r_lag_dict = {}
+    w_lag_dict = {}
+    
+    for lag in lag_map.keys():
+        pairs = lag_map[lag]
+        w_lag_dict[lag] = len(pairs)
+        r_lag_dict[lag] = np.sum([Rxx[i, j] for i, j in pairs]) / len(pairs)
+    
+    # --- ALSS (optional) ---
+    if alss_enabled:
+        if M is None:
+            raise ValueError("ALSS enabled but snapshots M not provided.")
+        r_lag_dict = apply_alss(
+            r_lag=r_lag_dict,
+            w_lag=w_lag_dict,
+            R_x=Rxx,
+            M=int(M),
+            mode=alss_mode,
+            tau=float(alss_tau),
+            coreL=int(alss_coreL),
+        )
+    
+    # Now build Toeplitz matrix from processed lags
+    Rv = np.zeros((Lv, Lv), dtype=complex)
     
     for m in range(Lv):
         for n in range(Lv):
             lag = int(one_side[m] - one_side[n])  # actual lag value (not index)
-            if lag in lag_map:
-                pairs = lag_map[lag]
-                # Unbiased: sum / w(l) where w(l) = number of pairs
-                Rv[m, n] = np.sum([Rxx[i, j] for i, j in pairs]) / len(pairs)
+            if lag in r_lag_dict:
+                Rv[m, n] = r_lag_dict[lag]
     
     dvirt = d_phys  # virtual spacing same as physical
     L1, L2 = best_start, best_start + best_length - 1
