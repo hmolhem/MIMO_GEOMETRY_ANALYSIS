@@ -12,6 +12,7 @@ A comprehensive Python framework for analyzing MIMO radar array geometries throu
 - ✅ **8+ Array Implementations**: ULA, Nested, Z1-Z6 specialized geometries
 - ✅ **Standardized 7-Step Analysis Pipeline**: Automated difference coarray computation and performance evaluation
 - ✅ **DOA Estimation Algorithms**: Spatial MUSIC, Coarray MUSIC with ALSS regularization
+- ✅ **Mutual Coupling Support**: Optional electromagnetic coupling modeling for realistic hardware scenarios
 - ✅ **Publication-Ready Visualization**: Automated plotting with LaTeX-ready figures (300 DPI)
 - ✅ **Comprehensive Benchmarking**: CLI tools for parameter sweeps and statistical analysis
 - ✅ **SVD Subspace Analysis**: Condition number tracking and singular value decomposition
@@ -207,6 +208,30 @@ print(results.performance_summary_table.to_markdown(index=False))
 ---
 
 ## 🛠️ Development
+
+### Mutual Coupling Feature (NEW - Nov 2025)
+
+Model electromagnetic interactions between array elements:
+
+```python
+from core.radarpy.signal.mutual_coupling import generate_mcm
+from core.radarpy.signal.doa_sim_core import run_music
+
+# Generate coupling matrix
+C = generate_mcm(7, positions, model="exponential", c1=0.3, alpha=0.5)
+
+# Run DOA estimation with coupling
+result = run_music(positions, 1.0, [10, -15], 2, 10, 100, 
+                   coupling_matrix=C)
+```
+
+**Features:**
+- ✅ Optional (easy on/off control)
+- ✅ Multiple models: exponential, Toeplitz, measured data
+- ✅ Works with all arrays and algorithms
+- ✅ Backward compatible
+
+See **[docs/MUTUAL_COUPLING_GUIDE.md](docs/MUTUAL_COUPLING_GUIDE.md)** for complete documentation.
 
 ### Adding New Arrays
 
