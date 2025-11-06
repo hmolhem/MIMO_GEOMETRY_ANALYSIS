@@ -3,37 +3,286 @@
 =======
 # MIMO Array Geometry Analysis Framework
 
+[![Python Version](https://img.shields.io/badge/python-3.13.0-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 ## Overview
-Analysis pipeline for MIMO radar array geometries through difference coarray computation. Supports ULA, Nested, and specialized Z-family arrays (Z1, Z3_1, Z3_2, Z4, Z5, Z6).
 
-## Key Features
-- **Difference Coarray Analysis**: Compute pairwise differences between sensor positions to derive virtual sensor arrays
-- **Performance Metrics**: Coarray aperture, contiguous segment length, maximum detectable sources, weight distribution
-- **DOA Estimation**: SpatialMUSIC (physical array) and CoarrayMUSIC (virtual array) implementations
-- **Benchmark Infrastructure**: Comprehensive testing across array types, SNR, snapshot counts, source separations
+A comprehensive Python framework for analyzing MIMO radar array geometries through **difference coarray analysis**. This toolkit enables researchers to evaluate virtual array properties, weight distributions, and Direction-of-Arrival (DOA) estimation performance across various array configurations including ULA, Nested, and specialized Z1-Z6 arrays.
 
-## Installation
+### Key Features
+
+- ✅ **8+ Array Implementations**: ULA, Nested, Z1-Z6 specialized geometries
+- ✅ **Standardized 7-Step Analysis Pipeline**: Automated difference coarray computation and performance evaluation
+- ✅ **DOA Estimation Algorithms**: Spatial MUSIC, Coarray MUSIC with ALSS regularization
+- ✅ **Publication-Ready Visualization**: Automated plotting with LaTeX-ready figures (300 DPI)
+- ✅ **Comprehensive Benchmarking**: CLI tools for parameter sweeps and statistical analysis
+- ✅ **SVD Subspace Analysis**: Condition number tracking and singular value decomposition
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Python**: 3.13.0 (managed via pyenv)
+- **OS**: Windows 10/11 with PowerShell
+- **Dependencies**: NumPy, Pandas, Matplotlib (see `requirements.txt`)
+
+### Installation
+
 ```powershell
-# Activate virtual environment
+# Activate virtual environment (Windows PowerShell)
 .\mimo-geom-dev\Scripts\Activate.ps1
 
-# Verify dependencies (numpy, pandas, matplotlib, scipy)
-pip list
+# Verify installation
+python --version  # Should show Python 3.13.0
+pip list | Select-String "numpy|pandas|matplotlib"
 ```
 
-## Quick Start
+### Your First Analysis
+
 ```powershell
-# Run geometry analysis
+# Interactive graphical demo (recommended for beginners)
+python analysis_scripts/graphical_demo.py
+
+# CLI analysis for Z5 array with 7 sensors
 python analysis_scripts/run_z5_demo.py --N 7 --markdown
 
-# Run DOA benchmark
-python -m analysis_scripts.run_benchmarks --arrays Z4,Z5,ULA --N 7 --snr 0,10 --snapshots 64,256 --k 2 --delta 2 --trials 50 --out results/bench/test.csv
+# Run DOA estimation benchmark
+python core/analysis_scripts/run_benchmarks.py --arrays Z5 --N 7 --trials 100
 ```
 
-## Limitations
-- **Root-MUSIC on virtual arrays**: Provided for research purposes only; use grid-based CoarrayMUSIC for reported results. Root-MUSIC implementation is experimental and may produce unstable estimates.
-- **Z6 CoarrayMUSIC**: Z6 geometry is optimized for w(1)=w(2)=0 but produces a fragmented coarray (Mv=3), making it unsuitable for virtual array DOA methods.
+**Expected Output:**
+- **Terminal**: Detailed coarray analysis (positions, weights, holes, performance metrics)
+- **Plots**: 6-panel visualization saved to `results/plots/`
+- **CSV**: Performance summary tables in `results/summaries/`
 
+<<<<<<< HEAD
 ## Citation
 If you use this framework in your research, please cite our paper (details TBD).
 >>>>>>> d7fd0dc (prepare paper Weight-Constrained Sparse Arrays (Z4/Z5): Nov 3, 2025 Monday 11:14PM)
+=======
+---
+
+## 📐 Core Concept: Difference Coarray
+
+MIMO arrays create **virtual sensors** through pairwise differences of physical sensor positions:
+
+```
+Physical array: [0, 5, 8, 11, 14, 17, 21] (N=7 sensors)
+                          ↓
+Difference coarray: All pairs (nᵢ - nⱼ) → N² = 49 differences
+                          ↓
+Virtual array: 17 unique positions spanning [-21, 21]
+```
+
+**Key Benefit**: Virtual aperture size determines **maximum detectable sources**:
+- **Degrees of Freedom (DOF)**: K_max = floor(L/2)
+- **Z5 Example**: 7 physical sensors → 43 virtual sensors → 21 sources detectable
+
+---
+
+## 📊 Project Structure
+
+```
+MIMO_GEOMETRY_ANALYSIS/
+├── README.md                    # This file
+├── docs/                        # Comprehensive documentation
+│   ├── GETTING_STARTED.md       # Installation & first steps
+│   ├── API_REFERENCE.md         # Complete API documentation
+│   ├── ARCHITECTURE.md          # System design
+│   └── tutorials/               # Step-by-step guides
+│
+├── geometry_processors/         # Array definitions
+│   ├── bases_classes.py        # Abstract framework
+│   └── z[1-6]_processor*.py    # Specialized arrays
+│
+├── core/radarpy/               # DOA estimation algorithms
+│   ├── algorithms/             # MUSIC, ALSS implementations
+│   ├── signal/                 # Signal generation
+│   └── metrics/                # Performance metrics
+│
+├── analysis_scripts/           # Interactive demos
+│   ├── graphical_demo.py      # Menu-driven analysis
+│   └── run_*_demo.py          # CLI demos
+│
+├── scripts/                    # Batch processing
+│   ├── run_paper_benchmarks.py # Paper-ready benchmarks
+│   └── sweep_*.ps1            # Parameter sweeps
+│
+├── tools/                      # Analysis utilities
+│   ├── plot_paper_benchmarks.py
+│   └── analyze_svd.py
+│
+├── papers/                     # Publication materials
+│   └── radarcon2025_alss/     # RadarCon 2025 submission
+│
+└── results/                    # Auto-generated outputs
+    ├── plots/
+    ├── bench/
+    └── summaries/
+```
+
+---
+
+## 📖 Usage Examples
+
+### Geometry Analysis
+
+```powershell
+# Interactive menu
+python analysis_scripts/graphical_demo.py
+
+# CLI with options
+python analysis_scripts/run_z5_demo.py --N 7 --markdown --save-csv
+python analysis_scripts/run_ula_demo.py --M 4 --save-json
+python analysis_scripts/run_z4_demo_.py --N 7 --assert --show-weights
+```
+
+### DOA Estimation Benchmarks
+
+```powershell
+# Basic benchmark
+python core/analysis_scripts/run_benchmarks.py \
+  --arrays Z5 --N 7 --algs CoarrayMUSIC \
+  --snr 0,5,10,15 --snapshots 64 --delta 13 --trials 200 \
+  --alss on --alss-mode zero --alss-tau 1.0 --alss-coreL 3
+
+# Paper-ready benchmarks with CIs
+python scripts/run_paper_benchmarks.py \
+  --array Z5 --N 7 --trials 400 \
+  --deltas 10,13,20,30,45 --alss-mode zero
+
+# Generate publication plots
+python tools/plot_paper_benchmarks.py results/bench/*.csv --all
+```
+
+### Programmatic Usage
+
+```python
+from geometry_processors.z5_processor_ import Z5ArrayProcessor
+
+# Create and analyze
+processor = Z5ArrayProcessor(N=7, d=1.0)
+results = processor.run_full_analysis()
+
+# Access results
+print(f"Max detectable sources: {results.max_detectable_sources}")
+print(results.performance_summary_table.to_markdown(index=False))
+```
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** | Installation, first analysis, troubleshooting |
+| **[API_REFERENCE.md](docs/API_REFERENCE.md)** | Complete API documentation with examples |
+| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | System design, data flow, component overview |
+| **[BENCHMARKING_GUIDE.md](docs/BENCHMARKING_GUIDE.md)** | Running benchmarks, interpreting results |
+| **[TUTORIAL_01.md](docs/tutorials/TUTORIAL_01_ARRAY_COMPARISON.md)** | Compare ULA, Nested, and Z5 arrays |
+| **[TUTORIAL_02.md](docs/tutorials/TUTORIAL_02_DOA_ESTIMATION.md)** | DOA estimation with MUSIC |
+| **[TUTORIAL_03.md](docs/tutorials/TUTORIAL_03_ALSS_REGULARIZATION.md)** | Using ALSS for improved performance |
+
+---
+
+## 🎯 Research Applications
+
+### Published Work: RadarCon 2025
+
+**Paper**: *"Adaptive Lag-Selective Shrinkage for MIMO Coarray DOA Estimation"*
+
+**Key Results:**
+- **Performance**: 6.9% RMSE improvement at SNR=5dB, Δθ=13° (Z5 array)
+- **Conditioning**: 2.5× better conditioning (Rv vs Rx)
+- **Dataset**: 3,200 trials across 32 scenarios
+- **Figures**: 18 publication-ready plots
+
+**Materials**: See `papers/radarcon2025_alss/` for LaTeX sections, figures, and guides.
+
+### Array Performance Summary
+
+| Array | N | Virtual (Mv) | DOF (K_max) | Holes | Key Feature |
+|-------|---|--------------|-------------|-------|-------------|
+| **ULA** | 7 | 13 | 6 | Many | Simple, uniform |
+| **Nested** | 7 | 25 | 12 | 0 | Nested structure |
+| **Z4** | 7 | 39 | 19 | 0 | w(1)=w(2)=0 |
+| **Z5** | 7 | 43 | 21 | 0 | Advanced w(1)=w(2)=0 |
+| **Z6** | 7 | 43 | 21 | 0 | Ultimate constraints |
+
+---
+
+## 🛠️ Development
+
+### Adding New Arrays
+
+1. Create processor in `geometry_processors/`
+2. Implement 8 abstract methods from `BaseArrayProcessor`
+3. Add demo script in `analysis_scripts/`
+4. Update `graphical_demo.py` menu
+
+See **[docs/DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md)** for details.
+
+### Running Tests
+
+```powershell
+# Unit tests
+python -m pytest core/tests/ -v
+
+# Validate all processors
+python analysis_scripts/methods_demo.py
+
+# Check results
+type results\method_test_log.txt
+```
+
+---
+
+## ⚠️ Important Limitations
+
+- **Root-MUSIC on virtual arrays**: Experimental; use grid-based CoarrayMUSIC for published results
+- **Z6 CoarrayMUSIC**: Produces fragmented coarray (Mv=3); unsuitable for virtual array DOA
+- **Spatial aliasing**: Z5/Z6 have wide apertures; ensure λ ≥ 2d to avoid aliasing
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Theory**: Difference coarray (Vaidyanathan & Pal, 2010)
+- **ALSS**: Original contribution for finite-sample regularization
+- **Tools**: NumPy, Pandas, Matplotlib, SciPy
+
+---
+
+## 📞 Citation
+
+```bibtex
+@inproceedings{your2025alss,
+  title={Adaptive Lag-Selective Shrinkage for MIMO Coarray DOA Estimation},
+  author={Your Name},
+  booktitle={IEEE RadarCon},
+  year={2025}
+}
+```
+
+---
+
+## 📚 References
+
+1. P. Pal and P. P. Vaidyanathan, "Nested arrays," *IEEE Trans. Signal Process.*, 2010.
+2. C.-L. Liu and P. P. Vaidyanathan, "Spatial smoothing in coarray MUSIC," *IEEE Signal Process. Lett.*, 2015.
+
+---
+
+**Last Updated:** 2025-11-06  
+**Version:** 1.0.0  
+**Status:** Production-Ready
+>>>>>>> 82a1795 (chore: clean project structure - remove duplicates and add documentation)

@@ -29,11 +29,55 @@ from core.analysis_scripts.run_benchmarks import (
 
 def resolve_tolerance_check(est_doas, true_doas, position_tol_deg=1.0, separation_tol_deg=0.5):
     """
-    Check if estimated DOAs are "resolved" based on paper criteria:
-    - Both peaks within ±position_tol_deg of true values
-    - Peaks separated by at least separation_tol_deg
+    Check if DOA estimates satisfy resolution criteria.
     
-    Returns: bool (True if resolved)
+    Determines whether estimated DOAs are "resolved" according to paper-specified
+    tolerances for both position accuracy and peak separation.
+    
+    **Resolution Criteria (both must be satisfied):**
+        1. Position Accuracy: Each estimate within ±position_tol_deg of truth
+        2. Separation: Peaks separated by ≥ separation_tol_deg
+        3. Correct Count: len(est_doas) == len(true_doas)
+    
+    Args:
+        est_doas (array-like): Estimated DOA angles in degrees
+        true_doas (array-like): True DOA angles in degrees
+        position_tol_deg (float): Position tolerance in degrees. Default: 1.0°
+        separation_tol_deg (float): Minimum peak separation in degrees. Default: 0.5°
+    
+    Returns:
+        bool: True if all criteria satisfied, False otherwise
+    
+    Algorithm:
+        1. Sort both estimate and truth arrays
+        2. Check count: len(est) == len(true)
+        3. Check position: ∀i, |est[i] - true[i]| ≤ position_tol_deg
+        4. Check separation: |est[1] - est[0]| ≥ separation_tol_deg (for 2 sources)
+        5. Return True only if all checks pass
+    
+    Usage:
+        >>> est = np.array([9.8, 23.3])
+        >>> true = np.array([10.0, 23.0])
+        >>> is_resolved = resolve_tolerance_check(est, true, position_tol_deg=1.0)
+        >>> print(is_resolved)
+        True  # Both within 1° and separated by 13.5° > 0.5°
+    
+    Example (Failure Cases):
+        >>> # Wrong count (only 1 peak found)
+        >>> resolve_tolerance_check([10.1], [10.0, 23.0])
+        False
+        
+        >>> # Position error too large
+        >>> resolve_tolerance_check([8.5, 23.0], [10.0, 23.0])
+        False  # 8.5 is 1.5° from 10.0 > 1.0° tolerance
+        
+        >>> # Insufficient separation
+        >>> resolve_tolerance_check([10.1, 10.4], [10.0, 23.0])
+        False  # Only 0.3° separation < 0.5° required
+    
+    Note:
+        This is a stricter criterion than simple RMSE < threshold.
+        Used in RadarCon 2025 paper for "resolve rate" metric.
     """
     if len(est_doas) != len(true_doas):
         return False
@@ -56,21 +100,58 @@ def local_refine_peaks(X, pos_phys, d_phys, wavelength, K, coarse_peaks,
                        alss_enabled=True, alss_mode='zero', alss_tau=1.0, alss_coreL=3,
                        refine_window_deg=2.0, refine_step_deg=0.01):
     """
-    Perform local refinement around coarse peaks with finer grid.
+    Perform two-stage grid refinement around coarse peak estimates.
     
-    Parameters:
-    -----------
-    coarse_peaks : array
-        Initial peak estimates from coarse scan
-    refine_window_deg : float
-        ±window around each peak to refine (default ±2°)
-    refine_step_deg : float
-        Fine grid step (default 0.01°)
+    **Two-Stage Refinement Strategy:**
+        Stage 1: Coarse global scan (0.05° step) → identify approximate peaks
+        Stage 2: Fine local scan (0.01° step) → refine each peak ±2° window
+    
+    This approach reduces computation while achieving 0.01° resolution accuracy.
+    
+    Args:
+        X (np.ndarray): Snapshot matrix (N, M)
+        pos_phys (np.ndarray): Physical sensor positions (integer grid)
+        d_phys (float): Physical spacing in meters
+        wavelength (float): Carrier wavelength in meters
+        K (int): Number of sources (should equal len(coarse_peaks))
+        coarse_peaks (np.ndarray): Initial DOA estimates from coarse scan
+        alss_enabled (bool): Enable ALSS for refinement. Default: True
+        alss_mode (str): ALSS shrinkage mode. Default: 'zero'
+        alss_tau (float): ALSS intensity. Default: 1.0
+        alss_coreL (int): ALSS protected lags. Default: 3
+        refine_window_deg (float): ±refinement window around each peak. Default: 2.0°
+        refine_step_deg (float): Fine grid step. Default: 0.01°
     
     Returns:
-    --------
-    refined_peaks : array
-        Refined DOA estimates
+        np.ndarray: Refined DOA estimates in degrees (sorted)
+    
+    Algorithm:
+        1. For each coarse peak θ_coarse:
+            a. Define local scan: [θ_coarse - 2°, θ_coarse + 2°]
+            b. Run MUSIC with 0.01° step in local window
+            c. Find single peak (K=1) in local region
+        2. Collect all refined peaks
+        3. Sort and return
+    
+    Computational Complexity:
+        - Coarse scan: O(G_coarse * L²) where G_coarse = 2401 (for ±60° @ 0.05°)
+        - Fine scans: K * O(G_fine * L²) where G_fine = 401 (for ±2° @ 0.01°)
+        - Total: ~2401 + 2*401 = 3203 grid points vs 24001 for full 0.01° scan
+        - Speedup: ~7.5× faster than naive 0.01° global scan
+    
+    Usage:
+        >>> # After coarse scan
+        >>> coarse_peaks = np.array([9.85, 23.15])  # 0.05° accuracy
+        >>> refined_peaks = local_refine_peaks(
+        ...     X, positions, d=0.5, wavelength=1.0, K=2, coarse_peaks,
+        ...     refine_step_deg=0.01
+        ... )
+        >>> print(refined_peaks)
+        [9.82, 23.11]  # 0.01° accuracy
+    
+    Note:
+        This is the paper-specified two-stage refinement method used in
+        RadarCon 2025 benchmarks for computational efficiency with high accuracy.
     """
     # Build local search ranges around each coarse peak
     local_ranges = []
