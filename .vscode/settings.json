@@ -1,11 +1,12 @@
 {
     // Python Environment Configuration
-    "python-envs.defaultEnvManager": "ms-python.python:venv",
+    "python-envs.defaultEnvManager": "ms-python.python:pyenv",
     "python-envs.pythonProjects": [],
     
-    // Virtual Environment Path (mimo-geom-dev)
-    "python.defaultInterpreterPath": "${workspaceFolder}/envs/mimo-geom-dev/Scripts/python.exe",
-    "python.venvPath": "${workspaceFolder}/envs",
+    // Virtual Environment Path (mimo-geom-dev) - ABSOLUTE PATH for reliability
+    "python.defaultInterpreterPath": "C:\\MyDocument\\RadarPy\\MIMO_GEOMETRY_ANALYSIS\\envs\\mimo-geom-dev\\Scripts\\python.exe",
+    "python.pythonPath": "C:\\MyDocument\\RadarPy\\MIMO_GEOMETRY_ANALYSIS\\envs\\mimo-geom-dev\\Scripts\\python.exe",
+    "python.venvPath": "${workspaceFolder}\\envs",
     "python.venvFolders": ["envs"],
     
     // Automatic Terminal Activation
