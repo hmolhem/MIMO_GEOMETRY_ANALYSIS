@@ -44,6 +44,9 @@ results/summaries/*.xlsx
 # Mini scripts folder (ignored from tracking)
 miniScript/
 
+# Garbage folder (removed/archived files)
+garbage/
+
 # Data files (if large)
 data/*.dat
 data/*.bin
