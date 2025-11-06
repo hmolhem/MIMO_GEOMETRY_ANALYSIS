@@ -33,13 +33,18 @@ A comprehensive Python framework for analyzing MIMO radar array geometries throu
 ### Installation
 
 ```powershell
-# Activate virtual environment (Windows PowerShell)
-.\mimo-geom-dev\Scripts\Activate.ps1
+# Activate virtual environment (Recommended: Batch file)
+.\activate_venv.bat
+
+# Alternative: PowerShell script (requires RemoteSigned execution policy)
+.\activate_venv.ps1
 
 # Verify installation
 python --version  # Should show Python 3.13.0
 pip list | Select-String "numpy|pandas|matplotlib"
 ```
+
+**Note:** Use the provided activation scripts (`activate_venv.bat` or `activate_venv.ps1`) which include automatic verification. The batch file (`.bat`) is recommended as it works without execution policy restrictions.
 
 ### Your First Analysis
 
@@ -50,8 +55,11 @@ python analysis_scripts/graphical_demo.py
 # CLI analysis for Z5 array with 7 sensors
 python analysis_scripts/run_z5_demo.py --N 7 --markdown
 
-# Run DOA estimation benchmark
-python core/analysis_scripts/run_benchmarks.py --arrays Z5 --N 7 --trials 100
+# Run DOA estimation benchmark (with automatic venv activation)
+.\run_benchmarks_with_venv.ps1 -Arrays Z5 -N 7 -Trials 100
+
+# Alternative: Batch file runner
+run_benchmarks_with_venv.bat Z5 7 100
 ```
 
 **Expected Output:**
@@ -262,6 +270,24 @@ python analysis_scripts/methods_demo.py
 # Check results
 type results\method_test_log.txt
 ```
+
+### Running Benchmarks with Venv
+
+The project provides automated benchmark runners that handle virtual environment activation:
+
+```powershell
+# PowerShell runner (with parameters)
+.\run_benchmarks_with_venv.ps1 -Arrays "Z5" -N 7 -Trials 100
+
+# With mutual coupling enabled
+.\run_benchmarks_with_venv.ps1 -Arrays "Z5" -N 7 -Trials 100 -WithCoupling
+
+# Batch runner (positional arguments)
+run_benchmarks_with_venv.bat Z5 7 100
+run_benchmarks_with_venv.bat Z5 7 100 coupling
+```
+
+**See full guide**: [docs/BENCHMARK_EXECUTION_GUIDE.md](docs/BENCHMARK_EXECUTION_GUIDE.md)
 
 ---
 
