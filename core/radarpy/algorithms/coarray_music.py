@@ -151,16 +151,28 @@ def root_music_from_Rv(Rv, K, k, d):
     return thetas, dbg
 
 def estimate_doa_coarray_music(X, positions, d_phys, wavelength, K,
-                               scan_deg=(-60, 60, 0.1), return_debug=False, use_root=False):
+                               scan_deg=(-60, 60, 0.1), return_debug=False, use_root=False,
+                               alss_enabled=False, alss_mode="zero", alss_tau=1.0, alss_coreL=3):
     """
     Coarray-MUSIC on the largest one-sided contiguous segment of the difference coarray.
     X: snapshots matrix (N x M), positions: integer-grid sensor indices * d_phys,
     d_phys: physical grid spacing (meters), wavelength (meters), K: source count.
+    
+    ALSS Parameters (optional lag-selective shrinkage):
+    - alss_enabled: Enable adaptive lag-selective shrinkage (default False)
+    - alss_mode: 'zero' (shrink toward 0) or 'ar1' (AR(1) prior) (default 'zero')
+    - alss_tau: Shrinkage strength parameter (default 1.0)
+    - alss_coreL: Protect low lags 0..coreL from shrinkage (default 3)
     """
     # Sample covariance
-    Rxx = X @ X.conj().T / max(1, X.shape[1])
+    M = X.shape[1]  # Number of snapshots
+    Rxx = X @ X.conj().T / max(1, M)
     # Build virtual ULA covariance from lag-averaged stats
-    Rv, dvirt, (L1, L2), one_side, rmap, coarray_debug = build_virtual_ula_covariance(Rxx, positions, d_phys)
+    Rv, dvirt, (L1, L2), one_side, rmap, coarray_debug = build_virtual_ula_covariance(
+        Rxx, positions, d_phys,
+        alss_enabled=alss_enabled, alss_mode=alss_mode,
+        alss_tau=alss_tau, alss_coreL=alss_coreL, M=M
+    )
     
     # Forward-Backward Averaging (FBA) - halves variance, decorrelates symmetric components
     Lv = Rv.shape[0]

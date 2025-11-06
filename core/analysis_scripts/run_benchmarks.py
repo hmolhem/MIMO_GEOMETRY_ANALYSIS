@@ -129,7 +129,8 @@ def get_array_geometry(name, N, d, lambda_factor=2.0):
 def parse_list(s, cast=float):
     return [cast(x) for x in s.split(",") if x.strip()]
 
-def run_alg(alg_name, X, positions, d_phys, wavelength, K, scan_deg=(-60, 60, 0.1), use_root=False):
+def run_alg(alg_name, X, positions, d_phys, wavelength, K, scan_deg=(-60, 60, 0.1), use_root=False,
+            alss_enabled=False, alss_mode="zero", alss_tau=1.0, alss_coreL=3):
     """
     Unified algorithm dispatcher for DOA estimation.
     
@@ -151,20 +152,29 @@ def run_alg(alg_name, X, positions, d_phys, wavelength, K, scan_deg=(-60, 60, 0.
         (theta_min, theta_max, theta_step) for angular scan
     use_root : bool
         If True and alg_name=='CoarrayMUSIC', use Root-MUSIC instead of grid search
+    alss_enabled : bool
+        Enable ALSS (Adaptive Lag-Selective Shrinkage) for CoarrayMUSIC
+    alss_mode : str
+        ALSS shrink target: 'zero' or 'ar1'
+    alss_tau : float
+        ALSS strength parameter
+    alss_coreL : int
+        Protect low lags 0..coreL from shrinkage
         
     Returns:
     --------
     tuple: (doas_est, dbg) where dbg is dict with Mv and other info
     """
     if alg_name == "SpatialMUSIC":
-        # Keep existing spatial MUSIC call
+        # Keep existing spatial MUSIC call (ALSS not applicable)
         doas_est = estimate_doa_spatial_music(X, positions, d_phys, wavelength, K, scan_deg=scan_deg)
         dbg = {"Mv": len(positions)}  # physical array size
         return doas_est, dbg
     elif alg_name == "CoarrayMUSIC":
-        # Ask for debug to get virtual size Lv
+        # Pass ALSS parameters through to CoarrayMUSIC
         doas_est, P, thetas, dbg_full = estimate_doa_coarray_music(
-            X, positions, d_phys, wavelength, K, scan_deg=scan_deg, return_debug=True, use_root=use_root
+            X, positions, d_phys, wavelength, K, scan_deg=scan_deg, return_debug=True, use_root=use_root,
+            alss_enabled=alss_enabled, alss_mode=alss_mode, alss_tau=alss_tau, alss_coreL=alss_coreL
         )
         # dbg_full["Lv"] present from coarray builder; expose Mv for CSV
         dbg = {"Mv": int(dbg_full.get("Lv", 1))}
@@ -185,6 +195,8 @@ def main():
     ap.add_argument("--snapshots", type=str, default="32,64,128")
     ap.add_argument("--k", type=str, default="2")
     ap.add_argument("--delta", type=str, default="2")  # spacing (deg) for 2-source tests
+    ap.add_argument("--doas", type=str, default=None,
+                    help="Custom DOAs (semicolon-separated degrees, e.g. '-7;12'). Overrides --delta if provided.")
     ap.add_argument("--trials", type=int, default=100)
     ap.add_argument("--out", type=str, default="results/bench/bench_default.csv")
     ap.add_argument("--seed", type=int, default=1234)
@@ -194,6 +206,15 @@ def main():
                     help="Export CRB overlay rows to results/bench/crb_overlay.csv")
     ap.add_argument("--use-root", action="store_true",
                     help="Use Root-MUSIC for CoarrayMUSIC (polynomial-based, faster+sharper)")
+    # ALSS (Adaptive Lag-Selective Shrinkage) parameters
+    ap.add_argument("--alss", choices=["on","off"], default="off",
+                    help="Enable Adaptive Lag-Selective Shrinkage in CoarrayMUSIC (default: off)")
+    ap.add_argument("--alss-mode", choices=["zero","ar1"], default="zero",
+                    help="ALSS shrink target: 'zero' (toward 0) or 'ar1' (toward AR(1) prior) (default: zero)")
+    ap.add_argument("--alss-tau", type=float, default=1.0,
+                    help="ALSS strength parameter (larger = more shrink) (default: 1.0)")
+    ap.add_argument("--alss-coreL", type=int, default=3,
+                    help="Protect low lags 0..coreL from shrink (default: 3)")
     args = ap.parse_args()
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
@@ -251,7 +272,12 @@ def main():
             for SNR in snrs:
                 for M in snaps:
                     for t in range(args.trials):
-                        if K == 2:
+                        # Custom DOAs override (if provided)
+                        if args.doas is not None:
+                            doas_true = np.array([float(x.strip()) for x in args.doas.split(';')], dtype=float)
+                            if len(doas_true) != K:
+                                raise ValueError(f"--doas provided {len(doas_true)} angles but K={K} sources expected")
+                        elif K == 2:
                             dth = deltas[t % len(deltas)]
                             doas_true = np.array([-dth/2.0, +dth/2.0])
                         else:
@@ -270,7 +296,14 @@ def main():
                             try:
                                 t0 = time.perf_counter()
                                 use_root = args.use_root if hasattr(args, 'use_root') else False
-                                doas_est, dbg = run_alg(alg, X, sensor_positions_grid, args.d, wavelength, K, scan_deg=(-60, 60, 0.1), use_root=use_root)
+                                # ALSS parameters (only used by CoarrayMUSIC)
+                                alss_enabled = (args.alss == "on")
+                                doas_est, dbg = run_alg(
+                                    alg, X, sensor_positions_grid, args.d, wavelength, K, 
+                                    scan_deg=(-60, 60, 0.1), use_root=use_root,
+                                    alss_enabled=alss_enabled, alss_mode=args.alss_mode,
+                                    alss_tau=args.alss_tau, alss_coreL=args.alss_coreL
+                                )
                                 t1 = time.perf_counter()
                                 
                                 runtime_ms = 1000.0 * (t1 - t0)
@@ -304,6 +337,10 @@ def main():
                                     "resolved": int(resolved),
                                     "runtime_ms": runtime_ms,
                                     "runtime_total_ms": runtime_total_ms,
+                                    "alss": "on" if alss_enabled else "off",
+                                    "alss_mode": args.alss_mode,
+                                    "alss_tau": args.alss_tau,
+                                    "alss_coreL": args.alss_coreL,
                                 })
                             except Exception as e:
                                 print(f"[ERROR] {alg} failed for {arr_name}: {e}")
