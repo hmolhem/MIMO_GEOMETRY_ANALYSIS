@@ -317,6 +317,38 @@ python analysis_scripts/run_doa_demo.py \
     --format png
 ```
 
+### 5. Enable Mutual Coupling Matrix (MCM)
+
+```bash
+# Simulate realistic antenna coupling effects
+python analysis_scripts/run_doa_demo.py \
+    --array z5 \
+    --N 7 \
+    --K 3 \
+    --enable-mcm \
+    --mcm-c1 0.3 \      # Coupling strength
+    --mcm-alpha 0.5     # Decay rate
+
+# Expected: Performance degradation due to coupling (realistic)
+```
+
+**Programmatic:**
+```python
+# With MCM enabled
+estimator = MUSICEstimator(
+    sensor_positions=coarray,
+    wavelength=2.0,
+    enable_mcm=True,
+    mcm_model='exponential',
+    mcm_params={'c1': 0.3, 'alpha': 0.5}
+)
+
+# Test with coupling
+signals = estimator.simulate_signals(true_angles=[-30, 0, 30], SNR_dB=20)
+estimated = estimator.estimate(signals, K_sources=3)
+# Expected: Higher RMSE than without MCM (shows coupling impact)
+```
+
 ---
 
 ## Validation
@@ -339,15 +371,36 @@ python analysis_scripts/test_all_arrays_doa.py
 - ✅ ePCA (1 configuration)
 - ✅ Z-arrays (8 configurations: Z1, Z3_1, Z3_2, Z4, Z5, Z6)
 
+### Test MCM Integration
+
+```bash
+# Test mutual coupling matrix features
+python analysis_scripts/test_mcm_doa.py
+
+# Expected output:
+# - No MCM:    RMSE = 0.000° (baseline)
+# - MCM (exp): RMSE = 34.064° (coupling degradation)
+# - MCM (toep): RMSE = 68.705° (stronger degradation)
+# ✓ MCM causes performance degradation (expected behavior)
+```
+
+**What it validates:**
+- ✅ MCM can be enabled/disabled
+- ✅ Exponential decay model works
+- ✅ Toeplitz model works
+- ✅ Coupling causes expected performance degradation
+- ✅ Integration with Z5 array (tests all components)
+
 ---
 
 ## Next Steps
 
-1. **Read Full Documentation:** `doa_estimation/README.md` (600+ lines)
+1. **Read Full Documentation:** `doa_estimation/README.md` (600+ lines with MCM section)
 2. **Implementation Details:** `doa_estimation/IMPLEMENTATION_SUMMARY.md`
 3. **Issue Resolution Log:** `doa_estimation/DOA_FIX_SUMMARY.md`
-4. **Experiment:** Try different arrays, SNR levels, source counts
-5. **Customize:** Modify visualization, add new metrics, extend to 2D
+4. **MCM Deep Dive:** `docs/MUTUAL_COUPLING_GUIDE.md` (comprehensive MCM guide)
+5. **Experiment:** Try different arrays, SNR levels, source counts, coupling strengths
+6. **Customize:** Modify visualization, add new metrics, extend to 2D
 
 ---
 
