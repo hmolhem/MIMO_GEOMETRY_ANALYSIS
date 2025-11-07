@@ -1,7 +1,0 @@
-array,alg,AvgRMSE,Resolve,Mv,crb_deg,RMSE/CRB
-ULA(N=7),CoarrayMUSIC,0.9493,24.2,7,,
-ULA(N=7),SpatialMUSIC,0.9395,27.3,7,,
-Z4(N=7),CoarrayMUSIC,59.8101,0.0,1,,
-Z4(N=7),SpatialMUSIC,0.3591,75.8,7,,
-Z5(N=7),CoarrayMUSIC,59.8101,0.0,1,,
-Z5(N=7),SpatialMUSIC,0.1852,87.9,7,,
