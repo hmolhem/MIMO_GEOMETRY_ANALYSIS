@@ -312,7 +312,61 @@ class ePCAArrayProcessor(BaseArrayProcessor):
         N3: int = 3,
         d: float = 1.0
     ):
-        """Initialize ePCA processor with prime parameters and subarray sizes."""
+        """
+        Initialize Extended Prime Coprime Array processor.
+        
+        Parameters
+        ----------
+        p1 : int
+            First prime number (smallest), must be ≥ 2 and p1 < p2 < p3.
+            Used as spacing factor for P2 and P3 subarrays.
+            Common choices: 2, 3, 5, 7, 11, 13.
+            
+        p2 : int
+            Second prime number (middle), must be ≥ 2 and p1 < p2 < p3.
+            Used as spacing factor for P1 and P3 subarrays.
+            
+        p3 : int
+            Third prime number (largest), must be ≥ 2 and p1 < p2 < p3.
+            Used as spacing factor for P1 and P2 subarrays.
+            
+        N1 : int, optional
+            Number of sensors in subarray P1 (default: 3).
+            Must be ≥ 2. P1 uses spacing p2×p3×d.
+            
+        N2 : int, optional
+            Number of sensors in subarray P2 (default: 3).
+            Must be ≥ 2. P2 uses spacing p1×p3×d.
+            
+        N3 : int, optional
+            Number of sensors in subarray P3 (default: 3).
+            Must be ≥ 2. P3 uses spacing p1×p2×d.
+            
+        d : float, optional
+            Base unit spacing multiplier (default: 1.0).
+            Typically λ/2 for narrowband DOA estimation.
+            Must be > 0.
+            
+        Raises
+        ------
+        ValueError
+            If any prime < 2, or Ni < 2, or d ≤ 0, or primes not ordered p1 < p2 < p3.
+            
+        Warns
+        -----
+        If primes are not pairwise coprime (gcd(pi,pj) ≠ 1), performance may degrade.
+        
+        Examples
+        --------
+        >>> # Basic ePCA with small primes
+        >>> epca = ePCAArrayProcessor(p1=2, p2=3, p3=5)
+        >>> print(epca.total_sensors, epca.is_coprime)
+        7 True
+        
+        >>> # Larger configuration
+        >>> epca = ePCAArrayProcessor(p1=3, p2=5, p3=7, N1=4, N2=3, N3=2, d=0.5)
+        >>> results = epca.run_full_analysis()
+        """
         # Validate inputs
         if p1 < 2 or p2 < 2 or p3 < 2:
             raise ValueError(f"ePCA requires all primes ≥ 2, got p1={p1}, p2={p2}, p3={p3}")
@@ -687,7 +741,20 @@ class ePCAArrayProcessor(BaseArrayProcessor):
         return result
     
     def __repr__(self) -> str:
-        """String representation of ePCA processor."""
+        """
+        String representation of ePCA processor.
+        
+        Returns
+        -------
+        str
+            Formatted string with all configuration parameters and status.
+            
+        Examples
+        --------
+        >>> epca = ePCAArrayProcessor(p1=2, p2=3, p3=5, N1=3, N2=3, N3=3)
+        >>> print(repr(epca))
+        ePCAArrayProcessor(p1=2, p2=3, p3=5, N1=3, N2=3, N3=3, d=1.0, total_sensors=7, coprime=True)
+        """
         return (
             f"ePCAArrayProcessor(p1={self.p1}, p2={self.p2}, p3={self.p3}, "
             f"N1={self.N1}, N2={self.N2}, N3={self.N3}, d={self.d}, "
@@ -707,28 +774,86 @@ def compare_epca_arrays(
     """
     Compare multiple ePCA configurations with different prime triplets.
     
+    Useful for design space exploration and parameter optimization.
+    All configurations use the same subarray sizes (N1, N2, N3) and spacing (d),
+    only the prime triplet varies.
+    
     Parameters
     ----------
     prime_triplets : List[Tuple[int, int, int]]
         List of (p1, p2, p3) prime combinations to compare.
+        Each tuple must satisfy: p1 < p2 < p3, all ≥ 2.
         Example: [(2,3,5), (3,5,7), (5,7,11), (7,11,13)]
         
     N1, N2, N3 : int, optional
         Subarray sizes (same for all comparisons, default 3 each).
+        Fixed across all configurations for fair comparison.
         
     d : float, optional
-        Unit spacing (default 1.0).
+        Base unit spacing (default 1.0).
+        Fixed across all configurations for fair comparison.
         
     Returns
     -------
     pd.DataFrame
-        Comparison table with all configurations and their metrics.
+        Comparison table with columns including:
+        - Array: Configuration name
+        - p1, p2, p3: Prime parameters
+        - Prime_Product: p1×p2×p3
+        - Total_Sensors: Physical sensor count
+        - Aperture: Two-sided coarray span
+        - K_max: Maximum detectable sources
+        - Holes: Missing lags
+        - DOF_Efficiency: K_max / Total_Sensors
+        Empty DataFrame if all configurations fail.
         
-    Example
-    -------
+    Examples
+    --------
+    **Example 1: Compare small to medium primes**
+    
+    >>> from geometry_processors.epca_processor import compare_epca_arrays
     >>> prime_sets = [(2,3,5), (3,5,7), (5,7,11)]
     >>> comparison = compare_epca_arrays(prime_sets, N1=3, N2=3, N3=3)
-    >>> print(comparison[['Array', 'Prime_Product', 'Aperture', 'K_max', 'DOF_Efficiency']])
+    >>> print(comparison[['Prime_Product', 'Aperture', 'K_max', 'DOF_Efficiency']])
+       Prime_Product  Aperture  K_max  DOF_Efficiency
+    0             30        60      2            0.29
+    1            105       210      5            0.71
+    2            385       770     18            2.57
+    
+    **Example 2: Find best configuration for target aperture**
+    
+    >>> primes = [(2,3,5), (2,3,7), (2,5,7), (3,5,7)]
+    >>> results = compare_epca_arrays(primes, N1=4, N2=3, N3=2, d=1.0)
+    >>> best = results.loc[results['DOF_Efficiency'].idxmax()]
+    >>> print(f"Best: ({best['p1']}, {best['p2']}, {best['p3']}) with eff={best['DOF_Efficiency']}")
+    
+    **Example 3: Aperture scaling study**
+    
+    >>> consecutive_primes = [(2,3,5), (3,5,7), (5,7,11), (7,11,13)]
+    >>> scaling = compare_epca_arrays(consecutive_primes, N1=2, N2=2, N3=2)
+    >>> import matplotlib.pyplot as plt
+    >>> plt.plot(scaling['Prime_Product'], scaling['Aperture'], 'o-')
+    >>> plt.xlabel('Prime Product'); plt.ylabel('Aperture')
+    >>> plt.title('ePCA Aperture Scaling')
+    
+    **Example 4: Error handling**
+    
+    >>> bad_primes = [(1,2,3), (2,3,5), (10,20,30)]  # Mix of valid/invalid
+    >>> results = compare_epca_arrays(bad_primes)
+    Error processing (1,2,3): ePCA requires all primes ≥ 2...
+    >>> # Returns results for (2,3,5) only
+    
+    Notes
+    -----
+    - Configurations that raise errors are skipped with warning printed
+    - Empty DataFrame returned if all configurations fail
+    - Non-coprime primes will trigger warnings but still be analyzed
+    - Use this for batch analysis, not single configuration testing
+    
+    See Also
+    --------
+    ePCAArrayProcessor : Single ePCA configuration analysis
+    TCAArrayProcessor : Two-level coprime array comparison
     """
     results = []
     
