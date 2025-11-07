@@ -1,0 +1,4 @@
+Array,Baseline_RMSE,Coupled_RMSE,Degradation_%,ULA_Degradation_%,Coupling_Resilience_Gain_%
+ULA,0.0,0.10606601717798216,inf,inf,
+Z5,0.0,0.0,,inf,
+Z6,0.0,0.0,,inf,

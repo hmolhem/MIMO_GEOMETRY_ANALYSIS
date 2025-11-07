@@ -1,0 +1,343 @@
+{
+  "statistical_metrics": {
+    "ULA": {
+      "Baseline_Mean": 0.052280125454604136,
+      "Baseline_CI_95_Low": 0.04146491160520262,
+      "Baseline_CI_95_High": 0.06309533930400565,
+      "Baseline_CI_Width": 0.02163042769880304,
+      "ALSS_Mean": 0.052280125454604136,
+      "ALSS_CI_95_Low": 0.04146491160520262,
+      "ALSS_CI_95_High": 0.06309533930400565,
+      "ALSS_CI_Width": 0.02163042769880304,
+      "Effect_Size_Cohens_d": 0.0,
+      "Effect_Size_Interpretation": "Negligible",
+      "Statistical_Power": 0.05000000000925891,
+      "Power_Adequate": false,
+      "Baseline_Bootstrap_Mean": 0.052280125454604136,
+      "Baseline_Bootstrap_CI_Low": 0.04246003915100844,
+      "Baseline_Bootstrap_CI_High": 0.06326636749573657,
+      "ALSS_Bootstrap_Mean": 0.052280125454604136,
+      "ALSS_Bootstrap_CI_Low": 0.04255130185456115,
+      "ALSS_Bootstrap_CI_High": 0.062258866785917785,
+      "Bootstrap_Parametric_Agreement_Baseline_%": 96.19009219073132,
+      "Bootstrap_Parametric_Agreement_ALSS_%": 91.1103802743909,
+      "Paired_t_test_statistic": NaN,
+      "Paired_t_test_p_value": NaN,
+      "Statistically_Significant": false,
+      "Wilcoxon_statistic": 0.0,
+      "Wilcoxon_p_value": NaN
+    },
+    "Z5": {
+      "Baseline_Mean": 0.04997073842554494,
+      "Baseline_CI_95_Low": 0.039708483060051696,
+      "Baseline_CI_95_High": 0.060232993791038185,
+      "Baseline_CI_Width": 0.02052451073098649,
+      "ALSS_Mean": 0.0011195688747770076,
+      "ALSS_CI_95_Low": 0.0009162847143586674,
+      "ALSS_CI_95_High": 0.0013228530351953479,
+      "ALSS_CI_Width": 0.00040656832083668036,
+      "Effect_Size_Cohens_d": 1.9128513599793477,
+      "Effect_Size_Interpretation": "Large",
+      "Statistical_Power": 0.99999999999997,
+      "Power_Adequate": true,
+      "Baseline_Bootstrap_Mean": 0.04997073842554494,
+      "Baseline_Bootstrap_CI_Low": 0.04072929453571791,
+      "Baseline_Bootstrap_CI_High": 0.05955835547399862,
+      "ALSS_Bootstrap_Mean": 0.0011195688747770076,
+      "ALSS_Bootstrap_CI_Low": 0.0009213576655120468,
+      "ALSS_Bootstrap_CI_High": 0.0013268453290170444,
+      "Bootstrap_Parametric_Agreement_Baseline_%": 91.7393899668161,
+      "Bootstrap_Parametric_Agreement_ALSS_%": 99.7342003111657,
+      "Paired_t_test_statistic": 9.567883388711989,
+      "Paired_t_test_p_value": 8.543601073129284e-13,
+      "Statistically_Significant": true,
+      "Wilcoxon_statistic": 0.0,
+      "Wilcoxon_p_value": 1.7763568394002505e-15
+    }
+  },
+  "computational_overhead": {
+    "ULA": {
+      "Array_Type": "ULA",
+      "Computation_Time_mean_ms": 129.7541856765747,
+      "Computation_Time_std_ms": 9.115368618157449,
+      "Computation_Time_min_ms": 119.05431747436523,
+      "Computation_Time_max_ms": 147.43375778198242,
+      "Memory_Footprint_MB": 0.19541549682617188,
+      "Memory_Peak_MB": 0.19541549682617188,
+      "N_sensors": 7,
+      "N_snapshots": 256,
+      "N_runs": 10
+    },
+    "Z5": {
+      "Array_Type": "Z5",
+      "Computation_Time_mean_ms": 128.70850563049316,
+      "Computation_Time_std_ms": 8.512765917598326,
+      "Computation_Time_min_ms": 116.51086807250977,
+      "Computation_Time_max_ms": 141.48306846618652,
+      "Memory_Footprint_MB": 0.19308090209960938,
+      "Memory_Peak_MB": 0.19308090209960938,
+      "N_sensors": 7,
+      "N_snapshots": 256,
+      "N_runs": 10
+    }
+  },
+  "parameter_sensitivity": {
+    "ULA_N": {
+      "Array_Type": "ULA",
+      "Parameter": "N",
+      "Parameter_Values": [
+        5,
+        7,
+        9,
+        11
+      ],
+      "RMSE_means": [
+        0.07507551751186733,
+        0.0362842712474627,
+        0.023213203435596054,
+        0.007071067811865477
+      ],
+      "RMSE_stds": [
+        0.0443132787133322,
+        0.041029887399805204,
+        0.03407560984425049,
+        0.021213203435596427
+      ],
+      "Sensitivity_Score": 70.96531143836509,
+      "CV_means": 0.709653114383651,
+      "CV_stds": 0.25197666039409533,
+      "Min_RMSE": 0.007071067811865477,
+      "Max_RMSE": 0.07507551751186733,
+      "RMSE_Range": 0.06800444970000186,
+      "Results": [
+        {
+          "Parameter_Value": 5,
+          "RMSE_mean": 0.07507551751186733,
+          "RMSE_std": 0.0443132787133322
+        },
+        {
+          "Parameter_Value": 7,
+          "RMSE_mean": 0.0362842712474627,
+          "RMSE_std": 0.041029887399805204
+        },
+        {
+          "Parameter_Value": 9,
+          "RMSE_mean": 0.023213203435596054,
+          "RMSE_std": 0.03407560984425049
+        },
+        {
+          "Parameter_Value": 11,
+          "RMSE_mean": 0.007071067811865477,
+          "RMSE_std": 0.021213203435596427
+        }
+      ]
+    },
+    "ULA_d": {
+      "Array_Type": "ULA",
+      "Parameter": "d",
+      "Parameter_Values": [
+        0.3,
+        0.4,
+        0.5,
+        0.6
+      ],
+      "RMSE_means": [
+        0.09014658532373326,
+        0.05758868453136234,
+        0.05617447096898886,
+        1.8320416305603424
+      ],
+      "RMSE_stds": [
+        0.044425141018021516,
+        0.039793760992740845,
+        0.04055155744671637,
+        12.595480279207052
+      ],
+      "Sensitivity_Score": 150.0991319484831,
+      "CV_means": 1.5009913194848308,
+      "CV_stds": 1.709398431862444,
+      "Min_RMSE": 0.05617447096898886,
+      "Max_RMSE": 1.8320416305603424,
+      "RMSE_Range": 1.7758671595913536,
+      "Results": [
+        {
+          "Parameter_Value": 0.3,
+          "RMSE_mean": 0.09014658532373326,
+          "RMSE_std": 0.044425141018021516
+        },
+        {
+          "Parameter_Value": 0.4,
+          "RMSE_mean": 0.05758868453136234,
+          "RMSE_std": 0.039793760992740845
+        },
+        {
+          "Parameter_Value": 0.5,
+          "RMSE_mean": 0.05617447096898886,
+          "RMSE_std": 0.04055155744671637
+        },
+        {
+          "Parameter_Value": 0.6,
+          "RMSE_mean": 1.8320416305603424,
+          "RMSE_std": 12.595480279207052
+        }
+      ]
+    },
+    "Z5_N": {
+      "Array_Type": "Z5",
+      "Parameter": "N",
+      "Parameter_Values": [
+        5,
+        7,
+        9,
+        11
+      ],
+      "RMSE_means": [
+        1.8183847763108503,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "RMSE_stds": [
+        12.597411512103626,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Sensitivity_Score": 173.20508071878686,
+      "CV_means": 1.7320508071878686,
+      "CV_stds": 1.7320508075138803,
+      "Min_RMSE": 0.0,
+      "Max_RMSE": 1.8183847763108503,
+      "RMSE_Range": 1.8183847763108503,
+      "Results": [
+        {
+          "Parameter_Value": 5,
+          "RMSE_mean": 1.8183847763108503,
+          "RMSE_std": 12.597411512103626
+        },
+        {
+          "Parameter_Value": 7,
+          "RMSE_mean": 0.0,
+          "RMSE_std": 0.0
+        },
+        {
+          "Parameter_Value": 9,
+          "RMSE_mean": 0.0,
+          "RMSE_std": 0.0
+        },
+        {
+          "Parameter_Value": 11,
+          "RMSE_mean": 0.0,
+          "RMSE_std": 0.0
+        }
+      ]
+    },
+    "Z5_d": {
+      "Array_Type": "Z5",
+      "Parameter": "d",
+      "Parameter_Values": [
+        0.3,
+        0.4,
+        0.5,
+        0.6
+      ],
+      "RMSE_means": [
+        0.00565685424949226,
+        0.0,
+        1.8,
+        0.0
+      ],
+      "RMSE_stds": [
+        0.01918332609325047,
+        0.0,
+        12.6,
+        0.0
+      ],
+      "Sensitivity_Score": 172.48233843222337,
+      "CV_means": 1.7248233843222336,
+      "CV_stds": 1.728541903781651,
+      "Min_RMSE": 0.0,
+      "Max_RMSE": 1.8,
+      "RMSE_Range": 1.8,
+      "Results": [
+        {
+          "Parameter_Value": 0.3,
+          "RMSE_mean": 0.00565685424949226,
+          "RMSE_std": 0.01918332609325047
+        },
+        {
+          "Parameter_Value": 0.4,
+          "RMSE_mean": 0.0,
+          "RMSE_std": 0.0
+        },
+        {
+          "Parameter_Value": 0.5,
+          "RMSE_mean": 1.8,
+          "RMSE_std": 12.6
+        },
+        {
+          "Parameter_Value": 0.6,
+          "RMSE_mean": 0.0,
+          "RMSE_std": 0.0
+        }
+      ]
+    }
+  },
+  "integration_assessment": {
+    "ULA": {
+      "Ease_of_Integration_Score": 10,
+      "Implementation_Complexity": "Very Low",
+      "Calibration_Requirements": "Minimal",
+      "Hardware_Constraints": "None",
+      "Software_Complexity": "Low",
+      "Deployment_Readiness": "Production Ready",
+      "Learning_Curve": "Minimal",
+      "Documentation_Quality": "Excellent",
+      "Community_Support": "Extensive",
+      "Practical_Considerations": [
+        "+ Simplest possible array geometry",
+        "+ Well-understood performance characteristics",
+        "+ Extensive literature and tools available",
+        "- Limited coupling robustness",
+        "- Moderate aperture size"
+      ],
+      "Array_Type": "ULA"
+    },
+    "Z5": {
+      "Ease_of_Integration_Score": 8,
+      "Implementation_Complexity": "Low",
+      "Calibration_Requirements": "Minimal",
+      "Hardware_Constraints": "Non-uniform spacing",
+      "Software_Complexity": "Low",
+      "Deployment_Readiness": "Production Ready",
+      "Learning_Curve": "Low",
+      "Documentation_Quality": "Good",
+      "Community_Support": "Growing",
+      "Practical_Considerations": [
+        "+ Excellent coupling robustness",
+        "+ Large virtual aperture",
+        "+ Systematic design procedure",
+        "+ Compatible with standard MUSIC",
+        "- Requires non-uniform sensor placement",
+        "- Less familiar to practitioners"
+      ],
+      "Array_Type": "Z5"
+    }
+  },
+  "summary": {
+    "Arrays_Analyzed": [
+      "ULA",
+      "Z5"
+    ],
+    "Scenarios_Included": [
+      "scenario1",
+      "scenario2",
+      "scenario3",
+      "scenario4",
+      "scenario5"
+    ],
+    "Total_Trials": 50,
+    "Bootstrap_Samples": 500,
+    "Analysis_Date": "2025-11-06 22:24:15"
+  }
+}

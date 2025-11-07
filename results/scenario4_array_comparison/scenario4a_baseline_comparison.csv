@@ -1,0 +1,5 @@
+Array,N_Physical,N_Virtual,Aperture_Size,RMSE_mean,RMSE_std,Resolution_Rate,Runtime_mean_ms,Valid_Trials,SNR_dB,Snapshots,Relative_Improvement_%,Virtual_Aperture_Efficiency,Runtime_Overhead_%,Complexity_Overhead_Ratio
+ULA,7,13,3.0,0.0,0.0,100.0,5.567520997719839,100,10.0,256,,,0.0,
+Nested,7,15,7.0,4.169410865602357,9.540231288275823,82.0,4.17610700125806,100,10.0,256,-inf,-inf,-24.99162548343559,-inf
+Z5,7,29,22.0,0.0,0.0,100.0,4.133062997134402,100,10.0,256,,,-25.764752412661124,
+Z6,7,23,21.0,0.0,0.0,100.0,4.3530090095009655,100,10.0,256,,,-21.814232738704952,

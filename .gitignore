@@ -54,6 +54,9 @@ data/*.bin
 # Datasets folder (large experimental data)
 datasets/
 
+# PDF files (papers, references, etc.)
+*.pdf
+
 # Paper outputs (generated files)
 papers/*/outputs/bench/*.csv
 papers/*/outputs/logs/*.txt
