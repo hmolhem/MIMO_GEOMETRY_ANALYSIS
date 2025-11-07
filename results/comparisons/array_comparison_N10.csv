@@ -1,0 +1,7 @@
+Array,Category,N,Aperture,Unique_Lags,L,K_max,Holes,w(1),w(2),DOF_Efficiency,Notes,DOF_Efficiency_Val
+ANAII-2,Nested (Three-subarray),10,54,49,29,14,0,4,3,1.40,Augmented nested II-2,1.4
+DNA (D=1),Nested (Dilated),10,58,59,59,29,0,5,4,2.90,Standard nested (D=1),2.9
+DNA (D=2),Nested (Dilated),10,118,67,9,4,0,4,3,0.40,Dilated (reduced coupling),0.4
+"DDNA (1,1)",Nested (Double-dilated),10,60,53,13,6,0,4,4,0.60,Standard nested (D1=D2=1),0.6
+"DDNA (1,2)",Nested (Double-dilated),10,120,59,9,4,0,4,3,0.40,"DNA-equivalent (D1=1, D2=2)",0.4
+"DDNA (2,2)",Nested (Double-dilated),10,220,59,1,0,0,0,4,0.00,Full DDNA (minimal coupling),0.0
