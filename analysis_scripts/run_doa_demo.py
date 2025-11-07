@@ -132,12 +132,22 @@ def run_single_estimation(args):
     
     print(f"\nTrue DOA Angles: {[f'{a:.1f}°' for a in true_angles]}")
     
+    # Prepare MCM parameters
+    mcm_params = {}
+    if args.enable_mcm:
+        if args.mcm_model == 'exponential':
+            mcm_params = {'c1': args.mcm_c1, 'alpha': args.mcm_alpha}
+        print(f"  MCM enabled: {args.mcm_model} model")
+    
     # Create MUSIC estimator
     estimator = MUSICEstimator(
         sensor_positions=array_data.sensors_positions,
         wavelength=args.wavelength,
         angle_range=(-90, 90),
-        angle_resolution=args.resolution
+        angle_resolution=args.resolution,
+        enable_mcm=args.enable_mcm,
+        mcm_model=args.mcm_model,
+        mcm_params=mcm_params
     )
     
     # Simulate signals
@@ -230,11 +240,21 @@ def run_snr_comparison(args):
     snr_values = np.arange(0, 21, 5)
     rmse_values = []
     
+    # Prepare MCM parameters
+    mcm_params = {}
+    if args.enable_mcm:
+        if args.mcm_model == 'exponential':
+            mcm_params = {'c1': args.mcm_c1, 'alpha': args.mcm_alpha}
+        print(f"  MCM enabled: {args.mcm_model} model")
+    
     # Create estimator
     estimator = MUSICEstimator(
         sensor_positions=array_data.sensors_positions,
         wavelength=args.wavelength,
-        angle_resolution=args.resolution
+        angle_resolution=args.resolution,
+        enable_mcm=args.enable_mcm,
+        mcm_model=args.mcm_model,
+        mcm_params=mcm_params
     )
     
     print(f"\nRunning {len(snr_values)} experiments...")
@@ -330,10 +350,19 @@ def run_array_comparison(args):
         print(f"  Sensors: {array_data.num_sensors}")
         print(f"  K_max: {k_max_val}")
         
+        # Prepare MCM parameters
+        mcm_params = {}
+        if args.enable_mcm:
+            if args.mcm_model == 'exponential':
+                mcm_params = {'c1': args.mcm_c1, 'alpha': args.mcm_alpha}
+        
         # Estimate
         estimator = MUSICEstimator(
             array_data.sensors_positions,
-            wavelength=args.wavelength
+            wavelength=args.wavelength,
+            enable_mcm=args.enable_mcm,
+            mcm_model=args.mcm_model,
+            mcm_params=mcm_params
         )
         
         X = estimator.simulate_signals(
@@ -395,6 +424,17 @@ Examples:
                        help="Signal wavelength")
     parser.add_argument("--resolution", type=float, default=0.5,
                        help="Angle resolution (degrees)")
+    
+    # Mutual Coupling Matrix (MCM) options
+    parser.add_argument("--enable-mcm", action="store_true",
+                       help="Enable mutual coupling matrix modeling")
+    parser.add_argument("--mcm-model", type=str, default="exponential",
+                       choices=["exponential", "toeplitz"],
+                       help="MCM model type (default: exponential)")
+    parser.add_argument("--mcm-c1", type=float, default=0.3,
+                       help="MCM exponential model: coupling strength (default: 0.3)")
+    parser.add_argument("--mcm-alpha", type=float, default=0.5,
+                       help="MCM exponential model: decay rate (default: 0.5)")
     
     # Modes
     parser.add_argument("--plot", action="store_true", help="Show plots")

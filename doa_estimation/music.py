@@ -16,6 +16,18 @@ References
 import numpy as np
 from typing import List, Tuple, Optional, Union
 import warnings
+import sys
+import os
+
+# Add path to access core radarpy modules
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+try:
+    from core.radarpy.signal.mutual_coupling import generate_mcm_exponential, generate_mcm_toeplitz
+    MCM_AVAILABLE = True
+except ImportError:
+    MCM_AVAILABLE = False
+    warnings.warn("Mutual coupling module not available. MCM features disabled.")
 
 
 class MUSICEstimator:
@@ -42,6 +54,17 @@ class MUSICEstimator:
     angle_resolution : float, optional
         Angular resolution in degrees (default: 0.5).
         Smaller values give finer resolution but slower computation.
+    
+    enable_mcm : bool, optional
+        Enable mutual coupling matrix modeling (default: False).
+        
+    mcm_model : str, optional
+        MCM model type: 'exponential' or 'toeplitz' (default: 'exponential').
+        
+    mcm_params : dict, optional
+        Parameters for MCM model:
+        - For 'exponential': {'c1': 0.3, 'alpha': 0.5}
+        - For 'toeplitz': {'coupling_values': [...]}
         
     Attributes
     ----------
@@ -53,6 +76,9 @@ class MUSICEstimator:
         
     angle_grid : np.ndarray
         Grid of angles for spectrum computation.
+    
+    coupling_matrix : np.ndarray or None
+        Mutual coupling matrix (N × N) if MCM enabled, else None.
         
     Examples
     --------
@@ -89,7 +115,29 @@ class MUSICEstimator:
     >>>     angle_resolution=0.25   # Higher resolution
     >>> )
     
-    **Example 3: Full spectrum analysis**
+    **Example 3: With Mutual Coupling Matrix (MCM)**
+    
+    >>> # Enable MCM with exponential decay model
+    >>> estimator = MUSICEstimator(
+    >>>     sensor_positions=z5.data.sensors_positions,
+    >>>     wavelength=1.0,
+    >>>     enable_mcm=True,
+    >>>     mcm_model='exponential',
+    >>>     mcm_params={'c1': 0.3, 'alpha': 0.5}
+    >>> )
+    >>> # MCM is automatically applied to steering vectors
+    
+    **Example 4: MCM with Toeplitz model**
+    
+    >>> estimator = MUSICEstimator(
+    >>>     sensor_positions=z5.data.sensors_positions,
+    >>>     wavelength=1.0,
+    >>>     enable_mcm=True,
+    >>>     mcm_model='toeplitz',
+    >>>     mcm_params={'coupling_values': [1.0, 0.3, 0.15, 0.08]}
+    >>> )
+    
+    **Example 5: Full spectrum analysis**
     
     >>> estimated_angles, spectrum = estimator.estimate(
     >>>     X, K_sources=3, return_spectrum=True
@@ -118,14 +166,27 @@ class MUSICEstimator:
         sensor_positions: Union[List[float], np.ndarray],
         wavelength: float = 1.0,
         angle_range: Tuple[float, float] = (-90, 90),
-        angle_resolution: float = 0.5
+        angle_resolution: float = 0.5,
+        enable_mcm: bool = False,
+        mcm_model: str = 'exponential',
+        mcm_params: Optional[dict] = None
     ):
-        """Initialize MUSIC estimator with array geometry."""
+        """Initialize MUSIC estimator with array geometry and optional MCM."""
         self.sensor_positions = np.array(sensor_positions, dtype=float)
         self.N = len(self.sensor_positions)
         self.wavelength = wavelength
         self.angle_range = angle_range
         self.angle_resolution = angle_resolution
+        
+        # Mutual Coupling Matrix configuration
+        self.enable_mcm = enable_mcm
+        self.mcm_model = mcm_model
+        self.mcm_params = mcm_params or {}
+        self.coupling_matrix = None
+        
+        # Generate MCM if enabled
+        if self.enable_mcm:
+            self._generate_coupling_matrix()
         
         # Create angle grid for spectrum computation
         self.angle_grid = np.arange(
@@ -137,6 +198,33 @@ class MUSICEstimator:
         # Pre-compute steering vectors for efficiency
         self._steering_matrix = self._compute_steering_matrix()
     
+    def _generate_coupling_matrix(self):
+        """Generate mutual coupling matrix based on configuration."""
+        if not MCM_AVAILABLE:
+            warnings.warn(
+                "MCM requested but mutual_coupling module not available. "
+                "Operating without coupling effects."
+            )
+            self.enable_mcm = False
+            return
+        
+        if self.mcm_model == 'exponential':
+            c1 = self.mcm_params.get('c1', 0.3)
+            alpha = self.mcm_params.get('alpha', 0.5)
+            self.coupling_matrix = generate_mcm_exponential(
+                self.N, self.sensor_positions, c1=c1, alpha=alpha
+            )
+        elif self.mcm_model == 'toeplitz':
+            coupling_values = self.mcm_params.get('coupling_values', None)
+            if coupling_values is None:
+                # Default Toeplitz values
+                coupling_values = [1.0] + [0.3 * 0.5**i for i in range(self.N-1)]
+            self.coupling_matrix = generate_mcm_toeplitz(self.N, coupling_values)
+        else:
+            raise ValueError(f"Unknown MCM model: {self.mcm_model}")
+        
+        print(f"✓ MCM enabled: {self.mcm_model} model (c1={self.mcm_params.get('c1', 0.3):.2f})")
+    
     def _compute_steering_matrix(self) -> np.ndarray:
         """
         Pre-compute steering vectors for all angles in grid.
@@ -145,11 +233,14 @@ class MUSICEstimator:
         -------
         np.ndarray
             Steering matrix (N_sensors × N_angles) with complex exponentials.
+            If MCM enabled, coupling effects are applied.
             
         Notes
         -----
         Steering vector for angle θ:
             a(θ) = exp(j × 2π × sensor_positions / λ × sin(θ))
+        With MCM:
+            a_coupled(θ) = C @ a(θ)
         """
         N_angles = len(self.angle_grid)
         A = np.zeros((self.N, N_angles), dtype=complex)
@@ -160,6 +251,10 @@ class MUSICEstimator:
             # Phase shift: 2π × (position / wavelength) × sin(θ)
             phase = 2 * np.pi * self.sensor_positions / self.wavelength * np.sin(theta)
             A[:, i] = np.exp(1j * phase)
+        
+        # Apply mutual coupling if enabled
+        if self.enable_mcm and self.coupling_matrix is not None:
+            A = self.coupling_matrix @ A  # (N,N) @ (N,M) = (N,M)
         
         return A
     
@@ -176,10 +271,17 @@ class MUSICEstimator:
         -------
         np.ndarray
             Steering vector (N_sensors × 1) complex array.
+            If MCM enabled, coupling effects are applied.
         """
         angle_rad = np.deg2rad(angle_deg)
         phase = 2 * np.pi * self.sensor_positions / self.wavelength * np.sin(angle_rad)
-        return np.exp(1j * phase)
+        a = np.exp(1j * phase)
+        
+        # Apply mutual coupling if enabled
+        if self.enable_mcm and self.coupling_matrix is not None:
+            a = self.coupling_matrix @ a
+        
+        return a
     
     def estimate(
         self,
