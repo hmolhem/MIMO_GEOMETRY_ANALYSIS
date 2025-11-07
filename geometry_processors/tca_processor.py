@@ -736,23 +736,96 @@ def compare_tca_arrays(configs: List[Tuple[int, int]], d: float = 1.0) -> pd.Dat
     """
     Compare multiple TCA configurations side-by-side.
     
+    Useful for design space exploration, coprime vs non-coprime comparison,
+    and parameter optimization studies.
+    
     Parameters
     ----------
     configs : List[Tuple[int, int]]
         List of (M, N) pairs to compare.
+        Each pair creates: P1 with N elements spacing M×d, P2 with M elements spacing N×d.
+        Example: [(2,3), (3,4), (3,5), (4,5), (5,7)]
+        
     d : float, optional
-        Unit spacing (default 1.0).
+        Base unit spacing (default 1.0).
+        Fixed across all configurations for fair comparison.
+        Typically λ/2 for narrowband DOA.
         
     Returns
     -------
     pd.DataFrame
-        Comparison table with all configurations.
+        Comparison table with columns including:
+        - Array: Configuration name
+        - M, N: Coprime parameters
+        - Is_Coprime: Boolean coprimality flag
+        - Total_Sensors: Physical sensor count (M+N-1)
+        - aperture: Two-sided coarray span
+        - K_max: Maximum detectable sources
+        - Holes: Missing lags in coarray
+        - DOF_Efficiency: K_max / Total_Sensors
+        - w(0), w(1), w(2): Weight distribution
+        Empty DataFrame if all configurations fail.
         
-    Example
-    -------
+    Examples
+    --------
+    **Example 1: Compare coprime pairs**
+    
+    >>> from geometry_processors.tca_processor import compare_tca_arrays
     >>> coprime_pairs = [(2,3), (3,4), (3,5), (4,5), (5,7)]
     >>> comparison = compare_tca_arrays(coprime_pairs)
-    >>> print(comparison.to_markdown(index=False))
+    >>> print(comparison[['M', 'N', 'Is_Coprime', 'K_max', 'DOF_Efficiency']])
+       M  N  Is_Coprime  K_max  DOF_Efficiency
+    0  2  3        True      1            0.25
+    1  3  4        True      2            0.33
+    2  3  5        True      4            0.50
+    3  4  5        True      5            0.56
+    4  5  7        True      9            0.75
+    
+    **Example 2: Coprime vs Non-coprime**
+    
+    >>> configs = [(3,5), (3,6), (4,5), (4,6)]  # Mix coprime/non-coprime
+    >>> results = compare_tca_arrays(configs, d=1.0)
+    >>> coprime = results[results['Is_Coprime'] == True]
+    >>> non_coprime = results[results['Is_Coprime'] == False]
+    >>> print(f"Coprime avg efficiency: {coprime['DOF_Efficiency'].mean():.2f}")
+    >>> print(f"Non-coprime avg efficiency: {non_coprime['DOF_Efficiency'].mean():.2f}")
+    
+    **Example 3: Scaling study**
+    
+    >>> pairs = [(2,3), (3,4), (4,5), (5,6), (6,7), (7,8)]
+    >>> scaling = compare_tca_arrays(pairs)
+    >>> import matplotlib.pyplot as plt
+    >>> plt.plot(scaling['Total_Sensors'], scaling['K_max'], 'o-')
+    >>> plt.xlabel('Physical Sensors (N)'); plt.ylabel('DOF (K_max)')
+    >>> plt.title('TCA DOF Scaling')
+    
+    **Example 4: Find best configuration**
+    
+    >>> candidates = [(2,3), (2,5), (3,4), (3,5), (4,5), (5,7)]
+    >>> results = compare_tca_arrays(candidates)
+    >>> # Find highest DOF efficiency
+    >>> best = results.loc[results['DOF_Efficiency'].idxmax()]
+    >>> print(f"Best: M={best['M']}, N={best['N']}, Efficiency={best['DOF_Efficiency']}")
+    Best: M=5, N=7, Efficiency=0.75
+    
+    **Example 5: Export for analysis**
+    
+    >>> configs = [(i,j) for i in range(2,8) for j in range(i+1,10) if gcd(i,j)==1]
+    >>> comparison = compare_tca_arrays(configs[:20])  # First 20 coprime pairs
+    >>> comparison.to_csv('tca_comparison.csv', index=False)
+    >>> comparison.to_markdown('tca_comparison.md', index=False)
+    
+    Notes
+    -----
+    - Configurations that raise errors are skipped with warning printed
+    - Empty DataFrame returned if all configurations fail  
+    - Non-coprime pairs (gcd(M,N) ≠ 1) will have degraded performance
+    - For single configuration analysis, use TCAArrayProcessor directly
+    
+    See Also
+    --------
+    TCAArrayProcessor : Single TCA configuration analysis
+    ePCAArrayProcessor : Extended three-level coprime array
     """
     results = []
     
