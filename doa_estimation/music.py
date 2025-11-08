@@ -223,7 +223,7 @@ class MUSICEstimator:
         else:
             raise ValueError(f"Unknown MCM model: {self.mcm_model}")
         
-        print(f"✓ MCM enabled: {self.mcm_model} model (c1={self.mcm_params.get('c1', 0.3):.2f})")
+        print(f"[OK] MCM enabled: {self.mcm_model} model (c1={self.mcm_params.get('c1', 0.3):.2f})")
     
     def _compute_steering_matrix(self) -> np.ndarray:
         """
