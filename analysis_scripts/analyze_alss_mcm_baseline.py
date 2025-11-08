@@ -141,8 +141,7 @@ def run_baseline_experiments():
                 X_no_mcm = estimator_no_mcm.simulate_signals(
                     true_angles=TRUE_ANGLES,
                     snapshots=SCENARIO2_SNAPSHOTS,
-                    SNR_dB=SCENARIO2_SNR,
-                    seed=1000 + trial
+                    SNR_dB=SCENARIO2_SNR
                 )
                 theta_est = estimator_no_mcm.estimate(X_no_mcm, K_sources=len(TRUE_ANGLES))
                 rmse_cond1.append(DOAMetrics.compute_rmse(TRUE_ANGLES, theta_est))
@@ -151,8 +150,7 @@ def run_baseline_experiments():
                 X_with_mcm = estimator_with_mcm.simulate_signals(
                     true_angles=TRUE_ANGLES,
                     snapshots=SCENARIO2_SNAPSHOTS,
-                    SNR_dB=SCENARIO2_SNR,
-                    seed=1000 + trial
+                    SNR_dB=SCENARIO2_SNR
                 )
                 theta_est = estimator_with_mcm.estimate(X_with_mcm, K_sources=len(TRUE_ANGLES))
                 rmse_cond3.append(DOAMetrics.compute_rmse(TRUE_ANGLES, theta_est))
