@@ -42,10 +42,14 @@ from geometry_processors.z5_processor import Z5ArrayProcessor
 # Configuration
 TRUE_ANGLES = np.array([-30, 0, 30])
 WAVELENGTH = 2.0
-NUM_TRIALS = 100
+NUM_TRIALS = 1000
 SCENARIO2_SNR = 10
 SCENARIO2_SNAPSHOTS = 200
 SNR_RANGE = np.array([0, 5, 10, 15, 20])
+
+# Reproducibility Seed - Fixed for all experiments
+REPRODUCIBILITY_SEED = 42
+np.random.seed(REPRODUCIBILITY_SEED)
 
 MCM_C1 = 0.3
 MCM_ALPHA = 0.5

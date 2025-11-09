@@ -36,5 +36,6 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.python",
         "editor.formatOnSave": false
-    }
+    },
+    "github.copilot.nextEditSuggestions.enabled": true
 }
