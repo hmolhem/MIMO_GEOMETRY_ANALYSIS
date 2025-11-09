@@ -1,0 +1,40 @@
+{
+    // Python Environment Configuration
+    "python-envs.defaultEnvManager": "ms-python.python:pyenv",
+    "python-envs.pythonProjects": [],
+    
+    // Virtual Environment Path (mimo-geom-dev) - ABSOLUTE PATH for reliability
+    "python.defaultInterpreterPath": "C:\\MyDocument\\RadarPy\\MIMO_GEOMETRY_ANALYSIS\\envs\\mimo-geom-dev\\Scripts\\python.exe",
+    "python.pythonPath": "C:\\MyDocument\\RadarPy\\MIMO_GEOMETRY_ANALYSIS\\envs\\mimo-geom-dev\\Scripts\\python.exe",
+    "python.venvPath": "${workspaceFolder}\\envs",
+    "python.venvFolders": ["envs"],
+    
+    // Automatic Terminal Activation
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.terminal.executeInFileDir": false,
+    
+    // PowerShell Integration
+    "terminal.integrated.env.windows": {
+        "VIRTUAL_ENV": "${workspaceFolder}\\envs\\mimo-geom-dev",
+        "PATH": "${workspaceFolder}\\envs\\mimo-geom-dev\\Scripts;${env:PATH}"
+    },
+    
+    // Python Language Server Settings
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/core",
+        "${workspaceFolder}/geometry_processors"
+    ],
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/core",
+        "${workspaceFolder}/geometry_processors"
+    ],
+    
+    // Ensure Python files use the venv interpreter
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python",
+        "editor.formatOnSave": false
+    }
+}
