@@ -277,27 +277,70 @@ print(f"Estimated: {estimated_angles}")
 
 ## 🎯 Research Applications
 
+This framework supports cutting-edge research in MIMO radar array design and DOA estimation algorithms.
+
+### Use Cases
+
+**Array Geometry Research:**
+- Novel sparse array topology design and optimization
+- Difference coarray analysis for virtual aperture characterization
+- Weight distribution studies for improved DOF
+- Comparative analysis across array families (ULA, Nested, Coprime, Z-family)
+
+**DOA Estimation Research:**
+- MUSIC algorithm performance evaluation
+- Coarray-based subspace methods
+- Finite-sample regularization techniques (ALSS)
+- Mutual coupling compensation strategies
+- Low-SNR and closely-spaced source scenarios
+
+**Signal Processing Research:**
+- Spatial smoothing on coarray manifolds
+- Subspace decomposition with regularization
+- Performance bounds and theoretical limits
+- Monte Carlo simulation frameworks
+
 ### Published Work: RadarCon 2025
 
-**Paper**: *"Adaptive Lag-Selective Shrinkage for MIMO Coarray DOA Estimation"*
+**Paper**: *"Adaptive Lag-Selective Shrinkage for MIMO Coarray DOA Estimation"*  
+**Authors**: Hossein Molhem et al.  
+**Status**: Under Review
+
+**Contributions:**
+- Novel ALSS regularization for covariance matrix estimation
+- Lag-selective shrinkage addressing finite-sample effects
+- Comprehensive performance evaluation across array types
 
 **Key Results:**
 - **Performance**: 6.9% RMSE improvement at SNR=5dB, Δθ=13° (Z5 array)
-- **Conditioning**: 2.5× better conditioning (Rv vs Rx)
-- **Dataset**: 3,200 trials across 32 scenarios
-- **Figures**: 18 publication-ready plots
+- **Conditioning**: 2.5× better conditioning (κ(Rv) vs κ(Rx))
+- **Dataset**: 3,200+ Monte Carlo trials across 32 scenarios
+- **Coverage**: 8 array types, 4 algorithms, multiple SNR/spacing conditions
+- **Reproducibility**: Complete code, data, and LaTeX source included
 
-**Materials**: See `papers/radarcon2025_alss/` for LaTeX sections, figures, and guides.
+**Paper Materials** (in `papers/radarcon2025_alss/`):
+- LaTeX source and compiled PDF
+- All figures (publication-ready, 300 DPI)
+- Benchmark data and processing scripts
+- Reproduction guide
 
 ### Array Performance Summary
 
-| Array | N | Virtual (Mv) | DOF (K_max) | Holes | Key Feature |
-|-------|---|--------------|-------------|-------|-------------|
-| **ULA** | 7 | 13 | 6 | Many | Simple, uniform |
-| **Nested** | 7 | 25 | 12 | 0 | Nested structure |
-| **Z4** | 7 | 39 | 19 | 0 | w(1)=w(2)=0 |
-| **Z5** | 7 | 43 | 21 | 0 | Advanced w(1)=w(2)=0 |
-| **Z6** | 7 | 43 | 21 | 0 | Ultimate constraints |
+Comparative performance for N=7 sensors at d=λ/2 spacing:
+
+| Array | N | Virtual (Mv) | DOF (K_max) | Holes | Aperture | Key Feature |
+|-------|---|--------------|-------------|-------|----------|-------------|
+| **ULA** | 7 | 13 | 6 | Many | 6λ/2 | Baseline reference |
+| **Nested** | 7 | 25 | 12 | 0 | 12λ/2 | Optimal DOF |
+| **Coprime** | 7 | 27 | 13 | 0 | 15λ/2 | Coprime structure |
+| **Z1** | 7 | 25 | 12 | 0 | 12λ/2 | Weight constraints |
+| **Z3_1** | 7 | 33 | 16 | 0 | 16λ/2 | Improved constraints |
+| **Z3_2** | 7 | 33 | 16 | 0 | 16λ/2 | Alternative Z3 |
+| **Z4** | 7 | 39 | 19 | 0 | 19λ/2 | w(1)=w(2)=0 |
+| **Z5** | 7 | 43 | 21 | 0 | 21λ/2 | Advanced w(1)=w(2)=0 |
+| **Z6** | 7 | 43 | 21 | 0 | 21λ/2 | Ultimate constraints |
+
+**Note**: K_max = floor(L/2) where L is the contiguous coarray segment length. All Z-family arrays eliminate unit and two-unit lags for improved small-lag weight distribution.
 
 ---
 
