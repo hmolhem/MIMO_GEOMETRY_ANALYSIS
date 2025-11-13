@@ -1,3 +1,18 @@
+"""Compatibility wrapper: nested_processor_.py -> nested_processor
+"""
+import warnings
+
+from .nested_processor import NestedArrayProcessor as _CanonicalNested
+
+warnings.warn(
+    "geometry_processors.nested_processor_ is deprecated — import from geometry_processors.nested_processor instead",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+NestedArrayProcessor = _CanonicalNested
+
+__all__ = ["NestedArrayProcessor"]
 import numpy as np
 import pandas as pd
 from .bases_classes import BaseArrayProcessor

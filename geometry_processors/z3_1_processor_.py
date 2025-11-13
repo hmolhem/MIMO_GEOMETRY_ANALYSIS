@@ -1,3 +1,18 @@
+"""Compatibility wrapper: z3_1_processor_.py -> z3_1_processor
+"""
+import warnings
+
+from .z3_1_processor import Z3_1ArrayProcessor as _CanonicalZ31
+
+warnings.warn(
+    "geometry_processors.z3_1_processor_ is deprecated — import from geometry_processors.z3_1_processor instead",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+Z3_1ArrayProcessor = _CanonicalZ31
+
+__all__ = ["Z3_1ArrayProcessor"]
 # geometry_processors/z3_1_processor.py
 
 import numpy as np

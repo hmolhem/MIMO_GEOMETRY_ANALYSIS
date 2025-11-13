@@ -1,3 +1,18 @@
+"""Compatibility wrapper: z5_processor_.py -> z5_processor
+"""
+import warnings
+
+from .z5_processor import Z5ArrayProcessor as _CanonicalZ5
+
+warnings.warn(
+    "geometry_processors.z5_processor_ is deprecated — import from geometry_processors.z5_processor instead",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+Z5ArrayProcessor = _CanonicalZ5
+
+__all__ = ["Z5ArrayProcessor"]
 # geometry_processors/z5_processor.py
 
 import numpy as np
