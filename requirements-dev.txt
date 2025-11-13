@@ -1,0 +1,5 @@
+pytest>=7.0
+ruff>=0.0
+# Test runtime deps used by smoke tests
+numpy>=1.21
+pandas>=1.3
