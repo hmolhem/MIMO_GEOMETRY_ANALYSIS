@@ -7,7 +7,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from util.coarray import build_virtual_ula_covariance
+from core.radarpy.algorithms.coarray import build_virtual_ula_covariance
 from geometry_processors.z4_processor import Z4ArrayProcessor
 from geometry_processors.z5_processor import Z5ArrayProcessor
 from geometry_processors.ula_processors import ULArrayProcessor
