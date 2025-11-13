@@ -19,3 +19,23 @@ scipy = "^1.7"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+# Keep linting fast and focused on common Python issues and import sorting.
+line-length = 120
+target-version = "py311"
+select = ["E", "F", "I"]
+ignore = []
+exclude = [
+	".git",
+	"envs",
+	"mimo-geom-dev",
+	"archives",
+	"results",
+	"build",
+	"dist",
+	"__pycache__",
+]
+
+[tool.ruff.isort]
+known-first-party = ["geometry_processors", "core", "analysis_scripts", "tools"]
