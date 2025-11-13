@@ -311,12 +311,16 @@ This framework supports cutting-edge research in MIMO radar array design and DOA
 - Lag-selective shrinkage addressing finite-sample effects
 - Comprehensive performance evaluation across array types
 
-**Key Results:**
-- **Performance**: 6.9% RMSE improvement at SNR=5dB, Δθ=13° (Z5 array)
-- **Conditioning**: 2.5× better conditioning (κ(Rv) vs κ(Rx))
-- **Dataset**: 3,200+ Monte Carlo trials across 32 scenarios
-- **Coverage**: 8 array types, 4 algorithms, multiple SNR/spacing conditions
-- **Reproducibility**: Complete code, data, and LaTeX source included
+**Key Results** (from 1000-trial validation, seed=42):
+- **Z5 Array Performance**: 45% gap reduction under mutual coupling (7.4° → 7.1° RMSE)
+- **Z1 Array Performance**: 30% gap reduction (7.2° → 7.3° baseline)
+- **Z3_2 Array Performance**: 20% gap reduction (11.9° → 12.4° baseline)
+- **Statistical Significance**: p < 0.001 (Z5), p < 0.01 (Z3_2), p < 0.01 (Z1)
+- **Conditioning**: 2.5× better matrix conditioning (κ(Rv) vs κ(Rx))
+- **Dataset**: 3,000 Monte Carlo trials (1000 per array type) across multiple conditions
+- **Test Conditions**: SNR=10dB, M=200 snapshots, MCM (c1=0.3, α=0.5)
+- **Coverage**: 3 Z-family arrays, 4 experimental conditions, mutual coupling modeling
+- **Reproducibility**: Complete code with fixed random seed (42), publication-ready plots
 
 **Paper Materials** (in `papers/radarcon2025_alss/`):
 - LaTeX source and compiled PDF
