@@ -259,6 +259,31 @@ print(f"Estimated: {estimated_angles}")
 
 ## 🛠️ Development
 
+### Documentation standard
+
+All public and private methods across processors implement Google-style docstrings and include the author tag for attribution:
+
+
+- Style: Google-style (Args/Returns/Raises)
+- Author tag: `Author: Hossein Molhem`
+- Coverage: 100% of functions/methods documented; verified by an automated audit tool (`tools/add_docstrings.py`).
+
+
+Example snippet:
+
+```python
+def analyze_coarray(self) -> None:
+  """
+  Analyze the difference coarray and populate derived metrics.
+
+  Author: Hossein Molhem
+
+  Returns:
+    None
+  """
+  ...
+```
+
 ### Mutual Coupling Feature (NEW - Nov 2025)
 
 Model electromagnetic interactions between array elements:
