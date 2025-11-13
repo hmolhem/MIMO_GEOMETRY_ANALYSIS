@@ -1,3 +1,25 @@
+"""Backward-compatibility wrapper for `ULArrayProcessor`.
+
+This file preserves the old module path/name while delegating to the
+canonical implementation in `geometry_processors.ula_processors`.
+
+It emits a DeprecationWarning so downstream users can update imports.
+"""
+import warnings
+
+from .ula_processors import ULArrayProcessor as _CanonicalULAP
+
+
+warnings.warn(
+    "geometry_processors.ula_processors_ is deprecated — import from geometry_processors.ula_processors instead",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+# Re-export the class under the old name
+ULArrayProcessor = _CanonicalULAP
+
+__all__ = ["ULArrayProcessor"]
 import numpy as np
 import pandas as pd
 from .bases_classes import BaseArrayProcessor
