@@ -33,7 +33,7 @@ jobs:
       run: echo "PYTHONPATH=$GITHUB_WORKSPACE/src" >> $GITHUB_ENV
 
     - name: Lint with ruff
-      run: ruff check . || true
+      run: ruff check .
 
     - name: Run tests
       run: pytest -q
