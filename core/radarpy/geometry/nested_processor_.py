@@ -1,3 +1,20 @@
+"""Compatibility wrapper for older core imports.
+
+Deprecated: re-exports canonical NestedArrayProcessor from geometry_processors.
+"""
+import warnings
+
+from geometry_processors.nested_processor import NestedArrayProcessor as _CanonicalNested
+
+warnings.warn(
+    "core.radarpy.geometry.nested_processor_ is deprecated — use geometry_processors.nested_processor.NestedArrayProcessor",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+NestedArrayProcessor = _CanonicalNested
+
+__all__ = ["NestedArrayProcessor"]
 import numpy as np
 import pandas as pd
 from .bases_classes import BaseArrayProcessor

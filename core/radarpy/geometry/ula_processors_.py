@@ -1,3 +1,21 @@
+"""Compatibility wrapper for older core imports.
+
+Deprecated: import the processor classes from top-level
+`geometry_processors` package instead.
+"""
+import warnings
+
+from geometry_processors.ula_processors import ULArrayProcessor as _CanonicalULAP
+
+warnings.warn(
+    "core.radarpy.geometry.ula_processors_ is deprecated — use geometry_processors.ula_processors.ULArrayProcessor",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+ULArrayProcessor = _CanonicalULAP
+
+__all__ = ["ULArrayProcessor"]
 import numpy as np
 import pandas as pd
 from .bases_classes import BaseArrayProcessor

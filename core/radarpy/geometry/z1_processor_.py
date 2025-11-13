@@ -1,3 +1,20 @@
+"""Compatibility wrapper for older core imports.
+
+Deprecated: re-exports canonical Z1ArrayProcessor from geometry_processors.
+"""
+import warnings
+
+from geometry_processors.z1_processor import Z1ArrayProcessor as _CanonicalZ1
+
+warnings.warn(
+    "core.radarpy.geometry.z1_processor_ is deprecated — use geometry_processors.z1_processor.Z1ArrayProcessor",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+Z1ArrayProcessor = _CanonicalZ1
+
+__all__ = ["Z1ArrayProcessor"]
 # geometry_processors/z1_processor.py
 
 import numpy as np
