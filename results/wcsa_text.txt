@@ -1,0 +1,1824 @@
+
+
+===== PAGE 1 =====
+
+4444 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Weight-Constrained Sparse Arrays For Direction of
+Arrival Estimation Under High Mutual Coupling
+Pranav Kulkarni ,Student Member, IEEE and P. P. Vaidyanathan ,Life Fellow, IEEE
+Abstract —In recent years, following the development of nested
+arrays and coprime arrays, several improved array constructions
+have been proposed to identify O(N2)directions with Nsensors
+and to reduce the impact of mutual coupling on the direction ofarrival (DOA) estimation. However, having O(N
+2)degrees of
+freedom may not be of interest, especially for large N. Also, a
+large aperture of such arrays may not be suitable when limitedspace is available to place the sensors. This paper presents twotypes of sparse array designs that can effectively handle highmutual coupling by ensuring that the coarray weights satisfyeitherw(1)=0o rw(1)=w(2)=0, where w(l)is the number
+of occurrences of the difference lin the set {n
+i−nj}N
+i,j=1,
+andniare sensors locations. In addition, several other coarray
+weights are small constants that do not increase with the numberof sensors N. The arrays of the ﬁrst type have an aperture of
+O(N)length, making them suitable when the available aperture
+is restricted and the number of DOAs is also O(N). These arrays
+are constructed by appropriately dilating a uniform linear array(ULA) and augmenting a few addi tional sensors. Despite having
+an aperture of O(N)length, these arrays can still identify more
+thanNDOAs. The arrays of the second type have O(N
+2)
+degrees of freedom and are suitable when the aperture is notrestricted. These arrays are constructed by appropriately dilatinga nested array and augmenting it with several additional sensors.We compare the proposed arrays with those in the literature byanalyzing their coarray propert ies and conducting several Monte-
+Carlo simulations. Unlike ULA and nested array, any sensor pairin the proposed arrays has a spacing of at least 2 units, because ofthe coarray hole at lag 1. In the presence of high mutual coupling,the proposed arrays can estimate DOAs with signiﬁcantly smallererrors when compared to other arrays because of the reductionof coarray weight at critical small-valued lags.
+Index Terms —Sparse arrays, O(N)aperture arrays, dif-
+ference coarray, DOA estimation, mutual coupling, weight-constrained sparse arrays, weight-constrained nested arrays.
+I. INTRODUCTION
+ARRAY signal processing has been a ﬁeld of active re-
+search for several decades now [1]. In particular, direction
+of arrival (DOA) estimation is an important application of sen-sor arrays in many domains, such as wireless communications,
+Received 12 January 2024; revised 8 June 2024 and 11 August 2024;
+accepted 12 September 2024. Date of publication 17 September 2024; dateof current version 14 October 2024. This work was supported in part by
+the Ofﬁce of Naval Research under Grant N00014- 21-1-2521 and in part
+by California Institute of Technology. The associate editor coordinating thereview of this article and approving it for publication was Dr. Zai Yang.(Corresponding author: Pranav Kulkarni.)
+The authors are with the Department of Electrical Engineering, Cal-
+ifornia Institute of Technology, Pasadena, CA 91125 USA (e-mail:pkulkarn@caltech.edu ;ppvnath@system s.caltech.edu ).
+Digital Object Identiﬁ er 10.1109/TSP.2024.3461720radar, and astronomy. A linear integer array of Nsensors
+z=/bracketleftbig
+n1n2...nN/bracketrightbig
+, (1)
+is used to identify the angles θ1,θ2,...,θ Dfrom which the
+Dsource signals impinge on the array. The difference coar-
+rayDz={ni−nj}N
+i,j=1is the set of all differences between
+the sensor locations, and the coarray weights w(l)denote the
+number of sensor pairs with distance lbetween them, i.e.
+w(l)=|{(i,j)whereni−nj=l}| (2)
+where|·|denotes the cardinality of th e set. It is well-known
+that if the sources are uncorrelated, well-designed sparse arrays
+can identify up to O(N2)DOAs through the ‘difference coarray
+domain’. Minimum redundancy arrays (MRAs) [2]have long
+been recognized to achieve this. However, ﬁnding optimal MRA
+requires an exhaustive search, and tabulate d sensor positions are
+available for only a small number of sensors [2],[3],[4].T h e
+introduction of nested arrays [5]and coprime arrays [6], which
+have closed-form expressions for sensor locations, has openedup a new direction for research in the design of sparse arrays.
+Although nested arrays and coprime arrays can identify fewer
+DOAs than an MRA with the same number of sensors, theirclosed-form expression for sensor positions for any Nmakes
+them more practical and attractive.
+A. Array Design Criteria and Their Drawbacks
+Following the development of nested arrays and coprime ar-
+rays, several generalizations of these arrays, such as generalized
+coprime arrays [7]and improved nested arrays [8], have been
+proposed. Several extensions of these arrays including super
+nested arrays [9],[10], augmented nested arrays [11], dilated
+nested arrays [12], MISC arrays [13], thinned coprime arrays
+[14], and padded coprime arrays [15] have also been advanced.
+The design of these arrays is based on three key principles:
+1) Sensor locations should be easily describable using a
+closed-form expression or simple generation rules.
+2) The difference coarray of the array should have a long
+central ULA segment, typically of O(N
+2)length.
+3) The number of sensor pairs with small separations should
+be kept to a minimum.
+The closed-form expression for sensor locations (criterion 1)
+is necessary to create arrays easily for any given number of
+sensorsN. The large central ULA segment of O(N2)length
+in the coarray (criterion 2) is enforced to ensure that the arrays
+can identify a large number of DOAs using coarray-based DOA
+1053-587X © 2024 IEEE. Personal use is permitted, but repub lication/redistribution re quires IEEE permission.
+See https://www.ieee.org/publications/right s/index.html for more information.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 2 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4445
+TABLE I
+KEYCRITERIA CONSIDERED FOR SPARSE ARRAY DESIGN ,THEIR DRAWBACKS ,AND MODIFICATIONS CONSIDERED IN THIS PAPER
+Array Design Criteria Drawback of the Criterion Modiﬁcation to the Criterion Drawback for the Modiﬁcation
+Closed-form expression or
+simple rule for sensor
+positionsCan identify fewer DOAs than
+MRA with coarray-MUSICNone -
+Central ULA segment of
+lengthO(N2)in coarrayO(N2)aperture may not be
+suitable, and O(N2)DOFs
+may not be needed for
+largeNO(N)aperture sparse arrays
+having ULA segment of
+O(N)length in their coarrayCan identify only up to O(N)DOAs
+w(l)small but non-zero
+forl=1,2,3Not robust to high mutual
+couplingw(1)=0o r
+w(1)=w(2)=0Can identify fewer DOAs due to
+one-sided ULA segment in coarray
+estimation algorithms such as coarray-MUSIC [5],[16],[17]
+and coarray-ESPRIT [18]. However, such a large coarray means
+that the array aperture will also be O(N2), which may not
+be practical when a large number of sensors Nis used. It is
+becoming more common to use almost a hundred sensors forlarge antenna arrays and massive MIMO in 6G technology [19],
+[20]. With such a large number of sensors, it may no longer
+be necessary for the arrays to have the capability to identify
+O(N
+2)sources because the number of DOAs is typically not
+that large. In practical situations where the arrays are deployed,
+such as in smartphones and self-driving cars, there may bephysical constraints on the array aperture. In such cases with
+aperture constraints, an O(N
+2)aperture may not be of interest
+or desirable.
+The third criterion above is to reduce the impact of mutual
+coupling between sensors [9],[21],[22] on DOA estimation.
+The exact impact of mutual coupling on the array output isunknown to the user and can be difﬁcult to model precisely.
+However, the sensor pairs with small separations contribute the
+most to the mutual coupling. Thus, to reduce the effect of mu-
+tual coupling on DOA estimation error, the coarray weights for
+small lags such as w(1),w(2), andw(3)that contribute the most
+to the effect of mutual coupling are kept to a minimum (criterion
+3). However, in order to ensure that the difference coarray of the
+array has a large central ULA segment, these weights are still
+non-zero. Even though some extensions of coprime arrays, such
+as extended padded coprime array [15] and thinned coprime
+array [14], can already achieve w(1)=w(2)=w(3)=1, the
+presence of high mutual coupling m ay still result in poorer DOA
+estimation because of non-zero w(1),w(2), andw(3).
+To summarize, when dealing with arrays that have a large
+number of sensors, we can relax the requirement of having
+O(N
+2)degrees of freedom (DOFs). Instead, other practical
+considerations, such as aperture constraint and robustness tohigh mutual coupling, become a priority. To address these re-
+quirements, we consider modiﬁcations to the second and third
+array design criteria in this paper and accordingly design sparse
+arrays. Table Isummarizes the modiﬁcations made and their
+advantages and disadvantages. Sparse arrays with a closed formfor sensor positions, such as nested arrays and coprime ar-
+rays, can identify fewer DOAs compared to MRAs. However,
+they became popular because of the practical beneﬁt of havingclosed-form sensor locations (criterion 1) for any number of
+sensors. By making modiﬁcations to the other two design cri-
+teria as described in Table I, we further sacriﬁce the maximumnumber of identiﬁable DOAs, but in turn, achieve practical
+beneﬁts such as improved robustness to high mutual coupling
+and suitability under aper ture constraint.
+B. Our Contributions and Connections to Literature
+Adhering to the modiﬁed array design criteria, we ﬁrst de-
+velop several sparse and weight-constrained arrays that have
+O(N)aperture and either w(1)=0o rw(1)=w(2)=0. These
+constructions are based on appropriately dilating a uniformlinear array (ULA) and augmenting it with a few additional
+sensors. The one-sided ULA segments in the difference coar-
+rays of these arrays start either from lag l=2o rl=3, and
+the coarrays have only a few holes. Since these arrays have an
+O(N)aperture, we can use more sensors than O(N
+2)aperture
+arrays when there is a ﬁxed aperture constraint. These arrays
+are better suited when the aperture is constrained, the number
+of DOAs DisO(N), and high mutual coupling is present. One
+may wonder why we cannot use an N-sensor uniform linear
+array (ULA) instead of the proposed O(N)aperture arrays.
+This is because DOA estimation using ULA can suffer signif-icantly in the presence of mutual coupling due to the densely
+packed sensors. Furthermore, an N-sensor ULA can identify
+o n l yu pt o N−1 DOAs, whereas the proposed O(N)aperture
+arrays can identify D>N DOAs (such as D=2N) through
+the difference coarray domain, although these arrays no longer
+haveO(N
+2)degrees of freedom.
+Next, for the situation where robustness to high mutual cou-
+pling is needed but the array aperture is not constrained, we
+propose another type of sparse and weight-constrained arrays.These arrays have either w(1)=0o rw(1)=w(2)=0 and
+O(N
+2)degrees of freedom. We achieve this by suitably dilating
+a nested array and appending it with several extra sensors.
+The one-sided ULA segment in the difference coarray of these
+arrays starts either from l=2o rl=3 and has O(N2)length.
+Through Monte-Carlo simulations, we demonstrate that in cer-
+tain situations, our proposed arrays, having O(N2)aperture and
+O(N2)degrees of freedom, can outperform arrays proposed
+in the literature. Please not e that the propos ed arrays do not
+have a central ULA segment in their difference coarrays (be-
+causew(1)=0), unlike many other well-known sparse arrays.
+However, we can still apply a modiﬁed coarray root-MUSIC
+on the one-sided ULA segment of the coarray. It is important
+to note that using a one-sided ULA segment from the coarrayreduces the number of identiﬁable DOAs using coarray-MUSIC
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 3 =====
+
+4446 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+compared to the case when there exists a central ULA segment
+in the coarray.
+We now explain the novelty of our contributions in light of
+what is already known about sparse arrays. To the best of our
+knowledge, O(N)aperture arrays that can identify more DOAs
+than the number of sensors have not been systematically devel-oped, or even mentioned in the litera ture before. Fur thermore, to
+the best of our knowledge, all simulations in earlier papers con-
+sidered a ﬁxed number of sensors N. Instead of only comparing
+different array geometries for a ﬁxed number of sensors N,w e
+also propose comparing different array geometries under a ﬁxed
+aperture constraint. This can be called ‘aperture-constrained’evaluation of sensor arrays. To achieve good performance under
+such aperture-cons trained setting, ‘apertu re-aware’ design of
+sparse arrays is required. One way to do this is to explicitly
+impose a strict constraint on the array aperture in the design
+stage. In this paper, we take a different approach and propose aclass of array geometries with a smaller O(N)aperture instead
+of a large O(N
+2)aperture. Because of this, the proposed O(N)
+aperture arrays can be more suitable than many other arraysfrom the literature under the apertu re constraint. In summary,
+motivated by practical aperture constraints that certain applica-
+tions may require, we propose an ‘aperture-constrained’ evalu-ation of sensor arrays and an ‘aperture-aware’ design approach,
+through this paper. Such designs can be more practically useful
+than the large O(N
+2)aperture arrays for certain applications.
+Similarly, arrays with w(1)=0o rw(1)=w(2)=0 are not
+very common in the literature. The CADiS array proposed in
+[7]is one such sparse array construction with a closed form
+for sensor locations and w(l)=0 for small values of lsuch as
+1,2,3, etc. However, CADiS arrays are not available for certain
+numbers of sensors (such as 17, 23, and 29) [14]. Furthermore,
+under aperture constraint, it may not be easy to come up with the
+design parameters (integers M,N, andpfrom [7]such that M
+andNare coprime and pis a divisor of M). Additionally, some
+of our proposed arrays with O(N2)aperture can identify more
+DOAs than CADiS with coarray-MUSIC, as we will see. Thisis because the one-sided ULA segment in the difference coarray
+of CADiS does not start immediat ely after a few initial holes,
+unlike the proposed arrays. Another array construction calledgeneralized nested array (GNA) [23] includes CADiS arrays as
+their special case and shares the property that w(l)=0 for small
+values of l. Similar to the CADiS array, it may not be easy to
+decide design parameters (coprime integers αandβfrom [23]),
+especially under aperture constraint. Some arrays tabulated in
+[3]also have w(1)=0, but these are obtained through an elab-
+orate search and do not have closed-form expressions for sensor
+positions. The tabulation is available only for N≤20.
+Some of the O(N)aperture arrays described in this work
+were presented in our conference paper [24]. This journal paper
+introduces several new arrays, presents extensive simulationsover and beyond [24], and provides a thorough comparison
+with the arrays from the literature. The new contributions (and
+outline) of this journal paper are as follows:
+1) We discuss the drawbacks of the sparse array design
+criteria and motivate modiﬁcations proposed in Table I
+(Sec. I-A).2) We describe and justify the application of coarray-
+MUSIC to a one-sided ULA segment in coarray (Sec. III).
+3) We introduce new O(N)aperture arrays with w(1)=
+w(2)=0 that can perform better than the O(N)aperture
+arrays with w(1)=0 proposed in [24] (Sec. IV-C ,IV-D ).
+4) We propose O(N
+2)aperture arrays with w(1)=0 (Sec.
+V-A)o rw(1)=w(2)=0 (Sec. V-B).
+5) We compare the coarray properties and coarray-MUSIC
+spectra of the proposed arrays with several arrays fromthe literature (Sec. VI-A ). We present extensive Monte-
+Carlo simulations under two simulation settings (ﬁxed
+N(Sec. VI-B ) and ﬁxed aperture A(Sec. VI-C )) to
+thoroughly compare different arrays, and discuss when
+we can expect the proposed arrays to perform well (Sec.
+VI-E ).
+Notations. Boldface letters such as Aandaare used to
+denote matrices and vectors. [A]
+mndenotes the (m,n)-th entry
+ofA.T h ek-th column of matrix Ais denoted by A(:,k).T h e
+statistical expectation operator is denoted by E(·). The notation
+[[n1,n2]]is used to denote the set of integers ns.t.n1≤n≤n2.
+The union of two sets P1andP2is denoted by P1∪P2. For a set
+P,αPis the set formed by multiplying each element in Pbyα,
+whereasP+αis the set formed by adding αto each element in
+P. The standard big-O notation is denoted by O(·). The largest
+integer not greater than xis⌊x⌋, and the smallest integer not
+smaller than xis⌈x⌉. Rounding operation round(x)returns the
+integer closest to x.
+II. P RELIMINARIES
+In this section, we summarize the signal model for DOA
+estimation, the effect of mutual coupling, and coarray-based
+DOA estimation. We consider the problem of estimating direc-tionsθ
+1,...,θ DofDmonochromatic, far-ﬁeld, uncorrelated
+sources. The half wavelength distance λ/2i sa s s u m e dt ob e
+unity without loss of generality. We also assume that Dis
+known. For the array in Eq. ( 1), the array output xis modeled
+as[25]
+x[k]=As[k]+n[k], (3)
+where A=/bracketleftbig
+a(ω1)a(ω2)...a(ωD)/bracketrightbig
+is the
+array manifold matrix containing steering vectors
+a(ωi)=/bracketleftbigejωin1ejωin2... ejωinN/bracketrightbigTcorresponding
+to theDDOAs. Here, the physical DOAs θiare converted
+into corresponding ω-domain quantities ωi=πsinθifor
+mathematical convenience. s[k]is the source amplitude vector,
+andn[k]is the additive Gaussian noise term. The sampled
+array outputs x[k]fork=1,...,K are called snapshots. The
+output covariance matrix is estimated using Ksnapshots as
+/hatwideRx=1
+KK/summationdisplay
+k=1x[k]xH[k]. (4)
+For ﬁnite snapshots, /hatwideRxis only an approximation to the ideal
+coarray covariance matrix
+Rx=E(xxH)=APAH+σ2
+nI. (5)
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 4 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4447
+As the sources are uncorrelated, the source covariance matrix P
+is a diagonal matrix containing source powers pi=E(sisH
+i)>
+0, andσ2
+nis the noise variance. The signal-to-noise ratio (SNR)
+is deﬁned as ¯p/σ2
+n, where¯p=/summationtextD
+i=1pi/Dis the average source
+power. Subspace-based DOA estimation algorithms such asMUSIC [16] and root-MUSIC [26] are based on the eigende-
+composition of /hatwideR
+x:
+/hatwideRx=/hatwideE/hatwideΛ/hatwideEH(6)
+where/hatwideΛis a diagonal matrix with eigenvalues ordered in de-
+creasing order of magnitude and /hatwideEcontains the corresponding
+eigenvectors. The last N−Dcolumns of /hatwideEprovide an ap-
+proximation to the ‘noise subspace’ (orthogonal complement
+of the column span of A). Thus, the submatrix /hatwideEn(containing
+the lastN−Dcolumns of /hatwideE) is used to either plot a MUSIC
+spectrum [16]
+P(ω)=/parenleftBig
+aH(ω)/hatwideEn/hatwideEH
+na(ω)/parenrightBig−1
+(7)
+or form a root-MUSIC polynomial [26]
+Q(z)=aT(z−1)/hatwideEn/hatwideEH
+na(z), (8)
+wherea(z)=/bracketleftbig
+zn1zn2... znN/bracketrightbigT. From the MUSIC
+spectrum P(ω), DOAs are estimated from the location of peaks.
+Root-MUSIC estimates the DOAs from the phases of the D
+complex-conjugate pairs of roots of Q(z)that are closest to
+the unit circle. Root-MUSIC is usually applied if the array is
+ULA (i.e. ni=i−1). The Cramér-Rao bound (CRB) for DOA
+estimation and analytical mean squared error expression forMUSIC and root-MUSIC are derived in [27],[28],[29].
+A. Effect of Mutual Coupling Between Sensors
+When sensors have electromagnetic coupling between them,
+the array output does not follow the standard model (Eq. ( 3)).
+This is called the mutual coupling effect, and it is challengingto precisely model mathematically [22]. In practice, it is usually
+unknown to the user. In numerical simulations, the effect of
+coupling is typically modeled as [9],[21],[30]
+x[k]=CAs[k]+n[k], (9)
+whereCis the coupling matrix with entries C
+i,j=c|ni−nj|,
+and the coupling coefﬁcients clare non-zero for l≤B. Here,
+c0=1, and the rest of the non-zeros coupling coefﬁcients
+cl,1≤l≤Bhave their magnitudes inversely proportional to l,
+i.e.|cm/cn|=n/m . For ULA, Cis a banded Toeplitz matrix.
+The coupling strength is characterized by |c1|=c. Another
+metric to characterize the amount of mutual coupling is the
+coupling leakage deﬁned as
+L=||C−diag(C)||F
+||C||F. (10)
+where||·||Fdenotes the Frobenius norm. To mitigate the im-
+pact of mutual coupling on DOA estimation, some papers [31],
+[32],[33] estimate the coupling matrix along with the DOAs.
+Another approach is to design sparse arrays in such a way that
+the effect of mutual coupling on DOA estimation is reduced.This is the motivation for the sparse array design criterion,
+which aims to reduce the weights w(1),w(2),andw(3)that
+contribute the most to the mutual coupling effect. In this paper,we do not explicitly account for mutual coupling algorithmi-
+cally but rather design sparse arrays that can effectively handle
+the presence of mutual coupling. To the best of our knowledge,a Cramér-Rao bound (CRB) for DOA estimation in the presence
+of mutual coupling is not known in the literature.
+B. A Note on the Practicality of the Mutual Coupling Model
+While this basic phenomenon of coupling is a direct conse-
+quence of Faraday’s law of induction, the actual application in
+an antenna array is quite complicated (for example, see p. 475 of
+[34], and [35]). Furthermore, the geometry of the antennas used
+in the array (i.e., whether they are dipole antennas, sleeve dipole
+antennas, spiral antennas, etc.) plays a role in determining themutual coupling behavior [36],[37],[38]. The coupling matrix
+Cis actually the inverse of a so-called normalized impedance
+matrixZ
+0that has been used to model the self- and mutual-
+coupling in the antenna elements [31],[39],[40],[41]. As seen
+from these ref erences, there are multiple ways to formulate the
+matrixZ0, and they yield quite different results. A summary
+of different methods and their pros and cons can be found in
+[35]. While these papers are insightful, they do not offer any
+way to estimate the ratio c=|c1|which actually comes from
+the inverse Z−1
+0.
+The element [Z0]k,m is proportional to zkmwhich is the
+mutual impedance between the kth andmth sensor. These
+impedances are approximately proportional to 1 /(nk−nm).
+This is consistent with the fact that the radiation term for the
+electric ﬁeld from an accelerated charge (as in the case of a
+sinusoidal current in an antenna wire) varies as 1 /rrather than
+as 1/r2(Chap. 28 of [42]). The 1/rassumption has been used
+in the past, and it can be veriﬁed in the estimates of impedances
+reported in Table 1 of [40] and Table 2 of [41]. The fact that the
+dependence is not exactly of the form 1 /ris well known even
+from basic examples such as can be found on page 189 of [43]
+(e.g., setd>>a,b in Eqs. (10) and (11) therein).
+Now, it is difﬁcult to see how the above assumption on
+[Z0]k,m reﬂects in the matrix C. As explained earlier, it is
+often assumed that Ci,j=c|ni−nj|and that|cm/cn|=n/m .
+While this is similar to the properties of [Z0]k,m, it is hard to
+give a theoretical justiﬁcation that the properties of Z0will be
+inherited like this by the elements of the inverse C=Z−1
+0.A
+more detailed description of the difﬁculties involved in model-
+ing mutual coupling can be found in [44]. However, this model
+of mutual coupling has been widely used [9],[30],[31] in the
+signal processing community and the same is used in this paper
+as well.
+As mentioned before, the goal of this paper is to design
+sparse arrays that can effectively handle the presence of mutual
+coupling without its explicit knowledge. That is, we do not
+attempt to estimate the coupling matrix Cor compensate for its
+effect algorithmically. In this paper, we simply apply coarray-
+based DOA estimation with appropriate modiﬁcations, a brief
+summary of which is provided next.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 5 =====
+
+4448 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+C. Coarray-Based DOA Estimation
+Based on the eigendecomposition of /hatwideRx, one can identify
+o n l yu pt o N−1 DOAs because the size of /hatwideRxisN×N.
+Instead, array output correlations can be ﬁrst estimated at each
+laglin the difference coarray Dzas
+/hatwideR(l)=1
+w(l)/summationdisplay
+ni−nj=l[/hatwideRx]i,j. (11)
+The ideal array output correlations (obtained by using Rxin-
+stead of/hatwideRxin Eq. ( 11)) have the form
+R(l)=D/summationdisplay
+i=1piejωil+σ2
+nδ(l), (12)
+whereδ(l)=1 whenl=0, and 0 otherwise. DOA estima-
+tion performed using the estimated correlations /hatwideR(l),l∈Dz=
+{ni−nj}N
+i,j=1is called coarray-based DOA estimation. Note
+thatDzcan contain up to N2−N+1 distinct elements and is
+symmetric around 0. We use D+
+zto refer to the non-negative
+part ofDz.
+Well-designed sparse arrays contain a large segment of con-
+tiguous lags in Dz, which starts at L1and ends at L2(i.e.
+w(l)/negationslash=0f o rL1≤l≤L2). Such a segment is called a ‘cen-
+tral ULA segment’ when L1=−L2. For arrays with a central
+ULA segment in the coarray, a coarray covariance matrix is
+formed either by spatial smoothing ( /hatwideRSS)[5]or by direct-
+augmentation approach ( /hatwideRDA)[17].A ss h o w ni n [17],/hatwideRDA
+has entries [/hatwideRDA]m,n=/hatwideR(m−n)and/hatwideRSS=1
+K/hatwideRDA/hatwideRH
+DA.
+Both/hatwideRDAand/hatwideRSSare Hermitian Toeplitz ma trices. Further-
+more,/hatwideRSSis positive semideﬁnite, but /hatwideRDAmay not be. It
+is equivalent to use either one of these matrices for subspace-
+based DOA estimation when a large number of snapshots
+are available. With limited snapshots, the direct-augmentationmethod can yield better performance as shown in [45].A st h e
+central ULA segments can have lengths as large as O(N
+2),
+the matrices /hatwideRDAand/hatwideRSShave size O(N2)×O(N2), and
+can thus identify up to O(N2)DOAs. The CRB for estimating
+D≥NDOAs was derived in [46],[47] and an analytical mean
+squared error expression for coarray-MUSIC was derived in[47]. Coarray-MUSIC is known to be asymptotically inefﬁcient
+(i.e., MSE does not approach CRB, even for a large number
+of snapshots and SNR) [47],[48]. Some alternate algorithms,
+such as the weighted least squares [49] method, an augmented
+Toeplitz matrix r econstruction approach [50], and a weighted
+proxy covariance matrix construction approach [51], have been
+proposed in the literature to im prove the efﬁciency of coarray-
+based DOA estimation.
+It is important to note that the fundamental assumption in
+using sparse arrays and coarray-based estimation of more DOAs
+than the number of sensors, is that the sources are uncorrelated.Such an assumption is difﬁcult to verify practically and it may
+not hold, especially in the situa tions where multipath prop-
+agation is possible. Developing algorithms and sparse arraysthat are robust to the presence of correlations is of practical
+interest. One of the recent attempts in this direction is the
+MESA algorithm [52] based on stochastic maximum likelihoodformulation. It is shown in [52] that coarray-based methods can
+be sensitive to source correlations due to the destruction of the
+Toeplitz covariance structure, and the MESA algorithm can be
+robust to source correlations, especially when D<N . Further
+research in this direction is required to enhance the practical
+utility of sparse arrays.
+III. C
+OARRAY- MUSIC U SING ONE-SIDED ULA S EGMENT
+INCOARRAY
+The new arrays proposed in this paper do not have a central
+ULA segment in the coarray, as they have w(1)=0. These
+arrays have one-sided ULA segments in the coarray from lagL
+1toL2where 0<L 1<L 2. In this section, we describe how
+to estimate DOAs using such one-sided ULA segment of length
+L=L2−L1+1 in the coarray, and show that up to ⌊L/2⌋
+DOAs can be identiﬁed using the procedure described. This
+procedure is similar to the direct-augmentation approach (with
+matrix/hatwideRDA) described in Sec. II-C. However, there are some
+subtleties involved as we explain next.
+Similar to /hatwideRDA, based on the estimated correlations
+/hatwideR(l),L1≤l≤L2, we can create a Toeplitz matrix /hatwideR:
+/hatwideR=⎡
+⎢⎢⎢⎢⎢⎢⎣/hatwideR(L
+2−r1+1)... /hatwideR(L1)
+/hatwideR(L2−r1+2).../hatwideR(L1+1)
+.........
+/hatwideR(L
+2−1).../hatwideR(L1+r1−2)
+/hatwideR(L2).../hatwideR(L1+r1−1)⎤
+⎥⎥⎥⎥⎥⎥⎦(13)
+The matrix /hatwideRhas sizer
+1×r2, wherer1=⌊L/2⌋+1 andr2=
+⌈L/2⌉, and its entries are /hatwideRm,n=/hatwideR(L2−r1+1+m−n).
+Thek-th column of /hatwideRcontains r1consecutive correlations
+starting from /hatwideR(L1+r2−k). Note that when L1=−L2,/hatwideR=
+/hatwideRDA./hatwideRis a square matrix when Lis odd, whereas /hatwideRis a
+tall matrix when Lis even. Even when /hatwideRis square, it is not a
+Hermitian matrix in general, unlike /hatwideRDAand/hatwideRSS. We would
+like to note that in [48], two variations of coarray-covariance
+matrix (namely, ‘tall’ and ‘fat’ variations) were proposed. Here,
+/hatwideRis formed in a similar way, but using the correlation entries
+from a one-sided ULA segment in the coarray. Furthermore,
+unlike that in [48], the size of /hatwideRis ﬁxed and does not depend on
+the number of DOAs D. The dimensions (⌊L/2⌋+1)×⌈L/2⌉
+of the matrix /hatwideRare chosen such that the number of DOAs we
+can identify using a subspace-based algorithm is maximized.
+As explained next, up to ⌊L/2⌋DOAs can be identiﬁed by
+computing singular value decomposition (SVD) of /hatwideR.
+To see this, ﬁrst consider an ideal version of the matrix
+/hatwideR, with entries R(l)instead of /hatwideR(l). With a large number of
+snapshots, the matrix /hatwideRconverges to the ideal r1×r2matrix
+Rwith entries
+[R]m,n=R(L2−r1+1+m−n) (14)
+As the ideal correlations R(l)have the sum-of-sinusoids form
+(Eq. ( 12)), the last (i.e. r2-th) column of Rcontaining entries
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 6 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4449
+R(L1)toR(L1+r1−1)can be written as
+R(:,r2)=⎡
+⎢⎢⎢⎣1 ...1
+ejω1...ejωD
+.........
+ejω1(r1−1)...ejωD(r1−1)⎤
+⎥⎥⎥⎦
+/bracehtipupleft/bracehtipdownright/bracehtipdownleft /bracehtipupright
+Ac⎡
+⎢⎢⎢⎣p
+1ejω1L1
+p2ejω2L1
+...
+pDejωDL1⎤
+⎥⎥⎥⎦(15)
+Similarly, the k-th column of Rcan be expressed as
+R(:,k)=A
+cbk (16)
+wherebkis aD-dimensional vector with m-th entry [bk]m=
+pmejωm(L1+r2−k). Collecting such equations for all columns of
+R(i.e. fork=1,...,r 2), we get
+R=AcPBH
+c (17)
+whereAcis anr1×Dmatrix with entries [Ac]m,n=
+ejωn(m−1),Pis aD×Ddiagonal matrix containing source
+powersp1,...,p D, andBcis anr2×Dmatrix with entries
+[Bc]m,n=e−jωn(L1+r2−m). Since the DOAs ω1,...,ω Dare
+distinct, as long as r1≥Dandr2≥Dthe Vandermonde ma-
+tricesAcandBchave rank D. Thus, using Sylvester’s rank
+inequality for matrices, it can be concluded that matrix Ralso
+has rankD.N o w ,a s AcandRhave the same rank D, and any
+vectorxsatisfying xHAc=0 also satisﬁes xHR=0 (from Eq.
+(17)), it can be concluded that matrices AcandRhave the same
+column spans.
+In practice, we only have access to the matrix /hatwideR. We can es-
+timate the column span of Ac(and its orthogonal complement)
+through an SVD of /hatwideR:
+/hatwideR=/hatwideU/hatwideΣ/hatwideVH, (18)
+where/hatwideUis anr1×r1matrix with orthonormal columns, and
+/hatwideΣis anr1×r2matrix containing singular values arranged
+in descending order along the principal diagonal. The ﬁrst D
+columns of /hatwideUprovide an approximation to the column span of
+Ac. The matrix /hatwideUncontaining the last r1−Dcolumns of /hatwideU
+provides an approximation to the ‘noise subspace’ (the orthog-
+onal complement of Ac). As long as D<r 1, we obtain a non-
+trivial noise subspace with a dimension of at least one. Thus,
+by using /hatwideUnin place of /hatwideEn, andac(z)(where[ac(z)]i=zi−1)
+in place of a(z)in Eq. ( 8), we can get a coarray root-MUSIC
+polynomial, from which the DOAs can be estimated.
+In summary, even when /hatwideRis not a square matrix, we can
+apply SVD to estimate signal subspace and noise subspacefrom/hatwideRand use coarray-based root-MUSIC to estimate DOAs
+using the one-sided ULA segment from the difference coarray.
+Note that D<r
+1andD≤r2for the above-described method to
+work. Thus, to maximize the number of DOAs we can identify
+using this approach, min(r1−1,r2)should be as large as pos-
+sible. As we only have the Lcontiguous correlation estimates
+/hatwideR(L1),...,/hatwideR(L2)to form the Teoplitz matrix /hatwideR,r1andr2
+should also satisfy r1+r2−1=L. Under this constraint, it
+can be veriﬁed that the largest value for min(r1−1,r2)is ob-
+tained when r1=⌊L/2⌋+1 andr2=⌈L/2⌉. Thus it is possi-
+ble to identify a maximum of r1−1=⌊L/2⌋DOAs in this way
+by applying SVD to the matrix /hatwideRof size(⌊L/2⌋+1)×⌈L/2⌉.We would like to note that some previous papers such as
+[7],[14] have reported DOA estimation performance using a
+subspace-based algorithm with CADiS arrays that have one-sided ULA segment in coarray. However, they do not describe
+or justify their method for identifying DOAs using such one-
+sided ULA segment in coarray, or derive the maximum num-ber of identiﬁable sources. In fact, the number of identiﬁable
+sources reported in [14] for CADiS array when using subspace-
+based DOA estimation is one less than ⌊L/2⌋whenLis even.
+It is possible to use techniques other than coarray-based
+algorithms to identify more DOAs than the number of sensors.
+Some examples include the weighted least squares method [49],
+stochastic maximum likelihood estimation [52], and dictionary-
+based methods [53]. This paper primarily focuses on introduc-
+ing new sparse arrays that can handle strong mutual coupling
+and aperture constraints, rather than focusing on various algo-
+rithms that can be applied for DOA estimation. With suitableadaptations, it is possible to use other DOA estimation algo-
+rithms with the proposed arrays. This section demonstrated the
+adaptation of widely used coarray-MUSIC for one-sided ULAsegments in the difference coarray.
+IV . P
+ROPOSED WEIGHT- CONSTRAINED SPARSE ARRAYS WITH
+O(N)APERTURE
+In this section, we ﬁrst systematically develop sparse arrays
+that have an aperture of O(N)length and w(1)=0. We will
+start by explaining a procedure to generate such arrays byproperly dilating a ULA and adding a few extra sensors. We will
+then propose modiﬁcations to the construction to make other
+crucial weights ( w(2)andw(3)) small constants independent
+ofNwhile keeping w(1)=0. We will also develop sparse ar-
+rays that have O(N)aperture and w(1)=w(2)=0. Moreover,
+we will discuss further modiﬁcations to make w(3)andw(4)
+small constants independent of N. The coarray properties of
+the arrays proposed in this section are summarized in Table II.
+These arrays will be called ‘weight-constrained sparse arrays’.
+We assume N> 5 to ensure that the general expressions for all
+arrays are valid.
+A. Proposed Sparse Arrays With O(N)Aperture and
+w(1)=0
+We want to create a sparse array with O(N)aperture and
+w(1)=0. We also want to ensure that the array has a large
+ULA segment in its coarray from lag two onwards for easyapplication of coarray root-MUSIC. To achieve this we follow
+these steps:
+1) Expand an ( N−1)-sensor ULA by a factor of two to cre-
+ate a ‘2-sparse’ ULA {0,
+2,...,2(N−2)}. This is called
+the array dilation step.
+2) Place the N-th sensor at location 2 N−1. This is called
+the array augmentation step.
+Thus, we get the array:
+z1=/bracketleftbig
+/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+2-sparse ULA024 ... 2(N−2)2N−1/bracketrightbig
+(19)
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 7 =====
+
+4450 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+TABLE II
+COARRAY PROPERTIES OF THE WEIGHT- CONSTRAINED SPARSE ARRAYS WITHO(N)APERTURE PROPOSED IN SEC.IV. Array Aperture ( A),
+COARRAY WEIGHTSw(l),U L AS EGMENT IN THE COARRAY ,COARRAY HOLES ,AND MAXIMUM NUMBER OF IDENTIFIABLE DOA SWITH
+COARRAY- MUSICDmARECOMPARED .‘A’IN THE SECOND LASTCOLUMN REFERS TO THE APERTURE LISTED IN THE SECOND COLUMN .ARRAY
+z6HASw(1)=w(2)=0AND CONSTANT w(3)ANDw(4)INDEPENDENT OF N
+ArrayAperture Coarray Weights ULA Segment in CoarrayHoles in Coarray DmAw(1)w(2)w(3)w(4)w(5)Start (L1)End (L2)Length (L)
+ULA N−1N−1N−2N−3N−4N−5−N+1N−1 2N−1 None N−1
+z1 2N−1 0N−2 1N−3 1 2 2N−3 2N−4 1,A−1 N−2
+z(1)
+23N−5 0 2N−3 1 1 2 3N−7 3N−8 1,A−1 ⌊1.5N⌋−4
+z(2)
+23N−3 0 1N−3 1 1 2 3N−7 3N−8 1,A−3,A−1 ⌊1.5N⌋−4
+z(1)
+34N−9 0 2 1N−4 1 2 4N−13 4N−14 1,A−3,A−1 2N−7
+z(2)
+34N−8 0 1 2N−4 1 2 4N−13 4N−14 1,A−4,A−2,A−1 2N−7
+z4 3N 0 0N−3 1 1 3 3N−7 3N−9 1,2,A−6,A−3,
+A−2,A−1⌊(3N−9)/2⌋
+z5 4N−5 0 0 2N−4 1 3 4N−13 4N−15 1,2,A−7,A−4
+A−2,A−12N−8
+z6 5N−12 0 0 3 1N−5 3 5N−21 5N−23 1,2,A−8,A−5,
+A−4,A−2,A−1⌊(5N−23)/2⌋
+Note that the coarray of the 2-sparse ULA consists only of
+the even lags from −2(N−2)to 2(N−2). The augmented
+sensor is placed at a distance three from the last sensor of the
+2-sparse ULA and is at odd distances from the other N−1 sen-
+sors. This creates lags 3 ,5,..., 2N−1 in the coarray, which
+were missing from the coarray of the 2-sparse ULA. Thus, the
+coarrayD+
+z1ofz1is
+D+
+z1={0,/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+One-sided ULA segment in coarray2,3,4,..., 2N−4,2N−3,2N−1} (20)
+The array z1has an aperture A=2N−1 and its coarray
+includes a ULA segment of length L=2N−4 starting from
+L1=2 and ending at L2=2N−3. Since the coarray is sym-
+metric, it also contains a ULA segment from −L2to−L1.A s
+explained in Sec. III, we can identify up to ⌊L/2⌋=N−2
+DOAs by using coarray root-MUSIC with this array. AlthoughanN-sensor ULA can identify one more DOA than z
+1,t h e
+proposed array can tolerate mutual coupling better than the
+ULA, as we will see in Section VI, because it has w(1)=0.
+Note that the coarray D+
+z1has two holes l ocated at positions
+1 and 2N−2. It is not possible to eliminate the extra hole at
+position 2 N−2. For any array that has w(1)=0,w(A−1)
+must also be zero. This is because there are sensors at 0 and
+Afor an array with aperture A. No sensor can be placed at
+either location 1 or A−1, as that will create a sensor pair
+with separation 1. With no sensors at 1 and A−1,w(A−1)
+must be zero. Thus, there are no holes in the coarray D+
+z1apart
+from those that arise as a necessary consequence of our design
+constraint w(1)=0.
+B. Further Reducing w(2)andw(3)
+Even though the array z1can make w(1)equal to zero, it has
+w(2)equal toN−2 because of the 2-sparse ULA segment in
+the array. To further reduce the mutual coupling, we need to
+construct an array where w(2)is a small constant independentof the number of sensors, while also ensuring that w(1)is zero.
+To achieve this, we can start with a ‘3-sparse’ ULA having(N−2)sensors and add two more sensors at a distance of
+either 2 or 4 units from the same end or opposite ends of the
+3-sparse ULA.
+Augmenting both sensors on the same side gives the array:
+z(1)
+2=/bracketleftbig
+/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+3-sparse ULA036 ... 3(N−3)3N−73N−5/bracketrightbig
+,
+(21)
+and its coarray is D+
+z(1)
+2={0,2,3,..., 3N−8,3N−7,
+3N−5}. The ULA segment in the coarray (underlined) is from
+L1=2t oL2=3N−7. Similar to the previous design, the
+coarray has only two holes l ocated at positions 1 and 3 N−6(=
+A−1). An important advantage of this design over z1is that
+w(2)=2, independent of the number of sensors Nused. This
+further reduces the impact of mutual coupling compared to the
+previous design z1. However, z(1)
+2has larger aperture than z1.
+Instead of placing both additional sensors on the same side,
+they can be placed on opposite sides of the 3-sparse ULA:
+z(2)
+2=/bracketleftbig
+−2/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+3-sparse ULA036 ... 3(N−3)3N−5/bracketrightbig
+.(22)
+By doing so, w(2)now becomes 1 instead of 2. The coarray
+still has ULA segment from 2 to 3 N−7, but the array aperture
+is now 3N−3 instead of 3 N−5, and the coarray D+
+z(2)
+2has
+three holes at 1, 3 N−6(=A−3), and 3N−4(=A−1).
+The arrays z(1)
+2andz(2)
+2makew(2)a constant independent
+of the number of sensors N, but their w(3)increases linearly
+withNbecause of the 3-sparse ULA segment in the array. To
+makew(1)=0 and both w(2)andw(3)small constants, we
+propose the following construction. We use a 4-sparse ULA of
+N−3 sensors with appropriately placed three other sensors:
+z(1)
+3=/bracketleftbig
+−2/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+4-sparse ULA04... 4(N−4)4N−13 4N−11/bracketrightbig
+.
+(23)
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 8 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4451
+TABLE III
+COARRAY PROPERTIES OF THE PROPOSED WEIGHT- CONSTRAINED NESTED ARRAYS WITHO(N2)APERTURE PROPOSED IN SEC.V.F o raG i v e n
+Number of Sensors N,THE OPTIMAL VALUES OF N1ANDN2FOR NESTED ARRAY AREN1=round((N+1)/2),AND
+N2=N−round((N+1)/2)[5].W EASSUMEN1≥5. T HEOPTIMAL VALUES OF N1ANDN2FORw(1)
+1ANDw(2)
+1AREGIVEN BY EQ.(29),AND
+THAT FOR w2AREGIVEN BY EQ.(34). T HEMAXIMUM NUMBER OF IDENTIFIABLE DOA SWITHCOARRAY- MUSIC IS⌊L/2⌋
+ArrayAperture Coarray Weights ULA Segment in Coarray
+A w(1)w(2)w(3)w(4)w(5) Start (L1) End (L2) Length (L)
+Nested (N1+1)N2−1 N1N1−1N1−2N1−3N1−4 -A A 2(N1+1)N2−1
+w(1)
+12(N1+1)N2+1 0 N1 N2N1−1 1 2 2(N1+1)N2−1 2(N1+1)N2−2
+w(2)
+12(N1+1)(2N2−1)+1 0 N1 1N1−1 1 2 2(N1+1)N2−1 2(N1+1)N2−2
+w2 3(N1+1)(2N2−1)+6 0 0 N1 1 N2 3 3(N1+1)N2−1 3(N1+1)N2−3
+Its coarray is D+
+z3={0,2,3,4,..., 4N−14,4N−13,4N−
+11,4N−9}. This array construction has constant w(1)=0,
+w(2)=2,w(3)=1 independent of the number of sensors
+N, and its coarray has ULA segment from L1=2t o
+L2=4N−13. By rearranging the t hree additionally placed
+sensors, we get another variation of this array conﬁguration
+z(2)
+3=/bracketleftbig−5−2/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+4-sparse ULA04... 4(N−4)4N−13/bracketrightbig
+.(24)
+The advantage of this array over z(1)
+3is thatw(2)is reduced to
+1. In the next subsection, to further reduce the impact of mutual
+coupling, we develop sparse arrays with w(1)=w(2)=0.
+C. Proposed Arrays With O(N)Aperture and
+w(1)=w(2)=0
+We can construct O(N)aperture arrays that have both
+w(1)=w(2)=0 by using a similar construction mechanism
+of ULA dilation and augmentation. Consider an array with 3-sparse ULA of N−2 sensors and two additional sensors placed
+at distances of 4 and 5 units from the opposite ends of the 3-
+sparse ULA:
+z
+4=/bracketleftbig
+−5/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+3-sparse ULA036 ... 3(N−3)3N−5/bracketrightbig
+.(25)
+The sensor located at 3 N−5 is positioned at a distance
+of 4 from one end of the 3-sparse ULA. This sensor pro-
+duces differences {4,7,10,..., 3N−5}with the sensors of
+the 3-sparse ULA. On the other hand, the sensor at −5i s
+located at a distance of 5 from the opposite end of the 3-
+sparse ULA and creates differences {5,8,11,..., 3N−4}
+with the sensors of the 3-sparse ULA. When combined withthe self-differences {0,3,6,..., 3(N−3)}created by the
+sensor pairs within 3-sparse ULA, we get that the coarray
+ofz
+4isD+
+z4={0,3,4,5...,3(N−3),3N−8,3N−7,3N−
+5,3N−4,3N}. The largest difference of 3 Nis between the
+two augmented sensors.
+This array with an aperture of length 3 Nhasw(1)=w(2)=
+0. Its coarray contains a ULA segment starting from L1=3
+and ending at L2=3N−7. It can identify up to ⌊(3N−9)/2⌋
+DOAs using coarray root-MUSIC. In addition to the holes at 1,
+and 2, the coarray has four additional holes located at 3 N−6,
+3N−3, 3N−2, and 3N−1.D. Further Reducing w(3)andw(4)
+Although z4hasw(1)=w(2)=0, itsw(3)increases as N
+increases. To make w(3)constant we consider the following
+array:
+z5=/bracketleftbig−5/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+4-sparse ULA048 ... 4(N−4)4N−13 4N−10/bracketrightbig
+.
+(26)
+Arrayz5consists of a 4-sparse ULA of N−3 sen-
+sors and three additional s ensors placed at positions −5,
+4N−13, and 4 N−10. The 4-sparse ULA creates self-
+differences 4 [[0,N−4]]in the coarray. The sensor at lo-
+cation−5 is at a distance 5 from the 4-sparse ULA seg-
+ment, and creates differences 4 [[1,N−3]]+1. The sensor
+at location 4 N−13 is at distance 3 from the 4-sparse ULA
+segment, and creates differences 4 [[1,N−3]]−1. The sen-
+sor at location 4 N−10 is at distance 6 from the 4-sparse
+ULA segment, and creates differences 4 [[1,N−3]]+2. Com-
+bined with the additional differences 4 N−8 and 4N−5
+between the augmented sensors, we get that the coarray of
+z5isD+
+z5={0,3,4,5,..., 4N−13,4N−11,4N−10,4N−
+8,4N−5}. The ULA segment in the coarray is from L1=3
+toL2=4N−13. The coarray has four holes in addition to the
+holes at positions 1 and 2.
+The ﬁrst three weights w(l),1≤l≤3o fz5do not increase
+withN. We can go a step further to also make w(4)a constant
+by considering the following array:
+z6=/bracketleftbig−7−4/bracehtipupleft /bracehtipdownright/bracehtipdownleft /bracehtipupright
+5-sparse ULA05... 5(N−5)5N−22 5N−19/bracketrightbig
+.
+(27)
+Arrayz6consists of a 5-sparse ULA of N−4 sensors
+and four augmented sens ors placed at positions −7,−4,
+5N−22, and 5 N−19. The 5-sparse ULA creates self-
+differences 5 [[0,N−5]]. The sensor at location 5 N−19
+creates differences 5 [[1,N−4]]+1, the sensor at location
+−7 creates differences 5 [[1,N−4]]+2, the sensor at loca-
+tion 5N−22 creates differences 5 [[1,N−4]]−2, and the
+sensor at location −4 creates differences 5 [[1,N−4]]−1
+with the sensors from the 5-sparse ULA segment. Combined
+with the additional differences 5 N−12 and 5 N−15 be-
+tween the augmented sensors, we get that the coarray ofz
+6isD+
+z6={0,3,4,5...,5N−21,5N−19,5N−18,5N−
+15,5N−12}. The ULA segment in the coarray (underlined) is
+fromL1=3t oL2=5N−21. The array has w(1)=w(2)=0,
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 9 =====
+
+4452 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+w(3)=3, andw(4)=w(6)=w(7)=w(8)=w(9)=1, and
+w(5)=N−5. Out of the ﬁrst nine coarray weights w(l),1≤
+l≤9, onlyw(5)increases with the number of sensors N. There
+are ﬁve holes in addition to the holes at positions 1 and 2 in the
+coarray.
+V. P ROPOSED WEIGHT- CONSTRAINED NESTED ARRAYS WITH
+O(N2)APERTURE
+In this section, we develop sparse arrays with O(N2)aperture
+that have either w(1)=0o rw(1)=w(2)=0. For arrays in the
+previous section, we expanded a ULA and added a few extra
+sensors. For O(N2)aperture arrays, we will start by expanding
+a nested array. However, we will need to add several extrasensors to ensure that the coarray has a ULA segment from lag 2
+or 3 onwards. These arrays will be called ‘weight-constrained
+nested arrays’. These arrays are well-suited for identifying alarge number of DOAs under high mutual coupling, as we will
+see in Sec. VI. However, they have large apertures, and so they
+are not suitable when there is an aperture constraint. Coarrayproperties of the arrays described in this section are summarized
+in Table III.
+A. Weight-Constrained Nested Arrays With w(1)=0
+Consider a standard nested array [5]z
+n=P1∪P2where,
+P1=[[1,N1]]andP2=(N1+1)[[1,N2]]. We assume that
+N1>3, so that the general expressions are valid. The coarray of
+the nested array is D+
+zn=[[0,(N1+1)N2−1]]. Now consider
+the array
+w(1)
+1=(2P1)∪(2P2)∪P3, (28)
+whereP3=2P2+3. This array w(1)
+1is formed by ﬁrst ex-
+panding a nested array to create a ‘2-sparse’ nested array(2P
+1)∪(2P2)and appending it with another sparse ULA seg-
+mentP3containing N2sensors.P3is just a shifted version
+of 2P2to the right by three units. Note that the coarray of
+the dilated nested array (2P1)∪(2P2)only contains even lags
+from−2(N1+1)N2+2t o2(N1+1)N2−2. Thus, we ap-
+pendP3to ﬁll up the missing odd lags (except the lag 1, to
+ensurew(1)=0). The array has a total of N1+2N2sensors
+and its aperture A=2(N1+1)N2+1 is slightly larger than
+twice that of the original nested array zn. We will now prove
+that the coarray of w(1)
+1has a ULA segment from L1=2t o
+L2=2(N1+1)N2−1.
+Lemma 1: The difference coarray D+
+w(1)
+1ofw(1)
+1contains a
+ULA segment from L1=2t oL2=2(N1+1)N2−1.
+Proof: As the difference coarray of the nested array is D+
+zn=
+[[0,(N1+1)N2−1]], it is easy to see that all even differences
+f r o m0t o2 (N1+1)N2−2 are created by the sensors from
+(2P1)∪(2P2). Now consider the ﬁrst sensor from P3located
+at 2(N1+1)+3. It creates odd differences {3,5,..., 2(N1+
+1)+1}=2[[1,(N1+1)]]+ 1 with the sensors from 2 P1∪
+{2(N1+1)}. Similarly, the k-th sensor in P3located at 2 (N1+
+1)k+3 creates differences of the form 2 [[1,(N1+1)]]+
+2(N1+1)(k−1)+1 with the sensor from 2 P1∪{2(N1+
+1)}. Putting together these diffe rences for all sensors in P3(i.e.,TABLE IV
+PROPERTIES OF ARRAYS WITHN=16. T HELAST9A RRAYS (z1TO
+w2)ARE THE NEWPROPOSED ARRAYS .COUPLING LEAKAGELIS
+CALCULATED WITHc=0.3ANDB=10. MSE FOR ESTIMATING 22
+DOA SIST H E SMALLEST FOR ARRAYS WITHw(1)=0(SEESEC.VI-A )
+Array ALDmCoarray WeightsMSEw(1) w(2) w(3) w(4) w(5)
+SNA2 71 0.2139 71 2 5 4 1 6 0.0174
+ANAII-2 84 0.2071 84 2 5 2 3 4 0.0285
+EGCA 88 0.1447 65 1 6 1 4 1 0.0772
+DNA 77 0.1843 71 1 6 1 4 1 0.0716
+DDNA 86 0.1738 72 1 5 1 3 1 0.0748
+MISC 83 0.1865 83 1 6 1 4 2 0.093
+MRA 90 0.2299 90 4 2 1 1 3 0.0315
+cMRA 80 0.1489 38 0 5 2 4 3 0.0001
+CPA 63 0.1997 39 2 2 2 9 2 0.0172
+CADiS 88 0.1113 30 0 0 7 0 0 0.0001
+TCA 75 0.1515 47 1 1 1 2 10 0.0658
+ePCA 85 0.1623 65 1 2 1 8 1 0.0369
+ULA 15 0.4443 15 15 14 13 12 11 -
+z1 31 0.233 14 0 14 1 13 1 -
+z(2)
+245 0.1592 20 0 1 13 1 1 -
+z(2)
+356 0.1290 25 0 1 2 12 1 0.0002
+z4 48 0.1506 19 0 0 13 1 1 -
+z5 59 0.118 24 0 0 2 12 1 0.0005
+z6 68 0.1061 28 0 0 3 1 11 0.0003
+w(1)
+173 0.1875 35 0 8 4 7 1 0.0003
+w(2)
+1127 0.1779 35 0 8 1 7 1 0.0001
+w2 126 0.117 34 0 0 7 1 3 0.0002
+fork∈[[1,N2]]), we get that P3generates all odd differences
+from 2[[1,(N1+1)N2]]+1. Furthermore, when N1>1, there
+are no sensor pairs with unit separation, and thus w(1)=
+w(A−1)=0. Thus, we have proved that the difference coarray
+ofw(1)
+1isD+
+w(1)
+1={0,2,3,4,..., 2(N1+1)N2−1,2(N1+
+1)N2+1}which contains a ULA segment from L1=2t o
+L2=2(N1+1)N2−1.
+The array has w(1)=0, and the difference coarray Dw(1)
+1has only two holes, one at location 1 and the other at location
+A−1. The length of the ULA segment in the coarray is L=
+L2−L1+1=2(N1+1)N2−2, and thus the number of iden-
+tiﬁable DOAs is ⌊L/2⌋=(N1+1)N2−1, which is same as
+the number of identiﬁable DOAs with the original nested array
+zn. However w(1)
+1usesN2additional sensors compared to zn.
+Furthermore, when N1>3, it can be veriﬁed that w(2)=N1,
+w(3)=N2,w(4)=N1−1, andw(5)=1.
+For a total number of sensors N, optimal N1andN2to
+maximize the ULA segment in the coarray of w(1)
+1are found
+by solving
+max
+N1,N22(N1+1)N2−2
+s.t.N1+2N2=N (29)
+The optimal solution to the above problem is given by N2=
+round((N+1)/4), andN1=N−2N2. With the optimal val-
+ues ofN1andN2, the maximum number of identiﬁable DOAs is
+O(N2)(approximately (N+1)2/8−2). Thus, the array w(1)
+1
+can identify O(N2)DOAs using coarray-MUSIC.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 10 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4453
+Fig. 1. Coarray weights w(l),0≤l≤40 for the arrays under consideration. All arrays have N=16. Out of the proposed arrays shown here, z1,z(2)
+2,z(2)
+3,
+w(1)
+1,a n dw(2)
+1havew(1)=0, andz4,z5,z6,a n dw2havew(1)=w(2)=0. The only other arrays that have w(1)=0 are CADiS [7]and (approximate)
+constrained MRAs (cMRA) [3]. See Sec. VI-A for details.
+Note that P3is a 2(N1+1)-sparse ULA of N2sensors
+placed at a distance three to the right of the sensors at location
+2(N1+1). It was introduced to ﬁll up the odd-valued differ-
+ences missing from the coarray of the expanded nested array.
+These odd valued differences are created between the sensors
+fromP3and the sensors from the (N1+1)-sensor 2-sparse
+ULA segment given by 2 P1∪{2(N1+1)}. Noting this, we can
+consider the following variation of the array
+w(2)
+1=(2P1)∪(2P2)∪P/prime
+3, (30)
+whereP/prime
+3=2P2−2N2(N1+1)−1. Here, the 2 (N1+1)-
+sparse ULA segment of N2sensorsP/prime
+3is placed three units to
+the left of the sensor at location 2, instead of placing it three
+units to the right of the sensor at 2 (N1+1). Thus, it creates
+the same set of odd-valued differences with the 2-sparse ULAsegment 2 P
+1∪{2(N1+1)}. Hence, it can be shown similar to
+Lemma 1that array w(2)
+1also has the same ULA segment in its
+coarray from L1=2t oL2=2(N1+1)N2−1. However, the
+aperture of w(2)
+1is roughly twice that of w(1)
+1, and its coarray
+has many holes, unlike that of w(1)
+1which had only two holes.
+By shifting the P3to the other side of the nested array, w(3)reduces from N2to 1. Thus, array w(2)
+1has reduced mutual
+coupling, at the cost of a larger aperture compared to w(1)
+1.
+B. Weight-Constrained Nested Arrays With w(1)=w(2)=0
+To create a sparse array with O(N2)degrees of freedom and
+w(1)=w(2)=0, we expand a nested array by a factor of 3
+and augment it with two additional appropriately placed sparse
+ULA segments. Consider the array
+w2=(3P1)∪(3P2)∪P4∪P5 (31)
+whereP1=[[1,N1]]andP2=(N1+1)[[1,N2]], and
+P4=3P2−3N2(N1+1)−1 (32)
+P5=3P2+5 (33)
+HereP4andP5are 3(N1+1)-sparse ULA segments of N2
+sensors placed at distances of 4 and 5 units, respectively, from
+the opposite ends of the 3-sparse ULA segment 3 P1∪{3(N1+
+1)N2}. Arrayw2has a total of N1+3N2sensors, and its
+apertureA=3(N1+1)(2N2−1)+6, which is roughly six
+times that of the original nested array zn. Similar to Lemma
+1, it can be shown that w2has a ULA segment in its coarray
+fromL1=3t oL2=3(N1+1)N2−1.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 11 =====
+
+4454 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Lemma 2: The difference coarray D+
+w2ofw2contains a ULA
+segment from L1=3t oL2=3(N1+1)N2−1.
+The proof is similar to that of Lemma 1, and details
+are omitted due to space constr aints. The main idea is that
+the dilated nested array (3P1)∪(3P2)creates self-differences
+3[[0,(N1+1)N2−1]]. The sensors from P4create dif-
+ferences 3 [[1,(N1+1)N2−1]]+1 with the sensors from
+3P1∪{3(N1+1)N2}. The sensors from P5create differ-
+ences 3[[1,(N1+1)N2−1]]+2 with the sensors from 3 P1∪
+{3(N1+1)N2}. Combining the three sets of differences, a
+ULA segment from L1=3t oL2=3(N1+1)N2−1 is ob-
+tained.
+Arrayw2hasw(1)=w(2)=0. However, it has a large
+aperture and contains several holes in its difference coarray.
+The length of the one-sided ULA segment in its coarray is
+L=3(N1+1)N2−3, and thus it can identify up to ⌊L/2⌋≈
+1.5(N1+1)N2−2 DOAs with coarray-MUSIC. However w2
+uses 2N2additional sensors compared to zn. It can be veriﬁed
+that when N1>3,w(3)=N1,w(4)=1, andw(5)=N2.
+GivenNsensors, the optimal N1andN2to maximize the
+ULA segment in the coarray of w2are found by solving
+max
+N1,N23(N1+1)N2−3
+s.t.N1+3N2=N (34)
+The optimal solution to the above problem is given by N2=
+round((N+1)/6), andN1=N−3N2. With the optimal val-
+ues ofN1andN2, the maximum number of identiﬁable DOAs
+isO(N2)(approximately (N+1)2/8−2). Thus, the array w2
+hasw(1)=w(2)=0 and can identify O(N2)DOAs using
+coarray-MUSIC.
+VI. S IMULATION RESULTS
+In this section, we compare our proposed weight-constrained
+arrays (with O(N)aperture array from Sec. IVas well as
+O(N2)aperture arrays from Sec. V) with other sparse arrays
+from the literature. Out of seve ral generalizations of nested
+arrays [5], we choose the following four in our comparisons.
+Super nested arrays (SNA) [9],[10] have the same length of
+difference coarray as the parent nested arrays, but are more
+robust to mutual coupling because of reduced coarray weights
+at small lags. Therefore, we use SNA for comparison instead ofnested arrays. We use a third-order super nested array (SNA3) if
+available, and if not, a second-order super nested array (SNA2)
+is used. Augmented nested arrays (ANA) [11] are formed by
+rearranging and distributing the sensors from the dense subarray
+of the nested array on the two sides of the sparse subarray
+of the nested array. Out of the four variations of ANAs, we
+use ANAII-2, which has the largest DOFs and small mutual
+coupling compared to other variations. Recently proposed vari-ations of nested arrays called dilated nested arrays (DNA) and
+displaced DNA (DDNA) [12] are also used in comparisons. All
+these modiﬁcations of the nested array require two parametersN
+1andN2for construction. For a given total number of sensors,
+optimal values of N1andN2are used for each array. One key
+drawback of all these variations of nested arrays is that w(2)of these arrays increases linearly with N1(and optimal N1is
+proportional to N).
+We also include MRAs [2]in our comparison, but MRAs
+are available only for a limited number of sensors [2],[4].
+In[3], the authors performed a restricted search for MRAs
+forN≤20 and tabulated the (approximate) MRAs they found
+using their restricted search. They also noted a general pattern
+of sensor locations in the arrays they obtained. The maximum
+inter-element spacing constraint (MISC) arrays [13] seem to
+be motivated by this general closed-form pattern noticed in
+[3]. In addition, the authors of [3]compiled another set of
+arrays, which we call constrained-MRAs (cMRA). These arraysmaximize the ULA segment in the difference coarray under
+the constraint that w(1)=0. The tabulated cMRAs in [3]are
+only an approximation to the ideal cMRAs because of the
+restricted search performed. As these arrays have w(1)=0,
+they can effectively mitigate m utual coupling, as we will see
+in the simulations.
+Out of several generalizations of coprime arrays (CPA) [6],
+we choose the following four in our comparisons. CADiS array[7]is generated by displacing and compressing one of the sparse
+ULAs of a coprime array. These arrays can have w(l)=0f o r
+several small values of land hence can effectively mitigate
+mutual coupling, similar to the proposed arrays. However, as
+noted in Sec. I-B, the ULA segment in the difference coarray
+of CADiS does not start immediat ely after the few initial holes
+unlike the proposed arrays, and hence the maximum number of
+identiﬁable DOAs can be smaller than our proposed arrays as
+well will see. Furthermore, CADiS requires 3 design parameters(M,N, andpfrom [7]such that MandNare coprime and
+p>1 divides M). For a given total number of sensors, or a
+ﬁxed aperture, it is not easy to come up with optimal parameters
+that maximize the ULA segment in the coarray of CADiS,
+without enumerating all possib ilities of design parameters ( M,
+N, andpfrom [7]). Furthermore, for a certain number of sensors
+(such as 17, 23, and 29), there are no possible CADiS array
+constructions
+[14]. Another modiﬁcation of coprime arrays we
+use for comparison is thinned coprime array (TCA) [14]. It has
+the same aperture and DOFs as the original coprime array but
+with fewer sensors and smaller coarray weights than the originalcoprime array. Four variations of padded coprime arrays (PCA)
+are proposed in [15] by characterizing hole locations in a tai-
+lored CADiS array and ﬁlling up those holes by augmenting asmall number of additional sensors. Out of these, extended PCA
+(ePCA) has the longest ULA segment in the coarray. Impres-
+sively, ePCA (with parameters MandNfrom [15]) can achieve
+w(l)=1,1≤l≤M−1 whenMis odd. In some simulations,
+we also consider the enhanced and generalized coprime array
+(EGCA) [54], which can have a larger ULA segment in coarray
+and smaller mutual coupling than other variations of coprime
+arrays.
+In Section VI-A , we compare the coarray properties for vari-
+ous arrays and illustrate coarr ay-MUSIC spectra obtained when
+estimating D>N DOAs. We then conduct two types of Monte-
+Carlo simulations. The ﬁrst set of simulations compares differ-
+ent arrays when the number of sensors Nis ﬁxed, and the array
+apertures can differ. The second set of simulations involves
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 12 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4455
+Fig. 2. Coarray-MUSIC spectr a obtained when identifying D=22 DOAs uniformly spaced in ωdomain from −0.9πto 0.9πwith different 16-sensor
+arrays from Table IV. SNR of 0 dB, mutual coupling with c=0.3a n dB=10, and 100 snapshots are considered. B lack vertical lines correspond to the true
+DOA locations. Except for CADiS and cMRA, all other arrays from the liter ature do not correctly identify all 22 DOAs and miss out on at least one DOA.
+On the other hand, the proposed arrays are able to identify all DOAs corr ectly with a small MSE by producing coarra y-MUSIC spectra h aving peak location s
+close to each true DOA.
+Fig. 3. MSE when estimating D=6 DOAs uniformly spaced in ωfrom−0.8πto 0.8πwith 16-sensor arrays. (a) SNR =5d Ba n d K=500, (b)c=0.5
+andK=500, (c)c=0.5 and SNR =5 dB. Although many of the proposed arrays perfo rm worse than other arrays from the literature, z6is found to
+perform the best in most situations.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 13 =====
+
+4456 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Fig. 4. MSE when estimating D=20 DOAs uniformly spaced in ωfrom−0.9πto 0.9πwith 16-sensor arrays. (a) SNR =5d Ba n d K=500, (b)c=0.5
+andK=500, (c)c=0.5 and SNR =5 dB. Arrays with w(1)=0 have smaller MSE, whereas arrays with w(1)/negationslash=0 cannot identify all the DOAs correctly,
+resulting in high MSE.
+a ﬁxed array aperture, while the number of sensors in arrays
+can vary. Each data point in the graphs is averaged over 1000Monte-Carlo trials in every Monte-Carlo simulation. In these
+trials, the source amplitudes s[k]and noise realizations n[k]
+are randomly chosen according to the signal model described
+in Sec. II. All sources are assumed to have equal powers. To
+estimate DOAs with sparse arrays, we use the coarray root-MUSIC algorithm, as described in Sec. III, using the largest
+ULA segment (possibly one-sided) in the difference coarray. As
+for the ULA, we apply direct (i.e., using /hatwideR
+x) root-MUSIC, as
+it usually performs better than coarray root-MUSIC [47],[48].
+The DOA estimation mean squared error (MSE) is calculated
+in theωdomain as
+1
+1000D1000/summationdisplay
+q=1D/summationdisplay
+i=1(ωi−ˆωiq)2, (35)
+where{ˆωiq}D
+i=1are the estimated DOA in the q-th Monte-Carlo
+trial. The mutual coupling model described in Eq. ( 9)i su s e d
+withB=10,c1=cejπ/3, andcl=(c1/l)e−j(l−1)π/8, where
+|c1|=c∈[0,1], represents the coupling strength. These values
+for coupling coefﬁcients have been used in most of the previous
+papers on sparse arrays [9],[12],[14],[15], and we use the
+same values in all our simulations here for consistency. In [24],
+it was noted that the DOA estimation performance may vary
+based on the phases of the coupling coefﬁcients chosen. Further
+research is required to understand the effect of the phases ofmutual coupling coefﬁcients on DOA estimation.
+A. Array Properties and Coarray-MUSIC Spectra
+We now compare the coarray properties of the proposed
+arrays with the well-known arrays discussed in the previous
+subsection for a ﬁxed number of sensors, N=16. For nested ar-
+ray variations, array designs with optimal N
+1andN2that max-
+imize the number of identiﬁable DOAs are chosen. Similarly,an optimal pair of coprime integers that maximize the number
+of identiﬁable DOAs is chosen for coprime array. The same
+design parameters are chosen for ePCA. Out of possible TCAconﬁgurations, we choose the array that can identify the most
+number of DOAs. Out of possible CADiS conﬁgurations, we
+choose the one with w(l)=0f o rl=1,2 for a fair comparisonwith the proposed arrays. Fig. 1plots the coarray weights w(l)
+for 0≤l≤40. It is observed that although the proposed arrays
+have some large weights, the weights that contribute the most
+to the mutual coupling effect are either zero or relatively small.
+With ﬁxed N=16, each array has a different aperture Aand
+the maximum number of identiﬁable DOAs using coarray root-
+MUSIC (D
+m), as shown in Table IV. The proposed O(N)aper-
+ture arrays have a relatively smaller aperture and can identify
+f e w e rD O A st h a n O(N2)aperture arrays. The coupling leakage
+values (L) in Table IVare calculated with c=0.3 andB=10
+(Eq. ( 10)). The coupling leakage is found to be smallest for z6,
+followed next by CADiS, w2, andz5. Coarray weights w(l)for
+1≤l≤5 are also shown in the Table. Only the proposed arrays,
+CADiS, and cMRA have w(1)=0. Although CADiS has a
+small mutual coupling, it can identify fewer DOAs compared
+to the proposed O(N2)aperture arrays w(1)
+1,w(2)
+1, andw2.
+Next, we consider the task of estimating D=22(>N=
+16)DOAs uniformly spaced in the ωdomain from −0.9π
+to 0.9πwith these arrays. SNR of 0 dB and 100 snapshots
+are considered. Note that ULA, z1, andz(2)
+2, andz4cannot
+identify 22 DOAs with coarray-MUSIC as they have Dm<22.
+These arrays will be included in the comparisons in the next
+subsections for simulations with smaller D.F i g . 2shows the
+coarray-MUSIC spectra obtained for the rest of the arrays. Weobserve that arrays that do not have w(1)=0 do not produce
+correct peaks in the coarray-MUSIC spectra for some DOAs.
+On the other hand, the proposed arrays, CADiS, and cMRA caneffectively mitigate the eff ect of mutual coupling and produce
+peaks in the coarray-MUSIC spectra corresponding to all 22
+DOAs. The DOA estimation MSE is also small for these arrays
+withw(1)=0, as shown in the last column of Table IV.
+B. Monte-Carlo Simulations With a Fixed Number of Sensors
+With the same set of arrays with N=16 sensors, we perform
+Monte-Carlo simulations to compare DOA estimation perfor-
+mance. First, for the simulations in Fig. 3, we consider D=6
+DOAs spaced uniformly in the ωdomain from −0.8πto 0.8π.
+We consider SNR of 5 dB, 500 snapshots, and coupling strength
+c=0.5. Out of these three, we ﬁx two quantities at a time
+and vary the third quantity to measure its impact on DOA
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 14 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4457
+Fig. 5. MSE when estimating D=6 DOAs spaced non-uniformly in ωdomain with different arrays under aperture constraint A≤100 andN≤50. (a)
+SNR=5d Ba n d K=500, (b)c=0.5a n dK=500, (c)c=0.5 and SNR =5 dB. The proposed O(N)aperture arrays perform much better than other
+sparse arrays as, under aperture constraint, they can ﬁt in more sensors while maintain ing small coupling leakage.
+estimation error. We see that in this situation, with a relatively
+small number of sensors and few DOAs, many of the proposedarrays perform worse than the other sparse arrays. However,
+notably,z
+6performs the best in this situation for a large range
+ofc, SNR, and snapshots. Array z6performs well because it
+hasw(1)=w(2)=0, and small w(3)andw(4), which makes
+it robust to the presence of high mutual coupling. In particular,in Fig. 3(a) we see that the increase in MSE for the proposed
+arrays is gradual as the coupling strength cis increased. In
+contrast, for most of the other arrays, MSE increases drasticallyascincreases beyond a certain point. The sudden increase in
+MSE usually indicates some of the DOAs being misidentiﬁed
+(similar to the case in Fig. 2). Despite having a smaller aperture
+and shorter ULA segment in coarray compared to the other
+O(N
+2)aperture arrays, we see from Fig. 3(b) and 3(c) thatz6
+performs better when SNR is larger than 0 dB and more than
+100 snapshots are used.
+Next, we change the number of DOAs to D=20 and repeat
+the above set of simulations. The DOAs are spaced uniformlyfrom−0.9πto 0.9πin theωdomain. In Fig. 4w es e eac l e a r
+separation between the arrays based on whether w(1)=0o r
+not. Arrays with w(1)=0 (irrespective of whether the aperture
+isO(N)orO(N
+2)) have smaller MSE than arrays for which
+w(1)/negationslash=0. The MSE for z(2)
+2is large because D=20 DOAs
+is barely within the maximum number of identiﬁable DOAs
+(Dm) with this array (see Table IV). From Fig. 4(a) note that
+forc≤0.2, proposed arrays have larger MSE than most other
+arrays. For such small mutual coupling, the arrays with larger
+lengths of the ULA segment in coarray have smaller MSE. Thisindicates that for small mutual coupling, making w(1)=0t o
+reduce mutual coupling is not as critical as it is when the high
+mutual coupling is present ( c>0.2). We see a similar ordering
+of arrays in Fig. 4(b) and 4(c). The MSEs saturated to a high
+value are indicative of misidentiﬁed DOAs. This simulationmakes it clear that under high mutual coupling and for larger
+D,w(1)=0 is required to correctly identify the DOAs.
+C. Monte-Carlo Simulations Under Aperture Constraint
+As we explained in the introduction, array design may be
+constrained by the available aperture, in practical applications.TABLE V
+PROPERTIES OF ARRAYS WHENA≤100 ANDN≤50. C OUPLING
+LEAKAGELISCALCULATED WITHc=0.3ANDB=10. M ANY OF THE
+PROPOSED O(N)APERTURE ARRAYS HAVE MORE SENSORS BUT
+SMALLERLCO M P A R E DT OT H E O(N2)APERTURE ARRAYS FROM THE
+LITERATURE
+Array NLDmCoarray Weights
+w(1) w(2) w(3) w(4) w(5)
+SNA3 19 0.1684 99 1 5 2 4 1
+ANAII-2 17 0.2152 86 2 7 2 5 2
+DNA 18 0.1909 89 1 8 1 6 1
+DDNA 17 0.1692 80 1 5 1 3 1
+MISC 17 0.1814 93 1 6 1 4 2
+MRA 16 0.2299 90 4 2 1 1 3
+cMRA 18 0.1722 48 0 8 2 7 2
+Coprime 20 0.1757 59 2 2 2 2 11
+CADiS 16 0.0712 25 0 0 0 0 6
+TCA 17 0.1436 59 1 1 1 1 10
+ePCA 18 0.1414 75 1 1 1 1 10
+ULA 50 0.46 49 49 48 47 46 45
+z1 50 0.2437 48 0 48 1 47 1
+z(2)
+234 0.1611 47 0 1 31 1 1
+z(2)
+327 0.1246 47 0 1 2 23 1
+z4 33 0.157 45 0 0 30 1 1
+z5 26 0.1179 44 0 0 2 22 1
+z6 22 0.1031 43 0 0 3 1 17
+w(1)
+118 0.1801 44 0 8 5 7 1
+w(2)
+114 0.1649 27 0 6 1 5 1
+w2 14 0.1088 25 0 0 5 1 3
+To compare array performance under such practical constraints,
+we consider a situation where a maximum aperture of length
+100 and a maximum of 50 sensors are available. For each array
+type under consideration, we appropriately choose the numberof sensors such that the array satisﬁes the aperture constraint of
+100. For example, a super nested array has 19 sensors, ULA and
+z
+1have 50 sensors each, and z3has 27 sensors. Table Vshows
+the number of sensors, the maximum number of identiﬁable
+DOAs with coarray-MUSIC ( Dm), coupling leakage ( L) calcu-
+lated with c=0.3,B=10, and the ﬁrst 5 coarray weights. Note
+that the proposed O(N)aperture arrays can ﬁt more sensors in
+the available aperture than the O(N2)aperture arrays from the
+literature and at the same time, have a smaller coupling leakage
+than many of those arrays (except CADiS, which has w(l)=0
+for 1≤l≤4).
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 15 =====
+
+4458 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Fig. 6. MSE when estimating D=20 DOAs uniformly spaced in ωfrom−0.9πto 0.9πwith different arrays under aperture constraint A≤100 and
+N≤50. (a) SNR =5d Ba n d K=500, (b)c=0.3a n dK=1000, (c) c=0.3 and SNR =5 dB. Despite high coupling leakage L, ULA performs the best
+under low SNR or a small number of snapshots. The proposed array z1performs well at higher SNRs or when a large number of snapshots are available.
+CADiS and ULA are found to perform well under very high mutual coupling.
+In general, arrays with fewer sensors and sparser sensor
+arrangements can help minimize the impact of mutual coupling.However, a smaller number of sensors also means fewer obser-
+vations per snapshot, which may result in less accurate DOA
+estimation. On the other hand, an array with a larger number of
+sensors provides more spatial samples of the impinging signals.
+But, under the aperture constraint, the sensors need to be closerto each other on average, which increases the effect of mutual
+coupling. Therefore, there is an interesting tradeoff in choosing
+the appropriate number of sensors and array geometry when thearray aperture is constrained, and mutual coupling is present.
+In Fig. 5, we examine the scenario with D=6 DOAs located
+at−0.8π,−0.35π,−0.1π,0.05π,0.4π,0.8πin theωdomain.
+The DOAs are spaced non-uniformly unlike the other simula-
+tion examples. We compare the MSE of DOA estimation for dif-
+ferent arrays constructed under the A≤100 andN≤50 con-
+straints. We consider an SNR of 5 dB, coupling strength of c=
+0.5, and 500 snapshots, and vary one of these three quantities at
+a time to measure its impact on DOA estimation performance.Based on the results, we observe that the proposed O(N)aper-
+ture arrays perform signiﬁcantly better than all other O(N
+2)
+aperture arrays. In particular, from Fig. 5(a) it can be observed
+thatO(N)aperture arrays perform better than other arrays even
+whenc=0 (i.e. when no mutual coupling is present). This is
+becauseO(N)aperture arrays have more sensors than O(N2)
+aperture arrays under aperture constraint. From Fig. 5(b) and
+5(c) it can be observed that for SNR larger than −10 dB and
+more than 100 snapshots, many of the proposed O(N)aperture
+sparse arrays perform better than other arrays.
+Next, in Fig. 6, we consider D=20 DOAs spaced uniformly
+in theωdomain from −0.9πto 0.9π. We consider the same
+arrays as in the previous simulation with A≤100 andN≤50.
+In Fig. 6(a), when K=500 and SNR is 5 dB, ULA performs
+the best for most values of cdespite its large coupling leakage
+and smaller aperture compared to the other arrays. A part of the
+reason for this may be that ULA has a large number of sensorsand it uses direct root-MUSIC (and not coarray root-MUSIC).
+CADiS is also found to perform well for higher values of c.
+However, in Fig. 6(b), where c=0.3 andK=1000, we see
+thatz
+1can perform the best when the SNR is -5dB or more.In Fig. 6(c), where c=0.3 and SNR =5 dB, we observe that
+for more than 800 snapshots z1can perform better than ULA.
+In Fig. 6(b) and 6(c), when SNR is less than −10 dB, or when
+fewer than 800 snapshots are used, ULA is observed to be better
+than other arrays despite having large coupling leakage.
+D. Some Additional Simulations
+The proposed weight-constrained nested arrays with O(N2)
+aperture have an advantage when there is no aperture constraint,
+and a large number of DOAs need to be identiﬁed under high
+mutual coupling. This is demonstrated by the simulation in
+Fig. 7. Here, we consider arrays with N=25 sensors. Note
+that cMRA [3]is not available for N> 20. Out of the possible
+CADiS array conﬁgurations for N=25, we choose the array
+withw(l)=0f o r1≤l≤4 to reduce the mutual coupling ef-
+fect. SNR of 5 dB, coupling strength c=0.3, and 500 snapshots
+are considered. We vary the number of DOAs Dand plot the
+MSE for different arrays. We can see that the proposed array
+w2has the smallest MSE when 35 ≤D≤80. Also, arrays w(1)
+1,
+w(2)
+1, andw2can identify more DOAs than CADiS.
+In Fig. 8, we also plot the MSE for the arrays from Table V
+(withA≤100 andN≤50) as the parameter Bin the mutual
+coupling model is varied from 10 to 100. We observe that the
+general trend of the proposed arrays compared to existing arrays
+remains consistent as the parameter Bis changed. This means
+that for different values of B, many of the proposed arrays can
+still perform better than the existing arrays.
+As mentioned at the end of Sec. II-C, although coarray-
+based DOA estimation assumes uncorrelated sources, corre-
+lated sources can be present in practical situations. To evaluate
+the DOA estimation performance of the weight-constrainedsparse arrays proposed in this paper for correlated sources, we
+conduct additional simulation experim ents. Using the 16-sensor
+arrays from Table IV, 10 DOAs uniformly spaced in the ω-
+domain from −0.9πto 0.9πare estimated. Although when
+the sources are correlated, the ideal correlations do not have
+the sum of sinusoids form as in Eq. ( 12), we still estimate
+/hatwideR(l)as in Eq. ( 11) and construct the matrix by /hatwideRfrom Eq.
+(13) to estimate DOAs. In Fig. 9, the correlation coefﬁcient
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 16 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4459
+Fig. 7. MSE when identifying DDOAs spaced uniformly in the ωdomain
+from−0.9πto 0.9πwith 25-sensor arrays. SNR =5d B ,K=500, and c=
+0.3. Arrayw2has the smallest MSE when 35 ≤D≤80. Arrays w(1)
+1,w(2)
+1,
+andw2can identify more DOAs than CADiS.
+Fig. 8. MSE when identifying 6 DOAs spaced uniformly in the ωdomain
+from−0.8πto 0.8πfor arrays with A≤100 and N≤50. SNR =5d B ,
+K=500, and c=0.5. The general trend of the proposed arrays compared
+to existing arrays remains c onsistent as the parameter Bis changed.
+between the second and ﬁfth sources is set to ρe−jπ/4, and
+the rest of the sources are uncorrelated. The magnitude of the
+correlation coefﬁcient ρis varied on the x-axis to measure its
+impact on DOA estimation MSE. We observe that in the absence
+of mutual coupling ( c=0), the rate of increase in MSE for most
+of the proposed arrays is not signiﬁcantly different from the rateof increase in MSE for other sparse arrays. Moreover, in the
+presence of mutual coupling with c=0.4, the proposed arrays
+still perform much better than other arrays from the literature,
+in the presence of a correlated source pair.
+Next, in Fig. 10, we introduce a correlation coefﬁcient of
+ρ/2·e
+jπ/3between the seventh and ninth source, in addition
+to the correlation coefﬁcient of ρe−jπ/4between the second
+and ﬁfth source. Thus, there are now two correlated sourcepairs. These numerical results indicate that the proposed arrays
+can continue to perform well in the presence of high mutual
+coupling and high correlations between a few pairs of sources.Fig. 9. MSE when estimating D=10 DOAs uniformly spaced in ωfrom
+−0.9πto 0.9πwith 16-sensor arrays when SNR =5d B ,a n d K=500.
+The correlation coefﬁcient between the second and ﬁfth source is taken to beρe
+−jπ/ 4.( a )c=0, and (b) c=0.4.
+Fig. 10. MSE when estimating D=10 DOAs uniformly spaced in ωfrom
+−0.9πto 0.9πwith 16-sensor arrays when SNR =5d B ,a n d K=500.
+The correlation coefﬁcient between th e second and ﬁfth source is taken to
+beρe−jπ/ 4, and the correlation coefﬁcient b etween the seventh and ninth
+source is ρ/2·ejπ/ 3.( a )c=0, and (b) c=0.4.
+E. Main Conclusions From Simulations
+The observations from the above numerical simulations can
+be summarized as follows. These also serve as a guideline for
+the situations in which the proposed arrays can be used and can
+be expected to perform well.
+For a ﬁxed number of sensors: Whenc>0.2 andD
+is large, arrays with w(1)=0o rw(1)=w(2)=0 are nec-
+essary to effectively mitigat e the effect of mutual coupling,
+and correctly identify all DOAs (Figs. 2and4). Arrays with
+w(1)/negationslash=0 perform poorly in this setting. However, there is no
+advantage to using arrays with w(1)=0o rw(1)=w(2)=0
+whenc<0.2. For a small number of DOAs, O(N)aperture
+array having small coarray weights (such as z6) can perform
+well (Fig. 3). Proposed arrays with O(N2)aperture are suitable
+for identifying a large number of DOAs with smaller errors in
+the presence of mutual coupling (Fig. 7). The proposed arrays
+also continue to perform well when a few source pairs arecorrelated (Figs. 9and10).
+Under aperture constraint: Under ﬁxed aperture, the pro-
+posedO(N)aperture arrays can accommodate a larger num-
+ber of sensors while still ma intaining low coupling leakage
+(Table V). This makes them effective regardless of the mutual
+coupling strength when there are only a few DOAs (Fig. 5). For
+a larger number of DOAs, some of the proposed arrays (such as
+z
+1) can perform well provided a high SNR and a larger number
+of snapshots are available (Fig. 6). At low SNRs and for a small
+number of snapshots, ULA is found to perform the best despite
+having high coupling leakage.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 17 =====
+
+4460 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Fig. 11. MSE when estimating D=6 DOAs uniformly spaced in ωfrom−0.8πto 0.8πwith 16-sensor arrays using ‘augmented root-MUSIC’ [55].( a )
+SNR=5d Ba n d K=500, (b)c=0.5a n dK=500, (c)c=0.5 and SNR =5 dB. These plots are anal ogous to the plots from Fig. 3. We observe here
+that because of the use of both ULA segments presen t in the coarrays of weight-constrained sparse a rrays, now many of the proposed arrays can perform at
+par or better than other arrays from the literature.
+F . Further Enhancing the Performance of Proposed
+Weigh-Constrained Sparse Arrays
+Note that all the simulations in this section are based on
+coarray root-MUSIC. We chose coarray root-MUSIC because it
+has theoretical identiﬁability guarantees under i deal conditions,
+is conceptually simple to use, and does not require hyperpa-
+rameter tuning like some other methods (such as dictionary-
+based methods) do. However, because of the DOA estimationalgorithm based on a one-sided coarray segment, the proposed
+arrays are at a “disadvantage” compared to the arrays having a
+central ULA segment in the coarray. For the arrays with central
+ULA segment in the coarray, both sides of the coarray are used
+to form the matrix /hatwideR, whereas, for the arrays with central holes
+in their coarray (i.e., w(1)=0), only one side of the coarray
+is used. Despite this limitation, the proposed arrays have a
+smaller MSE compared to previous arrays in the literature in the
+presence of mutual coupling under se veral simulation settings.
+This already demonstrates the value of our proposed arrays.
+However, to further enhance the performance of the proposed
+arrays, other DOA estimation algorithms that can use both sides
+of the difference coarray should be considered in the future. In
+our upcoming work [55], we propose ‘augmented root-MUSIC’
+that can utilize the ULA segment s on both sides of the coarrays
+with central holes. We have found that for some of the proposed
+arrays, the augmented root-MUSIC can have over an order ofmagnitude smaller MSE than coarray root-MUSIC that uses a
+one-sided ULA segment. The bas ic idea is to stack the Toeplitz
+matrices formed from the ULA segments in the coarray frompositive sides and negative sides. Then, a ‘noise subspace’ in a
+much higher dimension is estimated using the SVD of the aug-
+mented matrix. The details will be explained in [55].H e r ew e
+provide one simulation example to demonstrate its advantage.
+We rerun the simulations from Fig. 3using the augmented
+root-MUSIC algorithm [55]. The resulting plots are shown in
+Fig. 11. Note that in Fig. 3, only array z
+6performed better
+than other arrays from the literature. Whereas in Fig. 11above
+using augmented root-MUSIC, many of the proposed arrays
+now have over an order of magnitude smaller MSE than earlier
+and perform at par or better than arrays from the literature.As another future direction, the central holes in the coarrays
+can be ﬁlled using appropriate coarray interpolation techniques
+[56],[57],[58]. However, it can be challenging to incorporate
+mutual coupling into such algorithms. Once the central holes areappropriately ﬁlled through interpolation, we can use the central
+ULA segment in coarray instead of the one-sided segment.
+These directions will be explored in our future work.
+VII. C
+ONCLUDING REMARKS
+In this paper, we introduced new weight-constrained sparse
+arrays that are robust to the presence of high mutual coupling.
+We argued that with a large number of sensors N, we may not
+always require O(N2)degrees of freedom, and O(N2)length
+aperture of such sparse arrays can be impractical for various
+applications. To better accommodate aperture constraints andhigh mutual coupling, we proposed two modiﬁcations to the
+array design criteria and presented several O(N)aperture ar-
+rays with either w(1)=0o rw(1)=w(2)=0. Many of these
+arrays can s till identify D>N DOAs (such as D=2N)u s -
+ing coarray-MUSIC on a one-sided ULA segment present in
+the coarray. These arrays are obtained by appropriately dilat-ing a ULA and augmenting it with a few additional sensors.
+Through Monte-Carlo simulations, we demonstrated that these
+new arrays can outperform existing arrays from the literatureunder high mutual coupling or aper ture constrai nt conditions.
+Additionally, we proposed another type of arrays with w(1)=
+0o rw(1)=w(2)=0 andO(N
+2)aperture, called weight-
+constrained nested arrays, which are suitable for identifying
+a large number of DOAs under high mutual coupling whenaperture is not constrained.
+The theme of an ‘aperture-aware’ array design introduced
+in this work can be further explored to design sparse arrayssystematically under aperture constraints. Several interesting
+array design questi ons arise under such a s etting. For exam-
+ple, given a ﬁxed aperture Aand a ﬁxed number of sensors
+N<A , it would be of interest to know the sensor arrangement
+that leads to the lowest mutual coupling and gives the best
+DOA estimation performance. Furthermore, similar to the 1D
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 18 =====
+
+KULKARNI AND V AIDYANATHAN: WEIGHT-CONSTRAINED SPARSE ARRAYS FOR DIRECTION OF ARRIV AL ESTIMATION 4461
+weight-constrained sparse arrays introduced in this paper, 2D
+sparse arrays that have zero coarray weights at smaller lags are
+also of interest for future research.
+ACKNOWLEDGEMENT
+The authors wish to thank Po-Chih Chen for the discussion
+about the sparse arrays proposed in this work and for pointing
+out redundancy in an earlier construction of w2, which helped
+in making the design of w2more economical.
+REFERENCES
+[1] H. Krim and M. Viberg, “Two decades of array signal processing
+research: The parametric approach,” IEEE Signal Proc. Mag. , vol. 13,
+no. 4, pp. 67–94, Jul. 1996.
+[2] A. Moffet, “Minimum-redundancy linear arrays,” IEEE Trans. Antennas
+Propag. , vol. 16, no. 2, pp. 172–175, Mar. 1968.
+[3] M. Ishiguro, “Minimum redundancy linear arrays for a large number of
+antennas,” Radio Sci. , vol. 15, no. 6, pp. 1163–1170, 1980.
+[4] F. Schwartau, Y . Schröder, L. Wo lf, and J. Schoebel, “Large minimum
+redundancy linear arrays: Systematic search of perfect and optimal rulers
+exploiting parallel processing,” IEEE Open J. Antennas Propag. ,v o l .2 ,
+pp. 79–85, 2021.
+[5] P. Pal and P. P. Vaidyanathan, “ Nested arrays: A novel approach to
+array processing with enhanced degrees of freedom,” IEEE Trans. Signal
+Process. , vol. 58, no. 8, pp. 4167–4181, Aug. 2010.
+[6] P. P. Vaidyanathan and P. Pal, “Spa rse sensing with co-prime samplers
+and arrays,” IEEE Trans. Signal Process. , vol. 59, no. 2, pp. 573–586,
+Feb. 2011.
+[7] S. Qin, Y . D. Zhang, and M. G. Amin, “Generalized coprime array
+conﬁgurations for direction-of-arrival estimation,” IEEE Trans. Signal
+Process. , vol. 63, no. 6, pp. 1377–1390, Mar. 2015.
+[8] M. Yang, L. Sun, X. Yuan, and B. Chen, “Improved nested array with
+hole-free DCA and more degrees of freedom,” Electron. Lett. , vol. 52,
+no. 25, pp. 2068–2070, Dec. 2016.
+[9] C.-L. Liu and P. P. Vaidyanathan , “Super nested arrays: Linear sparse
+arrays with reduced mutual c oupling—Part I: Fundamentals,” IEEE
+Trans. Signal Process. , vol. 64, no. 15, pp. 3997–4012, Aug. 2016.
+[10] C.-L. Liu and P. P. Vaidyanathan , “Super nested arrays: Linear sparse
+arrays with reduced mutual coupling—Part II: High-order extensions,”
+IEEE Trans. Signal Process. , vol. 64, no. 16, pp. 4203–4217, Aug. 2016.
+[11] J. Liu, Y . Zhang, Y . Lu, S. Ren, and S. Cao, “Augmented nested arrays
+with enhanced DOF and reduced mutual coupling,” IEEE Trans. Signal
+Process. , vol. 65, no. 21, pp. 5549–5563, Nov. 2017.
+[12] A. M. Shaalan, J. Du, and Y .-H. Tu, “Dilated nested arrays with more
+degrees of freedom (DOFs) and less mutual coupling—Part I: Thefundamental geometry,” IEEE Trans. Signal Proc. , vol. 70, pp. 2518–
+2531, 2022, doi: 10.1109/TSP.2022.3174451 .
+[13] Z. Zheng, W.-Q. Wang, Y . Kong, and Y . D. Zhang, “MISC array: A
+new sparse array design achieving increased degrees of freedom and
+reduced mutual coupling effect,” IEEE Trans. Sig. Proc. , vol. 67, no. 7,
+pp. 1728–1741, Apr. 2019.
+[14] A. Raza, W. Liu, and Q. Shen, “Thi nned coprime array for second-order
+difference co-array generation w ith reduced mutual coupling,” IEEE
+Trans. Signal Process. , vol. 67, no. 8, pp. 2052–2065, Apr. 2019.
+[15] W. Zheng, X. Zhang, Y . Wang, J. Shen, and B. Champagne, “Padded
+coprime arrays for improved DOA estimation: Exploiting hole represen-tation and ﬁlling strategies,” IEEE Trans. Signal Process. , vol. 68, pp.
+4597–4611, 2020.
+[16] R. Schmidt, “Multiple emitter lo cation and signal parameter estimation,”
+IEEE Trans. Antennas Propag. , vol. 34, no. 3, pp. 276–280, Mar. 1986.
+[17] C.-L. Liu and P. P. Vaidyanathan, “Remarks on the spatial smoothing
+step in coarray MUSIC,” IEEE Signal Process. Lett. , vol. 22, no. 9, pp.
+1438–1442, Sep. 2015.
+[18] R. Roy and T. Kailath, “ESPRIT-estimation of signal parameters via
+rotational invariance techniques,” IEEE Trans. Acoust., Speech, Signal
+Process. , vol. 37, no. 7, pp. 984–995, Jul. 1989.
+[19] R. Zhang, B. Shim, and W. Wu, “Direction-of-arrival estimation for
+large antenna arrays with hybrid analog and digital architectures,” IEEE
+Trans. Signal Process. , vol. 70, pp. 72–88, 2022.[20] L. Lu, G. Y . Li, A. L. Swindlehurst, A. Ashikhmin, and R. Zhang,
+“An overview of massive MIMO: Beneﬁts and challenges,” IEEE J. Sel.
+Topics signal Process. , vol. 8, no. 5, pp. 742–758, Oct. 2014.
+[21] T. Svantesson, “Mutual coupling c ompensation using s ubspace ﬁtting,”
+inProc. IEEE Sensor Array Multichannel Signal Process. Workshop,
+Piscataway, NJ, USA: IEEE Press, 2000, pp. 494–498.
+[22] T. Svantesson, “Modeling and estimation of mutual coupling in a
+uniform linear array of dipoles,” in Proc. IEEE Int. Conf. Acoust., Speech
+Signal Process. (ICASSP) , 1999.
+[23] J. Shi, G. Hu, X. Zhang, and H. Zhou, “Generalized nested array:
+Optimization for degrees of freedom and mutual coupling,” IEEE
+Commun. Lett. , vol. 22, no. 6, pp. 1208–1211, Jun. 2018.
+[24] P. Kulkarni and P. P. Vaidyanathan , “Sparse, weight-constrained arrays
+withO(N)aperture for reduced mutual coupling,” in Proc. IEEE Int.
+Conf. Acoust., Speech, Signal Proc. , 2024, pp. 12891–12895.
+[25] H. L. Van Trees, Optimum Array Processing: Part IV of Detection,
+Estimation, and Modulation Theory . Hoboken, NJ, USA: Wiley, 2004.
+[26] A. Barabell, “Improving the resol ution performance o f eigenstructure-
+based direction-ﬁnding algorithms,” in Proc. IEEE Int. Conf. Acoust.,
+Speech Signal Process. (ICASSP) , 1983, pp. 336–339.
+[27] P. Stoica and A. Nehorai, “MUSIC, maximum likelihood, and Cramer-
+Rao bound,” IEEE Trans. Acc., Speech, Signal Process. , vol. 37, no. 5,
+pp. 720–741, May 1989,.
+[28] P. Stoica and A. Nehorai, “Perfo rmance study of c onditional and uncon-
+ditional direction-of-arrival estimation,” IEEE Trans. Acoust., Speech,
+Sig. Proc. , vol. 38, no. 10, pp. 1783–1795, Oct. 1990.
+[29] B. D. Rao and K. S. Hari, “Performance analysis of root-MUSIC,” IEEE
+Trans. Acoust., Speech, Signal Process. , vol. 37, no. 12, pp. 1939–1949,
+Dec. 1989.
+[30] B. Friedlander and A. J. Weiss, “Direction ﬁnding in the presence of
+mutual coupling,” IEEE Trans. Antennas Propag. , vol. 39, no. 3, pp.
+273–284, Mar. 1991.
+[31] E. BouDaher, F. Ahmad, M. G. Amin, and A. Hoorfar, “Mutual coupling
+effect and compensation in non-uniform arrays for direction-of-arrivalestimation,” Digital Signal Process. , vol. 61, pp. 3–14, Feb. 2017.
+[32] F. Sellone and A. Serra, “A novel online mutual coupling compensation
+algorithm for uniform and linear arrays,” IEEE Trans. Signal Process. ,
+vol. 55, no. 2, pp. 560–573, Feb. 2007.
+[33] Z. Ye, J. Dai, X. Xu, and X. Wu, “DOA estimation for uniform
+linear array with mutual coupling,” IEEE Trans. Aerosp. Electron. Syst. ,
+vol. 45, no. 1, pp. 280–288, Jan. 2009.
+[34] C. A. Balanis, Antenna Theory: Analysis and Design . Hoboken, NJ,
+USA: Wiley, 2016.
+[35] H.-S. Lui, H. T. Hui, and M. S. Leong, “A note on the mutual-coupling
+problems in transmitting and receiving antenna arrays,” IEEE Antennas
+Propag. Mag. , vol. 51, no. 5, pp. 171–176, Oct. 2009.
+[36] G. Brown, “Directional antennas,” Proc. Inst. Radio Eng. , vol. 25,
+no. 1, pp. 78–145, 1937.
+[37] H. King, “Mutual impedance of une qual length antennas in echelon,”
+IRE Trans. Antennas Propag. , vol. 5, no. 3, pp. 306–313, Jul. 1957.
+[38] K. M. Pasala and E. M. Friel, “Mutual coupling effects and their
+reduction in wideband direction of arrival estimation,” IEEE Trans.
+Aerosp. Electron. Syst. , vol. 30, no. 4, pp. 1116–1122, Oct. 1994.
+[39] I. Gupta and A. Ksienski, “Effect of mutual coupling on the performance
+of adaptive arrays,” IEEE Transact. Antennas Propag. , vol. 31, no. 5,
+pp. 785–791, Sep. 1983.
+[40] H. Hui, “Improved compensatio n for the mutual coupling effect in
+a dipole array for direction ﬁnding,” IEEE Trans. Antennas Propag. ,
+vol. 51, no. 9, pp. 2498–2503, Sep. 2003.
+[41] H. S. Lui, H. T. Hui, “Mutual coupling compensation for direction-of-
+arrival estimations using the recei ving-mutual-impedance method,” Int.
+J. Antennas Propag. , vol. 2010, Mar. 2010, Art. no. 373061.
+[42] R. P. Feynman, R. B. Leighton, and M. Sands, The Feynman Lectures on
+Physics , V ol. I the New Millennium Ed .: Mainly Mechanics, Radiation,
+and Heat. New York, NY , USA: Basic Books, 2011.
+[43] S. Ramo, J. R. Whinnery, and T. Van Duzer, Fields and Waves in
+Communication Electronics . Hoboken, NJ, USA: Wiley, 1994.
+[44] B. Friedlander, “On the mutual c oupling matrix in array signal process-
+ing,” in Proc. 54th Asilomar Conf. Signals, Syst., Comput. , 2020, pp.
+1245–1249.
+[45] Z. Yang and K. Wang, “Nonasymp totic performance analysis of direct-
+augmentation and spatial-smoothing ESPRIT for localization of more
+sources than sensors using sparse arrays,” IEEE Trans. Aerosp. Electron.
+Syst., vol. 59, no. 6, pp. 9379–9389, Dec. 2023.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.
+
+
+===== PAGE 19 =====
+
+4462 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+[46] C.-L. Liu and P. Vaidyanathan, “Cramér–Rao bounds for coprime and
+other sparse arrays, which ﬁnd more sources than sensors,” Digital
+Signal Process. , vol. 61, pp. 43–61, Feb. 2017.
+[47] M. Wang and A. Nehorai, “Coarrays, MUSIC, and the Cramér–Rao
+bound,” IEEE Trans. Signal Process. , vol. 65, no. 4, pp. 933–946,
+Feb. 2017.
+[48] P. Kulkarni and P. P. Vaidyanathan , “On the efﬁciency of coarray-based
+direction of arrival estimation,” in Proc. Asilomar Conf. Signals, Syst.
+Comput., Piscataway, NJ, USA: IEEE Press, 2023, pp. 1334–1338.
+[49] S. Sedighi, B. S. M. R. Rao, and B. Ottersten, “An asymptotically
+efﬁcient weighted least squares estim ator for co-array-based DoA es-
+timation,” IEEE Trans. Signal Process. , vol. 68, pp. 589–604, 2020.
+[50] Z. Zheng, Y . Huang, W.-Q. Wang, and H. C. So, “Augmented covariance
+matrix reconstruction for DOA estim ation using difference coarray,”
+IEEE Trans. Signal Process. , vol. 69, pp. 5345–5358, 2021.
+[51] P. Sarangi, M. C. Hücümeno ˘glu, and P. Pal, “Beyond coarray MUSIC:
+Harnessing the difference sets of ne sted arrays with limited snapshots,”
+IEEE Signal Process. Lett. , vol. 28, pp. 2172–2176, 2021.
+[52] Z. Yang, X. Chen, and X. Wu, “A robust and statistically efﬁcient
+maximum-likelihood method for DOA estimation using sparse linear
+arrays,” IEEE Trans. Aerosp. Electron. Syst. , vol. 59, no. 5, pp. 6798–
+6812, Oct. 2023.
+[53] Y . D. Zhang, M. G. Amin, and B. Himed, “Sparsity-based DOA
+estimation using co-prime arrays,” in Proc. IEEE Int. Conf. Acoust.,
+Speech Signal Process., Piscataway, NJ, USA: IEEE Press, 2013, pp.
+3967–3971.
+[54] J. Shi, F. Wen, Y . Liu, Z. Liu, and P. Hu, “Enhanced and generalized
+coprime array for direction of arrival estimation,” IEEE Trans. Aerosp.
+Electron. Syst. , vol. 59, no. 2, pp. 1327–1339, Apr. 2023.
+[55] P. Kulkarni and P. P. Vaidyanath an, “Efﬁcient use of non-central ULA
+segments in the coarrays of weight-c onstrained sparse arrays,” submitted
+for publication.
+[56] C.-L. Liu, P. Vaidyanathan, and P. Pal, “Coprime coarray interpolation
+for DOA estimation via nuclear norm minimization,” in Proc. IEEE Int.
+Symp. Circuits Syst. (ISCAS), Piscataway, NJ, USA: IEEE Press, 2016.
+[57] H. Qiao and P. Pal, “Uniﬁed an alysis of co-array interpolation for
+direction-of-arrival estimation,” in Proc. IEEE Int. Conf. Acoust., Speech
+Signal Process. (ICASSP), Piscataway, NJ, USA: IEEE Press, 2017, pp.
+3056–3060.
+[58] C. Zhou, Z. Shi, Y . Gu, and Y . D. Zhang, “Coarray interpolation-based
+coprime array DOA estimation via covariance matrix reconstruction,”inProc. IEEE Int. Conf. Acoust., Speech Signal Process. (ICASSP) ,
+Piscataway, NJ, USA: IEEE Press, 2018.
+Pranav Kulkarni (Student Member, IEEE) was
+born in 1997. He received the B.Tech. degree in
+electrical engineering with a minor in computerscience from Indian Institute of Technology (IIT),Bombay, in 2019, and the master’s degree in elec-
+trical engineering from California Institute of Tech-
+nology (Caltech), in 2021. He is currently workingtoward the Ph.D. degree in digital signal processingwith Caltech. His research interests include peri-
+odicity analysis, array si gnal processing, and line
+spectrum estimation. He was the recipient of ﬁrst
+place in the Student Paper Contest at the 2022 Asilomar Conference onSignals, Systems, and Computers.
+P. P. Vaidyanathan (Life Fellow, IEEE) received
+the B.Sc., B.Tech., and M .Tech. degrees from the
+University of Calcutta, Kolkata, India, in 1974,1977, and 1979, respectively, and the Ph.D. de-
+gree in electrical and computer engineering from
+the University of California, Santa Barbara, CA,USA, in 1982. He is the Kiyo and Eiko TomiyasuProfessor of electrical engi neering with California
+Institute of Technology (Caltech), Pasadena, CA,
+USA. He was the recipient of the IEEE CAS SocietyGolden Jubilee Medal, the Terman Award of the
+ASEE, the IEEE Gustav Robert Kirchhoff Technical Field Award in 2016,
+and the IEEE Signal Processing Society Technical Achievement Award in
+2002, the Education Award in 2012, and the Society Award in 2016. He wasthe recipient of the EURASIP Athanas ios Papoulis Award in 2021, a Foreign
+Fellow of the Indian National Academy o f Engineering, and a member of the
+European Academy of Scien ces and Arts. He was also t he recipient of multiple
+awards for teaching with Caltech, incl uding the Northrop Grumman Teaching
+Prize. He is the recipient of the IEEE J ack S. Kilby Signal Processing Medal
+and a member of the U.S. National Academy of Engineering.
+Authorized licensed use limited to: Kennesaw State University. Downloaded on September 24,2025 at 03:55:35 UTC from IEEE Xplore.  Restrictions apply.

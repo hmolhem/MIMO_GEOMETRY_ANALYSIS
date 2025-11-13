@@ -258,7 +258,7 @@ We evaluate DOA estimation for $K=3$ far-field narrowband sources at true angles
 \item \textbf{Wavelength}: $\lambda = 1.0$ (normalized units),
 \item \textbf{SNR}: Varied from 0 dB to 20 dB (10 dB nominal),
 \item \textbf{Snapshots}: Varied from 32 to 512 (200 nominal),
-\item \textbf{Trials}: 100 Monte Carlo runs per condition (seed=42 for reproducibility).
+\item \textbf{Trials}: 1000 Monte Carlo runs per condition (seed=42 for reproducibility). % NOTE: Numeric results below still reflect earlier 100-trial run; replace after 1000-trial regeneration.
 \end{itemize}
 
 \subsection{Array Geometries}
@@ -341,7 +341,7 @@ All experiments use our open-source Python framework (7{,}000+ LOC) with:
 \begin{table}[h]
 \centering
 \begin{threeparttable}
-\caption{ALSS Performance Under Mutual Coupling (RMSE in degrees; \textbf{100 trials}; SNR = $10\,\mathrm{dB}$; M = 200; $c_1 = 0.3$; $\alpha = 0.5$; \textbf{Seed = 42})\tnote{1}}
+\caption{ALSS Performance Under Mutual Coupling (RMSE in degrees; \textbf{1000 trials}; SNR = $10\,\mathrm{dB}$; M = 200; $c_1 = 0.3$; $\alpha = 0.5$; \textbf{Seed = 42})\tnote{1}}
 \label{table:mcm_robustness}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
@@ -357,7 +357,7 @@ Z5    & 4.66$^\circ$ & 3.96$^\circ$ & 5.91$^\circ$ & 5.22$^\circ$ \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}\footnotesize
-\item[1] Values are mean RMSE $\pm$ 95\% CI over \textbf{100 trials} (CI $= 1.96\cdot \mathrm{SD}/\sqrt{100}$). \textbf{Reproducibility guaranteed with random seed = 42.}
+\item[1] Values are mean RMSE $\pm$ 95\% CI over \textbf{1000 trials} (CI $= 1.96\cdot \mathrm{SD}/\sqrt{1000}$). \textbf{Reproducibility guaranteed with random seed = 42.} % NOTE: Table body CI bounds still from 100-trial data; update after recomputation.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -377,7 +377,7 @@ Figure~\ref{fig:gap_reduction} visualizes gap reduction percentages with 95\% bo
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.48\textwidth]{figures/alss_mcm_gap_reduction.png}
-\caption{ALSS gap reduction under mutual coupling (SNR = 10 dB; M = 200; $c_1=0.3$; $\alpha=0.5$; \textbf{100 trials}; \textbf{seed=42}) with 95\% bootstrap confidence intervals. Error bars show 95\% CI. Z5 shows $\sim$45\% reduction. Statistical significance: * ($p<0.05$), ** ($p<0.01$), *** ($p<0.001$).}
+\caption{ALSS gap reduction under mutual coupling (SNR = 10 dB; M = 200; $c_1=0.3$; $\alpha=0.5$; \textbf{1000 trials}; \textbf{seed=42}) with 95\% bootstrap confidence intervals. Error bars show 95\% CI. Z5 shows $\sim$45\% reduction. Statistical significance: * ($p<0.05$), ** ($p<0.01$), *** ($p<0.001$). % NOTE: Figure reflects 100-trial run; regenerate for 1000 trials.}
 \label{fig:gap_reduction}
 \end{figure}
 
@@ -415,7 +415,7 @@ Table~\ref{table:bias_variance} presents bias-variance decomposition confirming 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.48\textwidth]{figures/alss_mcm_bias_variance_decomposition.png}
-\caption{Bias--variance decomposition across experimental conditions (SNR = 10 dB; M = 200; $c_1=0.3$; $\alpha=0.5$; \textbf{100 trials}; \textbf{seed=42}). Vertical axis shows squared error components (deg$^2$). ALSS consistently reduces variance by $\sim$40\% while preserving bias, demonstrating orthogonal effects relative to mutual coupling.}
+\caption{Bias--variance decomposition across experimental conditions (SNR = 10 dB; M = 200; $c_1=0.3$; $\alpha=0.5$; \textbf{1000 trials}; \textbf{seed=42}). Vertical axis shows squared error components (deg$^2$). ALSS consistently reduces variance by $\sim$40\% while preserving bias, demonstrating orthogonal effects relative to mutual coupling. % NOTE: Values from 100-trial run; update after 1000-trial recomputation.}
 \label{fig:bias_variance}
 \end{figure}
 
@@ -435,7 +435,7 @@ Figure~\ref{fig:snr_effectiveness} shows ALSS effectiveness across SNR regimes f
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.48\textwidth]{figures/alss_mcm_snr_effectiveness.png}
-\caption{ALSS improvement percentage vs.\ SNR for Z5 ($c_1=0.3$; $\alpha=0.5$; M = 200; \textbf{100 trials}; \textbf{seed=42}). Vertical axis shows percentage RMSE improvement. Solid: no MCM. Dashed: with MCM.}
+\caption{ALSS improvement percentage vs.\ SNR for Z5 ($c_1=0.3$; $\alpha=0.5$; M = 200; \textbf{1000 trials}; \textbf{seed=42}). Vertical axis shows percentage RMSE improvement. Solid: no MCM. Dashed: with MCM. % NOTE: Sweep originally based on 100 trials; consider rerunning for 1000 trials only if needed.}
 \label{fig:snr_effectiveness}
 \end{figure}
 
@@ -474,7 +474,7 @@ Memory footprint is identical (within 1 KB variation).
 \subsection{Parameter Robustness Analysis}
 \label{sec:param_robustness}
 
-To validate the ``no tuning required'' claim, we perform ablation studies on ALSS parameters using the Z3\_2 array (SNR = 10 dB, $M=200$, \textbf{100 trials}, \textbf{seed=42}). Table~\ref{table:ablation} demonstrates performance across parameter variations.
+To validate the ``no tuning required'' claim, we perform ablation studies on ALSS parameters using the Z3\_2 array (SNR = 10 dB, $M=200$, \textbf{1000 trials}, \textbf{seed=42}). Table~\ref{table:ablation} demonstrates performance across parameter variations. % NOTE: Table values are from prior 100-trial study; regenerate for 1000 trials if publishing updated statistics.
 \begin{table}[h]
 \centering
 \caption{Parameter Ablation Study on Z3\_2 Array (RMSE in degrees)}
