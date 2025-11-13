@@ -47,6 +47,9 @@ miniScript/
 # Garbage folder (removed/archived files)
 garbage/
 
+# Backup folders (archived legacy/duplicate files)
+archives/underscore_backup_*/
+
 # Data files (if large)
 data/*.dat
 data/*.bin
