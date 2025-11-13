@@ -1,0 +1,46 @@
+================================================================================
+DOCSTRING AUDIT REPORT
+Generated: 2025-11-12 22:34:57
+Author: Hossein Molhem
+================================================================================
+
+SUMMARY:
+  Total Python files scanned: 115
+  Files with missing docstrings: 3
+  Missing class docstrings: 0
+  Missing function/method docstrings: 15
+
+================================================================================
+
+
+File: geometry_processors\z4_processor.py
+--------------------------------------------------------------------------------
+
+  Missing Function/Method Docstrings (2):
+    - Line 80: def __repr__ (in class Z4ArrayProcessor)
+    - Line 325: def _weight_dict (in class Z4ArrayProcessor)
+
+
+File: geometry_processors\z5_processor.py
+--------------------------------------------------------------------------------
+
+  Missing Function/Method Docstrings (6):
+    - Line 52: def __repr__ (in class Z5ArrayProcessor)
+    - Line 57: def _build_z5_positions (in class Z5ArrayProcessor)
+    - Line 80: def _preserves_constraints (in class Z5ArrayProcessor)
+    - Line 84: def _largest_contig_segment_nonneg (in class Z5ArrayProcessor)
+    - Line 123: def _improve_once_by_perturb (in class Z5ArrayProcessor)
+    - Line 196: def _largest_contiguous_segment (in class Z5ArrayProcessor)
+
+
+File: geometry_processors\z6_processor.py
+--------------------------------------------------------------------------------
+
+  Missing Function/Method Docstrings (7):
+    - Line 61: def __init__ (in class Z6ArrayProcessor)
+    - Line 95: def __repr__ (in class Z6ArrayProcessor)
+    - Line 113: def analyze_coarray (in class Z6ArrayProcessor)
+    - Line 148: def _largest_contiguous_run (in class Z6ArrayProcessor)
+    - Line 167: def generate_performance_summary (in class Z6ArrayProcessor)
+    - Line 205: def get_two_sided_holes (in class Z6ArrayProcessor)
+    - Line 208: def get_one_sided_holes (in class Z6ArrayProcessor)

@@ -20,6 +20,21 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
     """
 
     def __init__(self, N: int, d: float = 1.0):
+        """
+        Initialize Z3(2) array processor.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            N (int): Total number of sensors
+            d (float): Physical spacing multiplier (default: 1.0)
+            
+        Returns:
+            None
+            
+        Raises:
+            ValueError: If N < 5
+        """
         if N < 5:
             raise ValueError("Z3(2) requires N >= 5.")
         self.N_total = int(N)
@@ -49,10 +64,38 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
 
     # ---------- 2) Physical specification ----------
     def compute_array_spacing(self):
+        """
+        Set the physical sensor spacing.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.sensor_spacing)
+            
+        Raises:
+            None
+        """
         self.data.sensor_spacing = self.d
 
     # ---------- 3) Difference coarray (integer grid) ----------
     def compute_all_differences(self):
+        """
+        Compute all pairwise differences between sensor positions.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with difference computations)
+            
+        Raises:
+            None
+        """
         pos = np.asarray(self.data.sensors_positions, dtype=int)
         N = self.N_total
         n_i, n_j = np.meshgrid(pos, pos, indexing="ij")
@@ -67,6 +110,20 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
         })
 
     def analyze_coarray(self):
+        """
+        Analyze the difference coarray to identify unique positions and virtual sensors.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with coarray analysis)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
         uniq = np.unique(lags)
 
@@ -83,10 +140,38 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
         self.data.num_segmentation = 1
 
     def plot_coarray(self):
+        """
+        Plot the coarray visualization.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None
+            
+        Raises:
+            None
+        """
         return None
 
     # ---------- 4) Weights ----------
     def compute_weight_distribution(self):
+        """
+        Compute the weight distribution (frequency count) for each lag.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with weight distribution)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
         u, c = np.unique(lags, return_counts=True)
         weight_dict = dict(zip(u.tolist(), c.tolist()))
@@ -100,6 +185,20 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
 
     # ---------- 5) One-sided contiguous segment & DOF ----------
     def analyze_contiguous_segments(self):
+        """
+        Identify and analyze contiguous segments in the one-sided coarray.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with segment analysis)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.unique_differences, dtype=int)
         lpos = np.sort(lags[lags >= 0])
 
@@ -154,6 +253,20 @@ class Z3_2ArrayProcessor(BaseArrayProcessor):
 
     # ---------- 7) Summary ----------
     def generate_performance_summary(self):
+        """
+        Generate comprehensive performance summary table for the array.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.performance_summary_table)
+            
+        Raises:
+            None
+        """
         data = self.data
 
         # weight lookup
