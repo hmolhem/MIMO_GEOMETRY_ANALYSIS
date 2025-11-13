@@ -584,5 +584,19 @@ class BaseArrayProcessor(abc.ABC):
     # ---------- Abstract marker for subclasses (if they require custom behavior) ----------
 
     @abc.abstractmethod
-    def __repr__(self) -> str:  # not strictly necessary, but keeps subclasses explicit
+    def __repr__(self) -> str:
+        """
+        Return string representation of the array processor.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            str: String representation including class name and array name
+            
+        Raises:
+            None
+        """
         return f"<{self.__class__.__name__}: {self.data.name}>"

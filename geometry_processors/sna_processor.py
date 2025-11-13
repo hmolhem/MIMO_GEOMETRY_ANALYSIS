@@ -112,6 +112,20 @@ class SNA3ArrayProcessor(BaseArrayProcessor):
         self.data.weight_table = pd.DataFrame(columns=["Lag", "Weight"])
     
     def __repr__(self) -> str:
+        """
+        Return string representation of the SNA3 array processor.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            str: String representation with N1, N2, N3, and spacing parameters
+            
+        Raises:
+            None
+        """
         return f"SNA3ArrayProcessor(N1={self.N1}, N2={self.N2}, N3={self.N3}, d={self.d})"
     
     def _build_sna3_positions(self) -> np.ndarray:

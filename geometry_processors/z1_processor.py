@@ -14,6 +14,21 @@ class Z1ArrayProcessor(BaseArrayProcessor):
     """
 
     def __init__(self, N: int, d: float = 1.0):
+        """
+        Initialize Z1 array processor.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            N (int): Total number of sensors (minimum 3)
+            d (float): Physical spacing multiplier (default: 1.0)
+            
+        Returns:
+            None
+            
+        Raises:
+            ValueError: If N < 3
+        """
         if N < 3:
             raise ValueError("Z1 requires N >= 3.")
         self.N_total = int(N)
@@ -38,10 +53,38 @@ class Z1ArrayProcessor(BaseArrayProcessor):
 
     # ---------------- 2) Physical specification ----------------
     def compute_array_spacing(self):
+        """
+        Set the physical sensor spacing.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.sensor_spacing)
+            
+        Raises:
+            None
+        """
         self.data.sensor_spacing = self.d
 
     # ---------------- 3) Difference coarray (integer lag grid) ----------------
     def compute_all_differences(self):
+        """
+        Compute all pairwise differences between sensor positions.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with difference computations)
+            
+        Raises:
+            None
+        """
         pos = np.asarray(self.data.sensors_positions, dtype=int)
         N = self.N_total
         n_i, n_j = np.meshgrid(pos, pos, indexing="ij")
@@ -56,6 +99,20 @@ class Z1ArrayProcessor(BaseArrayProcessor):
         })
 
     def analyze_coarray(self):
+        """
+        Analyze the difference coarray to identify unique positions and virtual sensors.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with coarray analysis)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
         uniq = np.unique(lags)
 
@@ -74,11 +131,39 @@ class Z1ArrayProcessor(BaseArrayProcessor):
         self.data.num_segmentation = 1
 
     def plot_coarray(self):
+        """
+        Plot the coarray visualization.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None
+            
+        Raises:
+            None
+        """
         # delegate plotting to your graphical demo; keep placeholder
         return None
 
     # ---------------- 4) Weights ----------------
     def compute_weight_distribution(self):
+        """
+        Compute the weight distribution (frequency count) for each lag.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with weight distribution)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
         u, c = np.unique(lags, return_counts=True)
         weight_dict = dict(zip(u.tolist(), c.tolist()))
@@ -92,6 +177,20 @@ class Z1ArrayProcessor(BaseArrayProcessor):
 
     # ---------------- 5) One-sided contiguous segment & DOF ----------------
     def analyze_contiguous_segments(self):
+        """
+        Identify and analyze contiguous segments in the one-sided coarray.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with segment analysis)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.unique_differences, dtype=int)
         lpos = np.sort(lags[lags >= 0])  # one-sided domain
 
@@ -114,8 +213,22 @@ class Z1ArrayProcessor(BaseArrayProcessor):
         self.data.max_detectable_sources = L // 2
         self.data.segment_ranges = [(int(largest[0]), int(largest[-1]))] if L > 0 else []
 
-    # ---------------- 6) Holes (one-sided) ----------------
+    # ---------------- 6) One-sided holes ----------------
     def analyze_holes(self):
+        """
+        Identify missing positions (holes) in the one-sided coarray.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.missing_virtual_positions)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.unique_differences, dtype=int)
         lpos = np.sort(lags[lags >= 0])
 
@@ -132,6 +245,20 @@ class Z1ArrayProcessor(BaseArrayProcessor):
 
     # ---------------- 7) Summary ----------------
     def generate_performance_summary(self):
+        """
+        Generate comprehensive performance summary table for the array.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.performance_summary_table)
+            
+        Raises:
+            None
+        """
         data = self.data
         wd = {}
         if data.weight_table is not None and "Lag" in data.weight_table and "Weight" in data.weight_table:

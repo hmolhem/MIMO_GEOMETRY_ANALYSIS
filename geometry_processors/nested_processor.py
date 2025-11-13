@@ -11,7 +11,22 @@ class NestedArrayProcessor(BaseArrayProcessor):
     Achieves O(N^2) degrees of freedom with a contiguous coarray.
     """
     def __init__(self, N1: int, N2: int, d: int = 1):
+        """
+        Initialize Nested Array processor with two subarrays.
         
+        Author: Hossein Molhem
+        
+        Args:
+            N1 (int): Number of sensors in dense subarray
+            N2 (int): Number of sensors in sparse subarray
+            d (int): Physical spacing multiplier (default: 1)
+            
+        Returns:
+            None
+            
+        Raises:
+            None
+        """
         # 1. Calculate the sensor positions
         self.N1 = N1
         self.N2 = N2
@@ -154,6 +169,20 @@ class NestedArrayProcessor(BaseArrayProcessor):
 
 
     def analyze_contiguous_segments(self):
+        """
+        Identify contiguous segments in the virtual array coarray.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.contiguous_segments)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.unique_differences, dtype=int)
         lpos = np.sort(lags[lags >= 0])
 
@@ -178,6 +207,20 @@ class NestedArrayProcessor(BaseArrayProcessor):
 
 
     def analyze_holes(self):
+        """
+        Identify missing positions (holes) in the virtual array coarray.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.missing_virtual_positions)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.unique_differences, dtype=int)
         lpos = np.sort(lags[lags >= 0])
 
