@@ -19,6 +19,21 @@ class Z4ArrayProcessor(BaseArrayProcessor):
     """
 
     def __init__(self, N: int = 7, d: float = 1.0):
+        """
+        Initialize Z4 array processor with w(1)=w(2)=0 constraint.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            N (int): Total number of sensors
+            d (float): Physical spacing multiplier (default: 1.0)
+            
+        Returns:
+            None
+            
+        Raises:
+            ValueError: If N < 5 or invalid sensor generation
+        """
         if N < 5:
             raise ValueError("Z4 requires N >= 5")
 
@@ -63,12 +78,48 @@ class Z4ArrayProcessor(BaseArrayProcessor):
     # ---------------- Required abstract methods ---------------- #
 
     def __repr__(self) -> str:
+        """
+        Return a concise string representation of this processor instance.
+
+        Author: Hossein Molhem
+
+        Returns:
+            str: Class name with configured N and d values.
+        """
         return f"{self.__class__.__name__}(N={self.N_total}, d={self.d})"
 
     def compute_array_spacing(self):
+        """
+        Set the physical sensor spacing.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.sensor_spacing)
+            
+        Raises:
+            None
+        """
         return self.d
 
     def compute_all_differences(self):
+        """
+        Compute all pairwise differences between sensor positions.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with difference computations)
+            
+        Raises:
+            None
+        """
         # integer grid differences (two-sided)
         g = np.asarray(self.data.sensors_positions, dtype=int)
         diffs = []
@@ -79,6 +130,20 @@ class Z4ArrayProcessor(BaseArrayProcessor):
         self.data.total_diff_computations = int(len(diffs))
 
     def analyze_coarray(self):
+        """
+        Analyze the difference coarray to identify unique positions and virtual sensors.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with coarray analysis)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
         uniq = np.unique(lags)  # two-sided unique integer lags
 
@@ -95,11 +160,39 @@ class Z4ArrayProcessor(BaseArrayProcessor):
         self.data.aperture = int(uniq.max() - uniq.min())
 
     def compute_weight_distribution(self):
+        """
+        Compute the weight distribution (frequency count) for each lag.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with weight distribution)
+            
+        Raises:
+            None
+        """
         lags = np.asarray(self.data.all_differences_with_duplicates, dtype=int)
         u, c = np.unique(lags, return_counts=True)
         self.data.weight_table = pd.DataFrame({"Lag": u, "Weight": c})
 
     def analyze_contiguous_segments(self):
+        """
+        Identify and analyze contiguous segments in the one-sided coarray.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data with segment analysis)
+            
+        Raises:
+            None
+        """
         u = np.asarray(self.data.coarray_positions, dtype=int)
         nonneg = u[u >= 0]
         nonneg.sort()
@@ -132,6 +225,20 @@ class Z4ArrayProcessor(BaseArrayProcessor):
         self.data.max_detectable_sources = int(best_len // 2)
 
     def analyze_holes(self):
+        """
+        Identify missing positions (holes) in the one-sided coarray.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.missing_virtual_positions)
+            
+        Raises:
+            None
+        """
         # Z4: canonical A = 3N - 7; ensure w(1)=w(2)=0
         u = np.asarray(self.data.coarray_positions, dtype=int)
         A = 3 * self.N_total - 7
@@ -152,6 +259,20 @@ class Z4ArrayProcessor(BaseArrayProcessor):
         assert wt.get(2, 0) == 0, "Z4 requires w(2)=0"
 
     def generate_performance_summary(self):
+        """
+        Generate comprehensive performance summary table for the array.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None (updates self.data.performance_summary_table)
+            
+        Raises:
+            None
+        """
         wt = self._weight_dict()
         u = np.asarray(self.data.coarray_positions, dtype=int)
 
@@ -186,6 +307,20 @@ class Z4ArrayProcessor(BaseArrayProcessor):
         self.data.performance_summary_table = pd.DataFrame(rows, columns=["Metrics", "Value"])
 
     def plot_coarray(self):
+        """
+        Plot the coarray visualization.
+        
+        Author: Hossein Molhem
+        
+        Args:
+            None
+            
+        Returns:
+            None
+            
+        Raises:
+            None
+        """
         seg = getattr(self.data, "largest_contiguous_segment", np.array([], dtype=int))
         return {
             "title": "Array Z4 Visualization (w(1)=w(2)=0)",
@@ -196,9 +331,17 @@ class Z4ArrayProcessor(BaseArrayProcessor):
     # ---------------- helpers ---------------- #
 
     def _weight_dict(self) -> dict[int, int]:
+        """
+        Build a dictionary mapping each lag to its weight (multiplicity).
+
+        Author: Hossein Molhem
+
+        Returns:
+            dict[int, int]: Mapping from lag value to weight.
+        """
         if getattr(self.data, "weight_table", None) is None:
             return {}
         d = {}
         for _, row in self.data.weight_table.iterrows():
-            d[int(row["Lag"])] = int(row["Weight"])
+            d[int(row["Lag"]) ] = int(row["Weight"]) 
         return d

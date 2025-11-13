@@ -59,6 +59,21 @@ class Z6ArrayProcessor(BaseArrayProcessor):
     """
 
     def __init__(self, N: int, d: float = 1.0) -> None:
+        """
+        Initialize the Z6 array processor and construct its physical and grid geometries.
+
+        Author: Hossein Molhem
+
+        Args:
+            N (int): Total number of sensors; must be >= 5.
+            d (float): Physical spacing multiplier to scale integer grid positions.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If N < 5.
+        """
         if N < 5:
             raise ValueError("Z6 expects N>=5.")
         self.N_total = int(N)
@@ -93,6 +108,14 @@ class Z6ArrayProcessor(BaseArrayProcessor):
 
     # ---------- Pretty ----------
     def __repr__(self) -> str:
+        """
+        String representation for debugging and logging.
+
+        Author: Hossein Molhem
+
+        Returns:
+            str: Class name with configured N and d values.
+        """
         return f"Z6ArrayProcessor(N={self.N_total}, d={self.d})"
 
     # ---------- Geometry ----------
@@ -111,6 +134,21 @@ class Z6ArrayProcessor(BaseArrayProcessor):
 
     # ---------- Core Analysis ----------
     def analyze_coarray(self) -> None:
+        """
+        Analyze the Z6 difference coarray and populate derived metrics.
+
+        This computes:
+        - Two-sided differences and unique lags
+        - One-sided non-negative lags
+        - Weight distribution (multiplicity per lag)
+        - Largest one-sided contiguous run and its length L
+        - One-sided and two-sided holes within the observed support
+
+        Author: Hossein Molhem
+
+        Returns:
+            None
+        """
         x = self.sensors_grid
         # All ordered pair differences (two-sided)
         diffs = (x.reshape(-1, 1) - x.reshape(1, -1)).ravel()
@@ -146,6 +184,17 @@ class Z6ArrayProcessor(BaseArrayProcessor):
         self.data.holes_two_sided = holes_2s.tolist()
 
     def _largest_contiguous_run(self, sorted_nonneg: np.ndarray) -> Tuple[np.ndarray, int]:
+        """
+        Find the longest contiguous run (step=1) within a sorted non-negative integer array.
+
+        Author: Hossein Molhem
+
+        Args:
+            sorted_nonneg (np.ndarray): Sorted array of non-negative integer lags.
+
+        Returns:
+            Tuple[np.ndarray, int]: The best contiguous segment and its length L.
+        """
         if sorted_nonneg.size == 0:
             return np.array([], dtype=int), 0
         best_start = best_len = 0
@@ -165,6 +214,18 @@ class Z6ArrayProcessor(BaseArrayProcessor):
 
     # ---------- Summary ----------
     def generate_performance_summary(self) -> Dict[str, Any]:
+        """
+        Generate a performance summary table and return key artifacts.
+
+        The summary includes physical N, virtual unique lags, virtual-only count,
+        two-sided aperture span, contiguous segment length L and [L1:L2] range,
+        K_max = floor(L/2), number of holes, and small-lag weights.
+
+        Author: Hossein Molhem
+
+        Returns:
+            Dict[str, Any]: A dictionary containing 'summary_df' and 'weights_df'.
+        """
         wt_df = self.data.weights_df
         wt = {int(r["Lag"]): int(r["Weight"]) for _, r in wt_df.iterrows()} if not wt_df.empty else {}
 
@@ -203,7 +264,23 @@ class Z6ArrayProcessor(BaseArrayProcessor):
 
     # ---------- Convenience ----------
     def get_two_sided_holes(self) -> List[int]:
+        """
+        Get the missing two-sided lags within [-A_obs, A_obs].
+
+        Author: Hossein Molhem
+
+        Returns:
+            List[int]: Missing lag values on the two-sided coarray support.
+        """
         return list(self.data.holes_two_sided)
 
     def get_one_sided_holes(self) -> List[int]:
+        """
+        Get the missing one-sided lags within [0, A_obs].
+
+        Author: Hossein Molhem
+
+        Returns:
+            List[int]: Missing lag values on the one-sided coarray support.
+        """
         return list(self.data.holes_one_sided)
