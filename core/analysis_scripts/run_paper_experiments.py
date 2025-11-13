@@ -907,5 +907,17 @@ Examples:
     print()
 
 
+"""Thin wrapper delegating to package-level runner.
+
+Kept for backward compatibility with existing invocation paths.
+"""
+
+from mimo_geom_analysis.paper_experiments import run_paper_experiments
+
+
+def main():
+    run_paper_experiments()
+
+
 if __name__ == '__main__':
     main()
