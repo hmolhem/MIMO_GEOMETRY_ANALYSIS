@@ -91,40 +91,83 @@ Virtual array: 17 unique positions spanning [-21, 21]
 ```
 MIMO_GEOMETRY_ANALYSIS/
 ├── README.md                    # This file
-├── docs/                        # Comprehensive documentation
-│   ├── GETTING_STARTED.md       # Installation & first steps
-│   ├── API_REFERENCE.md         # Complete API documentation
-│   ├── ARCHITECTURE.md          # System design
-│   └── tutorials/               # Step-by-step guides
+├── CONTRIBUTING.md              # Contribution guidelines
+├── pyproject.toml               # Package configuration & Ruff settings
+├── pytest.ini                   # Test configuration
+├── requirements.txt             # Runtime dependencies
+├── requirements-dev.txt         # Development dependencies
 │
-├── geometry_processors/         # Array definitions
-│   ├── bases_classes.py        # Abstract framework
-│   └── z[1-6]_processor*.py    # Specialized arrays
+├── .github/
+│   ├── copilot-instructions.md # AI assistant guidance
+│   └── workflows/
+│       └── ci.yml              # CI/CD pipeline (pytest + ruff)
 │
-├── core/radarpy/               # DOA estimation algorithms
-│   ├── algorithms/             # MUSIC, ALSS implementations
-│   ├── signal/                 # Signal generation
-│   └── metrics/                # Performance metrics
+├── geometry_processors/         # Array processor implementations
+│   ├── bases_classes.py        # Abstract BaseArrayProcessor framework
+│   ├── ula_processors.py       # Uniform Linear Array
+│   ├── nested_processor.py     # Nested arrays
+│   ├── sna_processor.py        # SNA3 arrays
+│   └── z[1-6]_processor.py     # Z-family weight-constrained arrays
 │
-├── analysis_scripts/           # Interactive demos
+├── core/radarpy/               # Core radar algorithms
+│   ├── algorithms/             # MUSIC, ALSS, coarray processing
+│   ├── signal/                 # Signal generation & mutual coupling
+│   ├── metrics/                # Performance evaluation
+│   └── analysis_scripts/       # Benchmark runners
+│
+├── doa_estimation/             # DOA estimation module (NEW)
+│   ├── music.py               # MUSIC algorithm implementation
+│   ├── README.md              # DOA documentation
+│   └── QUICK_START.md         # 5-minute DOA guide
+│
+├── analysis_scripts/           # Interactive demos & analysis tools
 │   ├── graphical_demo.py      # Menu-driven analysis
-│   └── run_*_demo.py          # CLI demos
+│   ├── run_*_demo.py          # CLI demos for each array type
+│   ├── methods_demo.py        # Validate all processor methods
+│   ├── core/                  # Wrapper scripts
+│   └── demos/                 # Example usage
 │
-├── scripts/                    # Batch processing
-│   ├── run_paper_benchmarks.py # Paper-ready benchmarks
-│   └── sweep_*.ps1            # Parameter sweeps
+├── scripts/                    # Automation & batch processing
+│   ├── activate_venv.bat/.ps1 # Virtual environment activation
+│   ├── run_benchmarks_with_venv.* # Automated benchmark runners
+│   └── cleanup_*.ps1          # Repository maintenance
 │
-├── tools/                      # Analysis utilities
-│   ├── plot_paper_benchmarks.py
-│   └── analyze_svd.py
+├── tools/                      # Development & analysis utilities
+│   ├── add_docstrings.py      # Docstring audit tool
+│   ├── plot_paper_benchmarks.py # Plotting utilities
+│   └── analyze_svd.py         # Matrix analysis
+│
+├── src/mimo_geom_analysis/     # Package structure (for distribution)
+│   ├── __init__.py
+│   ├── runners.py             # Benchmark execution framework
+│   └── paper_experiments.py   # Paper-ready experiment configs
+│
+├── tests/                      # Test suite
+│   ├── test_geometry_processors_smoke.py
+│   ├── test_coarray_mv.py
+│   ├── test_runners.py
+│   └── test_paper_experiments.py
+│
+├── docs/                       # Comprehensive documentation
+│   ├── guides/                # Usage guides & tutorials
+│   ├── development/           # Development documentation
+│   └── summaries/             # Project summaries
 │
 ├── papers/                     # Publication materials
-│   └── radarcon2025_alss/     # RadarCon 2025 submission
+│   └── radarcon2025_alss/     # RadarCon 2025 ALSS paper
 │
-└── results/                    # Auto-generated outputs
-    ├── plots/
-    ├── bench/
-    └── summaries/
+├── results/                    # Auto-generated outputs (gitignored)
+│   ├── plots/                 # Visualization outputs
+│   ├── bench/                 # Benchmark results
+│   └── summaries/             # Performance tables
+│
+├── archives/                   # Historical backups (gitignored)
+│   ├── garbage_archive_*.zip
+│   └── tests_backup_*/
+│
+├── data/                       # Input datasets
+├── notebooks/                  # Jupyter notebooks
+└── configs/                    # Configuration files
 ```
 
 ---
