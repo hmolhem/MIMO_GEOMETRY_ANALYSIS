@@ -370,3 +370,29 @@ MIT License - see [LICENSE](LICENSE) file for details.
 **Last Updated:** 2025-11-06  
 **Version:** 1.0.0  
 **Status:** Production-Ready
+
+---
+
+## Developer setup (local)
+
+Recommended minimal steps to set up a development environment locally (Windows PowerShell):
+
+```powershell
+# 1) Create a new venv (recommended path: envs/mimo-geom-dev or your own location)
+python -m venv .\envs\mimo-geom-dev
+
+# 2) Activate venv (PowerShell)
+.\envs\mimo-geom-dev\Scripts\Activate.ps1
+
+# 3) Upgrade pip and install dev requirements
+python -m pip install --upgrade pip
+pip install -r requirements-dev.txt
+
+# 4) (Optional) Install package in editable mode when pyproject/setup is present
+# pip install -e .
+```
+
+Notes:
+- Use `requirements-dev.txt` for test/lint/runtime dev deps (pytest, ruff, numpy, pandas).
+- We intentionally do not track virtualenvs in git. If you accidentally committed a venv, remove it from tracking with `git rm -r --cached <venv-path>` and add it to `.gitignore`.
+
