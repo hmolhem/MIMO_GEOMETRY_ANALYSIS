@@ -60,6 +60,23 @@ datasets/
 # PDF files (papers, references, etc.)
 *.pdf
 
+# LaTeX files and paper sources
+*.tex
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+
 # Paper outputs (generated files)
 papers/*/outputs/bench/*.csv
 papers/*/outputs/logs/*.txt

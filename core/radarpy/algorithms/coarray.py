@@ -4,7 +4,9 @@ from .alss import apply_alss
 
 def build_virtual_ula_covariance(Rxx, positions, d_phys, *, 
                                  alss_enabled=False, alss_mode="zero",
-                                 alss_tau=1.0, alss_coreL=3, M=None):
+                                 alss_tau=1.0, alss_coreL=3, M=None,
+                                 use_rmt=False, auto_coreL=False,
+                                 K_sources=None, snr_est=None):
     """
     Build virtual ULA covariance from spatial covariance via lag averaging.
     
@@ -119,7 +121,11 @@ def build_virtual_ula_covariance(Rxx, positions, d_phys, *,
             M=int(M),
             mode=alss_mode,
             tau=float(alss_tau),
-            coreL=int(alss_coreL),
+            coreL=int(alss_coreL) if alss_coreL is not None else None,
+            use_rmt=use_rmt,
+            auto_coreL=auto_coreL,
+            K_sources=K_sources,
+            snr_est=snr_est
         )
     
     # Now build Toeplitz matrix from processed lags

@@ -228,7 +228,8 @@ def root_music_from_Rv(Rv, K, k, d):
 
 def estimate_doa_coarray_music(X, positions, d_phys, wavelength, K,
                                scan_deg=(-60, 60, 0.1), return_debug=False, use_root=False,
-                               alss_enabled=False, alss_mode="zero", alss_tau=1.0, alss_coreL=3):
+                               alss_enabled=False, alss_mode="zero", alss_tau=1.0, alss_coreL=3,
+                               use_rmt=False, auto_coreL=False, snr_est=None):
     """
     Estimate Direction-of-Arrival (DOA) using Coarray MUSIC algorithm.
     
@@ -262,6 +263,10 @@ def estimate_doa_coarray_music(X, positions, d_phys, wavelength, K,
         alss_mode (str): Shrinkage target ('zero' or 'ar1'). Default: 'zero'
         alss_tau (float): Shrinkage intensity [0, 1]. Default: 1.0
         alss_coreL (int): Number of low lags protected from shrinkage. Default: 3
+            If None and auto_coreL=True, computed adaptively.
+        use_rmt (bool): Use RMT-based robust noise estimation (ALSS-II). Default: False
+        auto_coreL (bool): Automatically compute coreL (ALSS-II). Default: False
+        snr_est (float): Estimated SNR in dB for adaptive coreL. Default: None
     
     Returns:
         tuple: Depends on return_debug flag:
@@ -329,7 +334,9 @@ def estimate_doa_coarray_music(X, positions, d_phys, wavelength, K,
     Rv, dvirt, (L1, L2), one_side, rmap, coarray_debug = build_virtual_ula_covariance(
         Rxx, positions, d_phys,
         alss_enabled=alss_enabled, alss_mode=alss_mode,
-        alss_tau=alss_tau, alss_coreL=alss_coreL, M=M
+        alss_tau=alss_tau, alss_coreL=alss_coreL, M=M,
+        use_rmt=use_rmt, auto_coreL=auto_coreL,
+        K_sources=K, snr_est=snr_est
     )
     
     # Forward-Backward Averaging (FBA) - halves variance, decorrelates symmetric components
