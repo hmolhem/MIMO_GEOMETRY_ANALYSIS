@@ -1,0 +1,895 @@
+\documentclass[11pt,letterpaper]{article}
+
+% ------------------------------------------------------------
+% Technical Proposal / Roadmap Source Document
+% Project: MIMO_GEOMETRY_ANALYSIS
+% Author: Hossein Molhem
+% ------------------------------------------------------------
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{pifont}
+
+\hypersetup{
+    pdftitle={Technical Proposal and Roadmap for ALSS-Enhanced Coarray MUSIC},
+    pdfauthor={Hossein Molhem},
+    pdfsubject={Sparse-array DOA estimation, ALSS, Coarray MUSIC, FPGA-ready acceleration},
+    pdfkeywords={DOA estimation, sparse arrays, coarray MUSIC, mutual coupling, ALSS, FPGA, HLS}
+}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newcommand{\review}[1]{\textcolor{blue}{\textbf{[REVIEW: #1]}}}
+\newcommand{\codepath}[1]{\texttt{#1}}
+\newcommand{\ALSS}{\textsc{ALSS}}
+\newcommand{\WCSA}{\textsc{WCSA}}
+\newcommand{\MCM}{\textsc{MCM}}
+\newcommand{\SCM}{\textsc{SCM}}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+  showstringspaces=false
+}
+
+\title{\textbf{Technical Proposal and Research Roadmap}\\[0.4em]
+\Large Adaptive Lag-Selective Shrinkage for Robust Coarray MUSIC in Weight-Constrained Sparse Arrays\\[0.3em]
+\large From Reproducible DOA Experiments to FPGA-Ready Acceleration}
+
+\author{Hossein Molhem\\
+Department of Electrical and Computer Engineering\\
+Kennesaw State University\\
+\texttt{hmolhem@students.kennesaw.edu}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document defines the technical proposal, research alignment map, repository restructuring plan, and long-term development roadmap for the \codepath{MIMO\_GEOMETRY\_ANALYSIS} project. The project extends weight-constrained sparse-array direction-of-arrival (DOA) estimation by adding a post-geometry statistical denoising layer for finite-snapshot coarray correlations. The reference work by Kulkarni and Vaidyanathan introduced weight-constrained sparse arrays that reduce mutual coupling sensitivity through geometric constraints such as $w(1)=0$ and $w(1)=w(2)=0$. This project complements that geometry-level bias mitigation with Adaptive Lag-Selective Shrinkage (\ALSS), a lag-aware regularization method designed to reduce variance in low-confidence coarray lag estimates before virtual covariance reconstruction and Coarray MUSIC processing.
+
+The near-term objective is to rebuild the repository into a coherent, reproducible research framework with exact reference geometries, aligned algorithm definitions, script-generated results, a paper-to-code map, and a clean IEEE-style paper. The long-term objective is to connect the Python research framework to FPGA/HLS acceleration by identifying hardware-friendly kernels such as sample covariance formation, coarray lag averaging, Toeplitz covariance reconstruction, and MUSIC spectrum scanning. This roadmap is intended to serve as the master source document for academic development, GitHub presentation, course projects, and resume positioning.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ------------------------------------------------------------
+\section{Project Vision}
+% ------------------------------------------------------------
+
+The objective of this project is to build a professional research and engineering portfolio around the following technical identity:
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{
+\centering
+\textbf{Sparse-array DOA estimation} $+$ \textbf{geometry-aware coarray processing} $+$ \textbf{statistical denoising} $+$ \textbf{FPGA/HLS acceleration path}
+}}
+\end{center}
+
+The project should not be treated as a loose collection of Python scripts. It should be treated as a reproducible research platform with a clear academic chain:
+
+\begin{center}
+\begin{tabular}{c}
+Reference paper on weight-constrained sparse arrays \\
+$\Downarrow$ \\
+Identified statistical estimation gap in finite-snapshot coarray processing \\
+$\Downarrow$ \\
+\ALSS{} algorithm for lag-aware coarray shrinkage \\
+$\Downarrow$ \\
+Reproducible Python experiments and figures \\
+$\Downarrow$ \\
+IEEE-style paper and GitHub portfolio \\
+$\Downarrow$ \\
+Future FPGA/HLS acceleration of selected DOA preprocessing kernels
+\end{tabular}
+\end{center}
+
+The final repository should be understandable by three audiences:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Academic reviewer:} Can verify that the research question, method, experiments, and claims are scientifically consistent.
+    \item \textbf{Professor/course evaluator:} Can see clear links to Antenna Engineering, Embedded AI/Autonomous Robots, Machine Learning, and Python/Data Science coursework.
+    \item \textbf{Hiring manager or technical recruiter:} Can see evidence of practical skill in DSP, radar signal processing, scientific Python, reproducibility, and FPGA/HLS acceleration planning.
+\end{enumerate}
+
+% ------------------------------------------------------------
+\section{Reference Work and Academic Positioning}
+% ------------------------------------------------------------
+
+\subsection{Reference Paper: Weight-Constrained Sparse Arrays}
+
+The core reference paper is:
+
+\begin{quote}
+P. Kulkarni and P. P. Vaidyanathan, ``Weight-Constrained Sparse Arrays for Direction of Arrival Estimation Under High Mutual Coupling,'' \emph{IEEE Transactions on Signal Processing}, vol. 72, pp. 4444--4460, 2024.
+\end{quote}
+
+The reference work addresses the effect of mutual coupling in sparse arrays by designing array geometries with reduced or zero coarray weights at critical small lags. In particular, the paper proposes sparse arrays with constraints such as
+\begin{equation}
+    w(1)=0
+\end{equation}
+and
+\begin{equation}
+    w(1)=w(2)=0,
+\end{equation}
+where $w(\ell)$ is the number of sensor pairs whose position difference equals lag $\ell$.
+
+The reference paper's central idea is:
+
+\begin{center}
+\fbox{\parbox{0.88\linewidth}{
+\centering
+\textbf{Geometry-level design reduces mutual coupling sensitivity by eliminating or reducing sensor-pair contributions at small lags.}
+}}
+\end{center}
+
+The paper also shows that many of the proposed arrays do not have a central ULA segment in the coarray. Instead, they use a one-sided contiguous ULA segment beginning at a positive lag such as $L_1=2$ or $L_1=3$. The maximum number of identifiable DOAs using the one-sided segment is tied to the segment length $L$ and is typically expressed as
+\begin{equation}
+    D_{\max} = \left\lfloor \frac{L}{2} \right\rfloor .
+\end{equation}
+
+\subsection{Identified Gap in the Reference Work}
+
+The reference work is primarily a geometry-design contribution. It focuses on reducing coupling-induced bias by controlling the array layout and the coarray weights at small lags. However, an uneven coarray weight distribution creates a separate statistical issue in finite-snapshot regimes.
+
+For a sample covariance matrix estimated from $M$ snapshots, a lag estimate $\hat{r}[\ell]$ is typically obtained by averaging all covariance entries whose sensor separation equals $\ell$:
+\begin{equation}
+    \hat{r}[\ell] = \frac{1}{w[\ell]} \sum_{n_i-n_j=\ell} [\hat{R}_x]_{i,j} .
+\end{equation}
+
+A first-order variance proxy suggests that low-weight lags have higher estimation variance:
+\begin{equation}
+    \operatorname{Var}\{\hat{r}[\ell]\} \propto \frac{\sigma_n^2}{w[\ell]M} .
+    \label{eq:variance_proxy}
+\end{equation}
+
+Thus, a geometry that helps mutual coupling can still produce noisy long-lag or low-weight coarray estimates when $M$ is finite. This motivates a post-geometry statistical processing layer.
+
+\subsection{Correct Academic Positioning of This Project}
+
+The project should not initially claim to invent a new sparse-array geometry. The strongest and most defensible positioning is:
+
+\begin{quote}
+This work extends weight-constrained sparse-array DOA estimation by adding a post-geometry statistical denoising layer for finite-snapshot coarray correlations. The array geometry reduces mutual-coupling bias, while \ALSS{} reduces variance in noisy lag estimates before virtual covariance reconstruction.
+\end{quote}
+
+In compact form:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Layer & Mechanism & Primary Effect \\
+\midrule
+Reference WCSA geometry & $w(1)=0$, $w(1)=w(2)=0$ & Reduces coupling sensitivity / bias \\
+Proposed \ALSS{} processing & Lag-selective shrinkage & Reduces finite-snapshot variance \\
+Combined framework & Geometry $+$ statistical denoising & Improves robust Coarray MUSIC \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ------------------------------------------------------------
+\section{Research Question and Hypothesis}
+% ------------------------------------------------------------
+
+\subsection{Main Research Question}
+
+The primary research question is:
+
+\begin{quote}
+Can lag-aware statistical shrinkage improve Coarray MUSIC performance in weight-constrained sparse arrays without destroying the coupling-mitigation benefit of the original geometry?
+\end{quote}
+
+More specifically:
+
+\begin{quote}
+Given a sparse array with uneven coarray weights $w[\ell]$, can low-confidence lag correlations be regularized before virtual covariance reconstruction in order to improve finite-snapshot DOA estimation?
+\end{quote}
+
+\subsection{Technical Hypothesis}
+
+The technical hypothesis is:
+
+\begin{quote}
+In weight-constrained sparse arrays, low-weight coarray lags have higher sample-estimation variance. Applying lag-selective shrinkage to these lags before Toeplitz covariance reconstruction can improve Coarray MUSIC robustness, especially under limited snapshots, low-to-moderate SNR, and mutual coupling.
+\end{quote}
+
+\subsection{Bias--Variance Interpretation}
+
+A useful conceptual decomposition is:
+\begin{equation}
+    \operatorname{MSE}\{\hat{\theta}\}
+    = \operatorname{Bias}^2\{\hat{\theta}\} + \operatorname{Var}\{\hat{\theta}\} .
+\end{equation}
+
+Within this framework:
+\begin{itemize}[leftmargin=*]
+    \item Mutual coupling introduces systematic steering-vector distortion and therefore contributes primarily to bias.
+    \item Finite snapshots and uneven lag weights produce random estimation error and therefore contribute primarily to variance.
+    \item Weight-constrained array geometry and \ALSS{} can be complementary because they address different components of the error.
+\end{itemize}
+
+This interpretation should be used carefully. It is a guiding framework, not a substitute for rigorous numerical validation.
+
+% ------------------------------------------------------------
+\section{Proposed Technical Framework}
+% ------------------------------------------------------------
+
+\subsection{Layer 1: Geometry and Coarray Analysis}
+
+The geometry layer computes and validates the following properties for each array:
+\begin{itemize}[leftmargin=*]
+    \item physical sensor positions $\{n_i\}_{i=1}^{N}$,
+    \item difference coarray $\mathcal{D}=\{n_i-n_j\}$,
+    \item coarray weights $w[\ell]$,
+    \item one-sided and two-sided holes,
+    \item largest contiguous one-sided segment $[L_1,L_2]$,
+    \item segment length $L=L_2-L_1+1$,
+    \item maximum identifiable DOAs $D_{\max}=\lfloor L/2 \rfloor$.
+\end{itemize}
+
+The current repository already includes an abstract processing structure through \codepath{BaseArrayProcessor}. This should be preserved and cleaned because it provides a strong software architecture for reusable array analysis.
+
+\subsection{Layer 2: Signal Processing and DOA Estimation}
+
+The signal-processing layer implements:
+\begin{itemize}[leftmargin=*]
+    \item narrowband far-field signal simulation,
+    \item sample covariance matrix estimation,
+    \item mutual coupling simulation,
+    \item coarray lag averaging,
+    \item virtual covariance reconstruction,
+    \item Coarray MUSIC or one-sided coarray root-MUSIC,
+    \item \ALSS{} regularization,
+    \item RMSE and resolution-rate evaluation.
+\end{itemize}
+
+\subsection{Layer 3: FPGA-Ready Acceleration Path}
+
+The FPGA/HLS layer is a future extension that connects this project to hardware acceleration. The already completed SCM accelerator project demonstrates that covariance formation is a defensible FPGA kernel for DOA preprocessing.
+
+The proposed hardware path is:
+\begin{center}
+\begin{tabular}{c}
+Sample covariance matrix acceleration \\
+$\Downarrow$ \\
+Coarray lag averaging acceleration \\
+$\Downarrow$ \\
+Toeplitz covariance reconstruction acceleration \\
+$\Downarrow$ \\
+MUSIC spectrum scan acceleration \\
+$\Downarrow$ \\
+Fixed-point FPGA implementation and PS--PL integration
+\end{tabular}
+\end{center}
+
+This hardware path should remain in the paper as future work until each kernel is implemented and verified.
+
+% ------------------------------------------------------------
+\section{ALSS Method Definition}
+% ------------------------------------------------------------
+
+\subsection{Purpose of ALSS}
+
+\ALSS{} is a coarray-domain denoising method applied after sample covariance estimation and lag averaging, but before virtual covariance reconstruction and subspace decomposition.
+
+The intended processing chain is:
+\begin{equation}
+    X \rightarrow \hat{R}_x \rightarrow \hat{r}[\ell] \rightarrow \hat{r}_{\ALSS}[\ell] \rightarrow \hat{R}_v \rightarrow \text{Coarray MUSIC} .
+\end{equation}
+
+\subsection{General Shrinkage Form}
+
+The general shrinkage form is:
+\begin{equation}
+    \hat{r}_{\ALSS}[\ell]
+    = \alpha[\ell]\hat{r}[\ell] + \left(1-\alpha[\ell]\right) r_{\mathrm{prior}}[\ell],
+    \label{eq:alss_general}
+\end{equation}
+where $\alpha[\ell]\in[0,1]$ is a lag-dependent retention factor.
+
+A conservative zero-prior version is:
+\begin{equation}
+    r_{\mathrm{prior}}[\ell]=0
+\end{equation}
+for long or low-confidence lags.
+
+\subsection{Variance Proxy}
+
+The variance proxy used for shrinkage scheduling is:
+\begin{equation}
+    \hat{V}[\ell] = \frac{\hat{\sigma}_n^2}{w[\ell]M} .
+\end{equation}
+
+The exact implementation must be aligned with the paper. Two possible forms are acceptable, but only one should be selected and used consistently.
+
+\subsubsection{Option A: Retention-Factor ALSS}
+
+\begin{equation}
+    \alpha[\ell] = \frac{1}{1+\tau \hat{V}[\ell]} .
+\end{equation}
+
+Then Eq.~\eqref{eq:alss_general} is used directly.
+
+\subsubsection{Option B: Variance-Ratio Shrinkage}
+
+A variance-ratio shrinkage form may instead define a shrinkage amount $\gamma[\ell]$ and use
+\begin{equation}
+    \hat{r}_{\ALSS}[\ell] = \left(1-\gamma[\ell]\right)\hat{r}[\ell] .
+\end{equation}
+
+If the code uses this formulation, the paper must describe this formulation exactly. The repository must not contain a mismatch between the mathematical algorithm and the implementation.
+
+\subsection{Core-Lag Protection}
+
+Low lags with sufficiently high weights are protected:
+\begin{equation}
+    \alpha[\ell]=1, \qquad \ell \leq L_0 .
+\end{equation}
+
+A simple definition is:
+\begin{equation}
+    L_0 = \max\{\ell : w[\ell]\geq w_{\min}\}, \qquad w_{\min}=3 .
+\end{equation}
+
+This parameter may be refined later, but the first paper should use a simple and reproducible rule.
+
+\subsection{Hermitian Symmetry}
+
+After shrinkage, Hermitian symmetry must be enforced:
+\begin{equation}
+    \hat{r}_{\ALSS}[-\ell] = \hat{r}_{\ALSS}^{*}[\ell] .
+\end{equation}
+
+This is essential because the virtual covariance matrix must preserve Hermitian structure before MUSIC processing.
+
+% ------------------------------------------------------------
+\section{Repository Restructuring Plan}
+% ------------------------------------------------------------
+
+\subsection{Target Repository Structure}
+
+The final repository should be organized as follows:
+
+\begin{lstlisting}
+MIMO_GEOMETRY_ANALYSIS/
+|-- README.md
+|-- pyproject.toml
+|-- requirements.txt
+|-- references/
+|   |-- references.bib
+|   |-- reference_paper_summary.md
+|-- docs/
+|   |-- technical_proposal_roadmap.tex
+|   |-- paper_to_code_map.md
+|   |-- reproduction_guide.md
+|   |-- experiment_summary.md
+|   |-- alss_algorithm_notes.md
+|   |-- literature_positioning.md
+|-- geometry_processors/
+|   |-- base/
+|   |   |-- base_array_processor.py
+|   |-- reference_kulkarni/
+|   |   |-- z1_kulkarni.py
+|   |   |-- z4_kulkarni.py
+|   |   |-- z5_kulkarni.py
+|   |   |-- z6_kulkarni.py
+|   |-- custom/
+|   |   |-- z5_custom.py
+|   |-- validation/
+|   |   |-- validate_geometry_tables.py
+|-- core/
+|   |-- radarpy/
+|   |   |-- algorithms/
+|   |   |   |-- alss.py
+|   |   |   |-- coarray.py
+|   |   |   |-- coarray_music.py
+|   |   |-- signal/
+|   |   |   |-- doa_sim_core.py
+|   |   |   |-- mutual_coupling.py
+|   |   |-- metrics/
+|-- scripts/
+|   |-- run_geometry_tables.py
+|   |-- run_alss_baseline_experiments.py
+|   |-- run_alss_mcm_experiments.py
+|   |-- run_snr_sweep.py
+|   |-- run_snapshot_sweep.py
+|   |-- run_all_paper_experiments.py
+|-- tools/
+|   |-- plot_geometry_figures.py
+|   |-- plot_alss_results.py
+|   |-- export_paper_tables.py
+|-- results/
+|   |-- raw/
+|   |-- processed/
+|   |-- figures/
+|   |-- manifests/
+|-- papers/
+|   |-- alss_ieee_paper.tex
+|   |-- figures/
+|-- tests/
+|   |-- test_geometry_processors.py
+|   |-- test_alss.py
+|   |-- test_coarray_music.py
+|   |-- test_reproducibility_smoke.py
+\end{lstlisting}
+
+\subsection{Important Naming Rule}
+
+Reference geometries and custom geometries must be separated.
+
+\begin{itemize}[leftmargin=*]
+    \item If an implementation exactly follows the reference paper, name it with suffix \codepath{\_kulkarni}.
+    \item If an implementation is hand-tuned, perturbed, or modified, name it with suffix \codepath{\_custom}.
+    \item Do not call a custom geometry \codepath{Z5} unless it is mathematically identical to the reference Z5 construction.
+\end{itemize}
+
+This rule is essential for academic integrity and reproducibility.
+
+% ------------------------------------------------------------
+\section{Work Packages}
+% ------------------------------------------------------------
+
+\subsection{WP1: Literature and Source Alignment}
+
+\textbf{Goal:} Clarify what the reference paper contributed and where this project begins.
+
+\begin{longtable}{p{0.08\linewidth}p{0.52\linewidth}p{0.30\linewidth}}
+\toprule
+ID & Task & Deliverable \\
+\midrule
+WP1.1 & Summarize Kulkarni and Vaidyanathan's WCSA contribution. & \codepath{docs/reference\_paper\_summary.md} \\
+WP1.2 & Identify exact definitions of Z1, Z4, Z5, Z6, and WCSA variants. & Geometry notes \\
+WP1.3 & Define the statistical estimation gap caused by uneven coarray weights. & \codepath{docs/literature\_positioning.md} \\
+WP1.4 & Build a clean BibTeX file. & \codepath{references/references.bib} \\
+\bottomrule
+\end{longtable}
+
+\subsection{WP2: Geometry Processor Cleanup}
+
+\textbf{Goal:} Make every array geometry reproducible, traceable, and academically defensible.
+
+\begin{longtable}{p{0.08\linewidth}p{0.52\linewidth}p{0.30\linewidth}}
+\toprule
+ID & Task & Deliverable \\
+\midrule
+WP2.1 & Preserve and clean the abstract base class architecture. & \codepath{base\_array\_processor.py} \\
+WP2.2 & Implement exact reference geometries from the Kulkarni paper. & \codepath{reference\_kulkarni/*.py} \\
+WP2.3 & Move hand-tuned geometries to a custom folder. & \codepath{custom/*.py} \\
+WP2.4 & Validate $w(1)$, $w(2)$, $w(3)$, aperture, holes, and contiguous segment length. & \codepath{validate\_geometry\_tables.py} \\
+WP2.5 & Export geometry tables automatically. & \codepath{results/processed/geometry\_summary.csv} \\
+\bottomrule
+\end{longtable}
+
+\subsection{WP3: ALSS Algorithm Alignment}
+
+\textbf{Goal:} Ensure that the paper formula and code implementation are identical.
+
+\begin{longtable}{p{0.08\linewidth}p{0.52\linewidth}p{0.30\linewidth}}
+\toprule
+ID & Task & Deliverable \\
+\midrule
+WP3.1 & Select final ALSS formulation: retention-factor or variance-ratio shrinkage. & \codepath{docs/alss\_algorithm\_notes.md} \\
+WP3.2 & Update \codepath{alss.py} to match the selected formulation. & \codepath{core/radarpy/algorithms/alss.py} \\
+WP3.3 & Add tests for shrinkage behavior and Hermitian symmetry. & \codepath{tests/test\_alss.py} \\
+WP3.4 & Verify that ALSS does not change protected core lags. & Unit test report \\
+\bottomrule
+\end{longtable}
+
+\subsection{WP4: Reproducible Experiments}
+
+\textbf{Goal:} Regenerate all numerical claims from scripts.
+
+\begin{longtable}{p{0.08\linewidth}p{0.52\linewidth}p{0.30\linewidth}}
+\toprule
+ID & Experiment & Output \\
+\midrule
+WP4.1 & Geometry table reproduction. & \codepath{geometry\_summary.csv} \\
+WP4.2 & Coarray weight plots. & \codepath{figures/coarray\_weights\_*.png} \\
+WP4.3 & Baseline Coarray MUSIC without ALSS. & \codepath{baseline\_rmse.csv} \\
+WP4.4 & ALSS vs non-ALSS without MCM. & \codepath{alss\_nomcm.csv} \\
+WP4.5 & ALSS vs non-ALSS with MCM. & \codepath{alss\_mcm.csv} \\
+WP4.6 & SNR sweep. & \codepath{snr\_sweep.csv} \\
+WP4.7 & Snapshot sweep. & \codepath{snapshot\_sweep.csv} \\
+WP4.8 & Optional bias--variance decomposition. & \codepath{bias\_variance.csv} \\
+\bottomrule
+\end{longtable}
+
+\subsection{WP5: Paper-to-Code Map}
+
+\textbf{Goal:} Every table, figure, and major claim in the paper must be traceable to code.
+
+\begin{longtable}{p{0.16\linewidth}p{0.28\linewidth}p{0.25\linewidth}p{0.20\linewidth}}
+\toprule
+Paper Item & Claim / Output & Script / Source & Status \\
+\midrule
+Introduction & WCSA motivation and mutual coupling issue & Literature summary & Verified after source review \\
+Table I & Array geometry specifications & \codepath{run\_geometry\_tables.py} & Pending regeneration \\
+Algorithm 1 & ALSS definition & \codepath{alss.py} & Needs formula-code alignment \\
+Figure 1 & Coarray weight distributions & \codepath{plot\_geometry\_figures.py} & Pending \\
+Table II & ALSS without MCM & \codepath{run\_alss\_baseline\_experiments.py} & Pending \\
+Table III & ALSS with MCM & \codepath{run\_alss\_mcm\_experiments.py} & Pending \\
+Figure 2 & SNR sweep & \codepath{run\_snr\_sweep.py} & Pending \\
+Figure 3 & Snapshot sweep & \codepath{run\_snapshot\_sweep.py} & Pending \\
+Future Work & FPGA-ready acceleration path & SCM HLS project report and code & Conceptually verified \\
+\bottomrule
+\end{longtable}
+
+\subsection{WP6: IEEE-Style Paper Rewrite}
+
+\textbf{Goal:} Rewrite the paper as one clean, defensible, reproducible IEEE-style article.
+
+Recommended paper title:
+
+\begin{quote}
+\textbf{Adaptive Lag-Selective Shrinkage for Robust Coarray MUSIC in Weight-Constrained Sparse Arrays}
+\end{quote}
+
+Recommended sections:
+\begin{enumerate}[leftmargin=*]
+    \item Introduction
+    \item Background: WCSA and Coarray MUSIC
+    \item Finite-Snapshot Variance Problem
+    \item Proposed ALSS Method
+    \item Experimental Framework
+    \item Results and Discussion
+    \item FPGA-Ready Acceleration Path
+    \item Conclusion and Future Work
+\end{enumerate}
+
+\textbf{Important recommendation:} The first clean paper should focus on ALSS only. ALSS-II should be moved to future work or a separate extended paper until its claims are independently validated.
+
+\subsection{WP7: GitHub and Portfolio Presentation}
+
+\textbf{Goal:} Make the repository readable by professors, reviewers, and hiring managers.
+
+The README should answer:
+\begin{itemize}[leftmargin=*]
+    \item What problem does the project solve?
+    \item What is the reference paper?
+    \item What is the new contribution?
+    \item How are the figures and tables reproduced?
+    \item How does the project connect to FPGA/HLS acceleration?
+\end{itemize}
+
+Avoid unverified phrases such as:
+\begin{itemize}[leftmargin=*]
+    \item ``Production-ready''
+    \item ``100\% test coverage''
+    \item ``1000-trial validation''
+    \item ``real-time deployment''
+\end{itemize}
+
+Use more accurate wording:
+
+\begin{quote}
+Research-grade reproducible Python framework for geometry-aware Coarray MUSIC experiments and ALSS regularization in weight-constrained sparse arrays.
+\end{quote}
+
+% ------------------------------------------------------------
+\section{Experiment Design}
+% ------------------------------------------------------------
+
+\subsection{Baseline Signal Model}
+
+The narrowband array signal model is:
+\begin{equation}
+    x[k] = A(\theta)s[k] + n[k],
+\end{equation}
+where $A(\theta)$ is the array manifold matrix, $s[k]$ is the source vector, and $n[k]$ is additive white Gaussian noise.
+
+The sample covariance matrix is:
+\begin{equation}
+    \hat{R}_x = \frac{1}{M}\sum_{k=1}^{M}x[k]x^H[k].
+\end{equation}
+
+\subsection{Mutual Coupling Model}
+
+For simulation, mutual coupling may be modeled as:
+\begin{equation}
+    x_c[k] = C A(\theta)s[k] + n[k],
+\end{equation}
+where $C$ is a coupling matrix. A commonly used model is a decaying coupling matrix whose entries depend on sensor separation.
+
+The exact mutual-coupling model must be documented clearly in every experiment, including:
+\begin{itemize}[leftmargin=*]
+    \item coupling strength,
+    \item phase model, if complex coefficients are used,
+    \item coupling bandwidth or truncation parameter,
+    \item whether the same model as the reference paper is used.
+\end{itemize}
+
+\subsection{Performance Metrics}
+
+Primary metrics:
+\begin{itemize}[leftmargin=*]
+    \item DOA RMSE,
+    \item probability of resolution,
+    \item failure rate or incorrect peak count,
+    \item runtime,
+    \item condition number of reconstructed virtual covariance.
+\end{itemize}
+
+Secondary metrics:
+\begin{itemize}[leftmargin=*]
+    \item bootstrap confidence intervals,
+    \item paired statistical tests,
+    \item bias--variance decomposition, if implemented carefully,
+    \item sensitivity to snapshots and SNR.
+\end{itemize}
+
+\subsection{Reproducibility Requirements}
+
+Every experiment must record:
+\begin{itemize}[leftmargin=*]
+    \item script name,
+    \item command-line arguments,
+    \item git commit hash,
+    \item Python version,
+    \item package versions,
+    \item random seed policy,
+    \item output CSV path,
+    \item figure path,
+    \item runtime.
+\end{itemize}
+
+A manifest file should be saved for each experiment:
+
+\begin{lstlisting}
+results/manifests/
+|-- alss_mcm_YYYYMMDD_HHMMSS_manifest.json
+\end{lstlisting}
+
+% ------------------------------------------------------------
+\section{FPGA and Embedded-AI Development Path}
+% ------------------------------------------------------------
+
+\subsection{Connection to the Existing SCM HLS Project}
+
+The previous FPGA project accelerated sample covariance matrix computation using Vitis HLS on a Zynq-7000 target. The project demonstrated the importance of array partitioning, loop unrolling, pipeline interleaving, and Hermitian symmetry. The strongest throughput design reduced latency from approximately $85{,}000$ cycles to $10{,}610$ cycles, while the area-oriented Hermitian design reduced DSP usage at the cost of higher latency.
+
+This result supports the hardware feasibility of accelerating the front-end covariance stage of the DOA pipeline.
+
+\subsection{Candidate Hardware Kernels}
+
+\begin{longtable}{p{0.20\linewidth}p{0.35\linewidth}p{0.35\linewidth}}
+\toprule
+Kernel & Description & FPGA Suitability \\
+\midrule
+SCM formation & Compute $\hat{R}_x=\frac{1}{M}\sum x[k]x^H[k]$ & Highly regular; already prototyped in HLS \\
+Lag averaging & Map covariance entries to coarray lag estimates $\hat{r}[\ell]$ & Moderate control; lookup-table friendly \\
+ALSS shrinkage & Apply lag-dependent scalar shrinkage & Lightweight; mostly scalar operations \\
+Toeplitz reconstruction & Build $R_v$ from processed lags & Regular indexing; suitable for hardware memory mapping \\
+MUSIC spectrum scan & Evaluate pseudospectrum over angle grid & High arithmetic density; good acceleration candidate \\
+EVD/SVD & Subspace extraction & More complex; keep in software initially \\
+\bottomrule
+\end{longtable}
+
+\subsection{Recommended Hardware Strategy}
+
+The immediate hardware strategy should not attempt a full MUSIC accelerator. Instead:
+\begin{enumerate}[leftmargin=*]
+    \item keep EVD/SVD in software,
+    \item accelerate covariance and coarray preprocessing kernels,
+    \item explore fixed-point reformulation,
+    \item use PS--PL partitioning on a Zynq/PYNQ platform,
+    \item document timing, latency, DSP, LUT, FF, and BRAM tradeoffs.
+\end{enumerate}
+
+This is consistent with a defensible engineering roadmap and avoids overclaiming.
+
+% ------------------------------------------------------------
+\section{Course and Career Alignment}
+% ------------------------------------------------------------
+
+\subsection{Summer Course: Embedded AI / Autonomous Robots}
+
+Connection:
+\begin{itemize}[leftmargin=*]
+    \item real-time sensing,
+    \item radar perception,
+    \item embedded signal processing,
+    \item hardware-aware algorithm design.
+\end{itemize}
+
+Possible project angle:
+\begin{quote}
+Embedded radar perception pipeline with FPGA-ready Coarray DOA preprocessing.
+\end{quote}
+
+\subsection{Summer Course: Antenna Engineering}
+
+Connection:
+\begin{itemize}[leftmargin=*]
+    \item array geometry,
+    \item mutual coupling,
+    \item aperture constraints,
+    \item element spacing and grating-lobe considerations,
+    \item practical antenna-array layout.
+\end{itemize}
+
+Possible project angle:
+\begin{quote}
+Mutual-coupling sensitivity of weight-constrained sparse arrays from an antenna-engineering perspective.
+\end{quote}
+
+\subsection{Fall Course: Machine Learning}
+
+Connection:
+\begin{itemize}[leftmargin=*]
+    \item data-driven shrinkage,
+    \item adaptive lag selection,
+    \item learned priors for coarray denoising,
+    \item model-assisted signal processing.
+\end{itemize}
+
+Possible extension:
+\begin{quote}
+Learning-assisted lag selection for Coarray MUSIC.
+\end{quote}
+
+\subsection{Fall Course: Python for Data Science}
+
+Connection:
+\begin{itemize}[leftmargin=*]
+    \item reproducible experiments,
+    \item Monte Carlo simulation,
+    \item confidence intervals,
+    \item statistical visualization,
+    \item data pipelines and experiment manifests.
+\end{itemize}
+
+Possible deliverable:
+\begin{quote}
+A fully reproducible Python research package with scripts, figures, tables, and experiment manifests.
+\end{quote}
+
+% ------------------------------------------------------------
+\section{Risk Register and Corrections}
+% ------------------------------------------------------------
+
+\begin{longtable}{p{0.22\linewidth}p{0.34\linewidth}p{0.34\linewidth}}
+\toprule
+Risk & Problem & Mitigation \\
+\midrule
+Formula--code mismatch & ALSS equation in paper may not match \codepath{alss.py}. & Select final formulation and align both paper and code. \\
+Geometry ambiguity & Custom Z5 may be confused with reference Z5. & Separate \codepath{reference\_kulkarni/} and \codepath{custom/}. \\
+Overclaiming & Terms like ``1000 trials'', ``real-time'', or ``production-ready'' may be unsupported. & Only claim results regenerated from scripts. \\
+ALSS-II complexity & Too many enhancements and strong numerical claims. & Move ALSS-II to future work or separate extended paper. \\
+Mutual coupling interpretation & MCM may sometimes improve RMSE, making gap reduction ill-defined. & Use careful metrics and avoid invalid gap-reduction formulas when the denominator is negative. \\
+Timing claims for FPGA & Python runtime and FPGA runtime can be confused. & Separate software experiment runtime from hardware acceleration estimates. \\
+\bottomrule
+\end{longtable}
+
+% ------------------------------------------------------------
+\section{Immediate Action Plan}
+% ------------------------------------------------------------
+
+\subsection{Priority 1: Freeze the Scientific Narrative}
+
+The first version of the project should focus on:
+\begin{quote}
+\textbf{ALSS for finite-snapshot coarray denoising in weight-constrained sparse arrays.}
+\end{quote}
+
+Do not make the first clean paper about ALSS-II. ALSS-II can remain as a future enhancement.
+
+\subsection{Priority 2: Build the Paper-to-Code Map}
+
+Create:
+\begin{lstlisting}
+docs/paper_to_code_map.md
+\end{lstlisting}
+
+This file becomes the master truth table of the project.
+
+\subsection{Priority 3: Correct Geometry Implementations}
+
+Implement exact reference geometries from the source paper and clearly separate custom geometries.
+
+\subsection{Priority 4: Regenerate All Results}
+
+Do not trust old tables or figures until they are regenerated from scripts.
+
+\subsection{Priority 5: Rewrite README and Paper}
+
+After scripts and results are aligned, rewrite:
+\begin{lstlisting}
+README.md
+papers/alss_ieee_paper.tex
+\end{lstlisting}
+
+% ------------------------------------------------------------
+\section{Expected Final Deliverables}
+% ------------------------------------------------------------
+
+\begin{enumerate}[leftmargin=*]
+    \item Clean GitHub repository with documented structure.
+    \item Exact reference geometry processors.
+    \item Custom geometry processors clearly labeled.
+    \item ALSS implementation aligned with paper equations.
+    \item Reproducible experiment scripts.
+    \item CSV result tables and regenerated figures.
+    \item \codepath{docs/paper\_to\_code\_map.md}.
+    \item \codepath{docs/reproduction\_guide.md}.
+    \item \codepath{docs/experiment\_summary.md}.
+    \item IEEE-style ALSS paper.
+    \item Hardware acceleration roadmap linked to the SCM HLS project.
+\end{enumerate}
+
+% ------------------------------------------------------------
+\section{Resume and Portfolio Positioning}
+% ------------------------------------------------------------
+
+A strong resume bullet after completion could be:
+
+\begin{quote}
+Developed a reproducible Python research framework for Coarray MUSIC DOA estimation in weight-constrained sparse arrays, including lag-selective shrinkage, mutual-coupling simulation, Monte Carlo validation, and FPGA-ready acceleration mapping.
+\end{quote}
+
+A stronger hardware-focused bullet could be:
+
+\begin{quote}
+Built a DSP/FPGA research portfolio connecting sparse-array DOA estimation, coarray covariance processing, and Vitis HLS acceleration of covariance kernels for embedded radar applications.
+\end{quote}
+
+A GitHub project tagline could be:
+
+\begin{quote}
+Research-grade framework for geometry-aware coarray denoising, robust DOA estimation, and FPGA-ready radar signal-processing acceleration.
+\end{quote}
+
+% ------------------------------------------------------------
+\section{Conclusion}
+% ------------------------------------------------------------
+
+This project has strong academic and professional potential. The core idea is scientifically defensible: weight-constrained sparse arrays reduce coupling sensitivity through geometry, but their uneven coarray weight distributions can create finite-snapshot variance problems. \ALSS{} is a natural and defensible post-geometry regularization layer that addresses this gap.
+
+The main weakness of the current project is not the idea itself; it is the lack of full alignment among the paper's claims, code implementation, experimental scripts, and numerical results. The roadmap in this document is designed to solve that problem by rebuilding the project around traceability, reproducibility, and disciplined academic claims.
+
+The final goal is to produce a professional research asset that supports coursework, publication development, GitHub credibility, and future FPGA/Embedded-AI career positioning.
+
+% ------------------------------------------------------------
+\begin{thebibliography}{99}
+
+\bibitem{kulkarni2024wcsa}
+P. Kulkarni and P. P. Vaidyanathan, ``Weight-Constrained Sparse Arrays for Direction of Arrival Estimation Under High Mutual Coupling,'' \emph{IEEE Transactions on Signal Processing}, vol. 72, pp. 4444--4460, 2024.
+
+\bibitem{pal2010nested}
+P. Pal and P. P. Vaidyanathan, ``Nested arrays: A novel approach to array processing with enhanced degrees of freedom,'' \emph{IEEE Transactions on Signal Processing}, vol. 58, no. 8, pp. 4167--4181, 2010.
+
+\bibitem{vaidyanathan2011sparse}
+P. P. Vaidyanathan and P. Pal, ``Sparse sensing with co-prime samplers and arrays,'' \emph{IEEE Transactions on Signal Processing}, vol. 59, no. 2, pp. 573--586, 2011.
+
+\bibitem{schmidt1986music}
+R. O. Schmidt, ``Multiple emitter location and signal parameter estimation,'' \emph{IEEE Transactions on Antennas and Propagation}, vol. 34, no. 3, pp. 276--280, 1986.
+
+\bibitem{vanTrees2002}
+H. L. Van Trees, \emph{Optimum Array Processing: Part IV of Detection, Estimation, and Modulation Theory}. New York, NY, USA: Wiley, 2002.
+
+\bibitem{cong2011hls}
+J. Cong, B. Liu, S. Neuendorffer, J. Noguera, K. Vissers, and Z. Zhang, ``High-Level Synthesis for FPGAs: From Prototyping to Deployment,'' \emph{IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems}, vol. 30, no. 4, pp. 473--491, 2011.
+
+\bibitem{molhem2026scm}
+H. Molhem, ``Hardware-Aware Acceleration of Sample Covariance Matrix Computation via High-Level Synthesis for MIMO Radar,'' EE6900 FPGA Accelerator Project, Kennesaw State University, 2026.
+
+\bibitem{amd2025vitis}
+AMD/Xilinx, \emph{Vitis High-Level Synthesis User Guide}, UG1399, 2025.
+
+\end{thebibliography}
+
+\end{document}
