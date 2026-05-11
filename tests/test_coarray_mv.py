@@ -1,16 +1,18 @@
 # tests/test_coarray_mv.py
 """Unit tests for Mv (virtual array size) reporting in coarray processing."""
-import numpy as np
 import sys
 from pathlib import Path
+
+import numpy as np
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.radarpy.algorithms.coarray import build_virtual_ula_covariance
+from geometry_processors.ula_processors import ULArrayProcessor
 from geometry_processors.z4_processor import Z4ArrayProcessor
 from geometry_processors.z5_processor import Z5ArrayProcessor
-from geometry_processors.ula_processors import ULArrayProcessor
+
 
 def test_z4_mv_reporting():
     """Test that Z4 coarray correctly reports Mv for N=7."""

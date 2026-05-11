@@ -21,21 +21,31 @@ scipy = "^1.7"
 where = ["src"]
 
 [tool.ruff]
-# Keep linting fast and focused on common Python issues and import sorting.
+# Keep linting fast and focused on maintained Python code.
 line-length = 120
 target-version = "py311"
-select = ["E", "F", "I"]
-ignore = []
 exclude = [
-	".git",
-	"envs",
-	"mimo-geom-dev",
-	"archives",
-	"results",
-	"build",
-	"dist",
-	"__pycache__",
+    ".git",
+    ".vscode",
+    "envs",
+    "mimo-geom-dev",
+    "archives",
+    "results",
+    "build",
+    "dist",
+    "__pycache__",
+
+    # Research / paper artifacts and legacy exploratory scripts.
+    # These will be cleaned gradually in separate branches.
+    "papers",
+    "analysis_scripts",
+    "tools",
+    "scripts",
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.ruff.lint.isort]
 known-first-party = ["geometry_processors", "core", "analysis_scripts", "tools"]

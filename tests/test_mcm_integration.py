@@ -7,13 +7,15 @@ ideal (no coupling) vs coupled scenarios.
 Date: November 6, 2025
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import numpy as np
-from core.radarpy.signal.mutual_coupling import generate_mcm, get_coupling_info
+
 from core.radarpy.signal.doa_sim_core import run_music
+from core.radarpy.signal.mutual_coupling import generate_mcm, get_coupling_info
 
 print("="*70)
 print("MCM Integration Test - DOA Estimation with Mutual Coupling")
@@ -27,8 +29,8 @@ snr_db = 10
 snapshots = 100
 seed = 42
 
-print(f"\nTest Configuration:")
-print(f"  Array: 7-element ULA, λ/2 spacing")
+print("\nTest Configuration:")
+print("  Array: 7-element ULA, λ/2 spacing")
 print(f"  True DOAs: {true_doas} degrees")
 print(f"  SNR: {snr_db} dB")
 print(f"  Snapshots: {snapshots}")
@@ -55,7 +57,7 @@ print("-"*70)
 C_exp = generate_mcm(len(positions_ula), positions_ula, model="exponential", 
                      c1=0.3, alpha=0.5)
 info = get_coupling_info(C_exp)
-print(f"Coupling Matrix Info:")
+print("Coupling Matrix Info:")
 print(f"  Max off-diagonal coupling: {info['max_off_diagonal']:.4f}")
 print(f"  Avg off-diagonal coupling: {info['avg_off_diagonal']:.4f}")
 print(f"  Condition number: {info['condition_number']:.2e}")
@@ -79,7 +81,7 @@ coupling_coeffs = np.array([1.0, 0.3, 0.15, 0.08, 0.04, 0.02, 0.01])
 C_toep = generate_mcm(len(positions_ula), positions_ula, model="toeplitz", 
                       coupling_coeffs=coupling_coeffs)
 info_toep = get_coupling_info(C_toep)
-print(f"Coupling Matrix Info:")
+print("Coupling Matrix Info:")
 print(f"  Max off-diagonal coupling: {info_toep['max_off_diagonal']:.4f}")
 print(f"  Avg off-diagonal coupling: {info_toep['avg_off_diagonal']:.4f}")
 print(f"  Condition number: {info_toep['condition_number']:.2e}")
@@ -108,7 +110,7 @@ rmse_ideal = np.sqrt(np.mean(errors_ideal**2))
 rmse_exp = np.sqrt(np.mean(errors_coupled**2))
 rmse_toep = np.sqrt(np.mean(errors_toep**2))
 
-print(f"\nDegradation due to coupling:")
+print("\nDegradation due to coupling:")
 print(f"  Exponential: {((rmse_exp - rmse_ideal) / rmse_ideal * 100):+.2f}% change")
 print(f"  Toeplitz:    {((rmse_toep - rmse_ideal) / rmse_ideal * 100):+.2f}% change")
 

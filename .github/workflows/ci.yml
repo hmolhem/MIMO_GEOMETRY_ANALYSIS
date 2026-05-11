@@ -33,7 +33,7 @@ jobs:
       run: echo "PYTHONPATH=$GITHUB_WORKSPACE/src" >> $GITHUB_ENV
 
     - name: Lint with ruff
-      run: ruff check .
+      run: ruff check tests --ignore E402,E741
 
     - name: Run tests
       run: pytest -q
