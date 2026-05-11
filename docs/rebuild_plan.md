@@ -97,5 +97,5 @@ MIMO_GEOMETRY_ANALYSIS/
 ├── results/
 │   ├── tables/
 │   └── figures/
-└── archive/
+└── archives/
     └── legacy_scripts/
