@@ -59,6 +59,8 @@ datasets/
 
 # PDF files (papers, references, etc.)
 *.pdf
+# Roadmap documentation PDF is intentionally tracked
+!docs/Technical_Proposal_Roadmap.pdf
 
 # Paper outputs (generated files)
 papers/*/outputs/bench/*.csv
