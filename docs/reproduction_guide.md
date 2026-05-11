@@ -217,6 +217,17 @@ On branch reproduction-guide
 nothing to commit, working tree clean
 ```
 
+
+## Smoke-Test Notes
+
+During the clean rebuild, the paper experiment runner was tested locally from the repository root.
+
+Because the project uses a `src/` package layout, the Python path must include both the repository root and the `src` directory before running the paper experiment script directly.
+
+PowerShell setup command:
+
+```powershell
+$env:PYTHONPATH = "$(Get-Location)\src;$(Get-Location)"
 ---
 
 ## 6. Test Commands
