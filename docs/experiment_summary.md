@@ -589,3 +589,15 @@ Status: Draft
 Branch: experiment-summary
 Purpose: summarize known experiment structure and identify audit gaps
 ```
+
+---
+
+## Runner-Level ALSS Parameter Validation
+
+After adding explicit ALSS command-line parameters to the package-level paper experiment runner, Scenario 3 was validated from `main` using the selected calibration candidate:
+
+```text
+alss_mode  = ar1
+alss_tau   = 0.25
+alss_coreL = 3
+```
