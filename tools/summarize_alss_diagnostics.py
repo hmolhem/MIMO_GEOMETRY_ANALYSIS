@@ -80,7 +80,7 @@ def parse_args() -> argparse.Namespace:
         "--min-average-harmlessness",
         type=float,
         default=70.0,
-        help="Reject candidates whose average Harmlessness_%% is below this value.",
+        help="Reject candidates whose average Harmlessness_% is below this value.",
     )
 
     return parser.parse_args()
