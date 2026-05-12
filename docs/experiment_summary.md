@@ -1,4 +1,4 @@
-# Experiment Summary
+﻿# Experiment Summary
 
 ## 1. Purpose
 
@@ -402,6 +402,23 @@ If not, the paper must state the actual trial count.
 | Scenario 4 cross-array validation | Yes | TBD | 500 in usage examples | No |
 | ALSS SNR sweep | Yes | TBD | 100 default | No |
 | Existing paper figures | Partially | Yes/likely | Unknown | No |
+
+---
+
+## Verified Pilot Execution Notes
+
+During the clean rebuild, the paper experiment runner was tested from the repository root using the DS conda environment.
+
+Because the project uses a `src/` package layout, the following PowerShell command is required before directly running the paper experiment script:
+
+```powershell
+$env:PYTHONPATH = "$(Get-Location)\src;$(Get-Location)"
+
+```
+
+Verified pilot commands passed for Scenario 1, Scenario 3, and Scenario 4 using 5 trials with output directories under `$env:TEMP`.
+Observed row counts: Scenario 1 = 30 rows, Scenario 3 = 16 rows, Scenario 4 = 12 rows.
+These pilot outputs are execution checks only, not paper-ready scientific results, and should not be committed as final results.
 
 ---
 
