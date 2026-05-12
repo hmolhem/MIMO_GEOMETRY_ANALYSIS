@@ -4,29 +4,28 @@ Package-level runner for paper experiments (pilot refactor of
 
 Provides `run_paper_experiments(argv=None)` for programmatic use and testing.
 """
-from pathlib import Path
-import sys
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
 
 import argparse
-import time
 import os
-from typing import List, Tuple, Optional
+import sys
+import time
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 from scipy.optimize import linear_sum_assignment
+from scipy.stats import kendalltau, ttest_rel
 from scipy.stats import t as t_dist
-from scipy.stats import ttest_rel, kendalltau
-import warnings
 
-# Import core functionality from core package
-from core.radarpy.signal.doa_sim_core import simulate_snapshots
-from core.radarpy.algorithms.coarray_music import estimate_doa_coarray_music
-from core.radarpy.algorithms.crb import crb_pair_worst_deg
-from core.radarpy.signal.mutual_coupling import generate_mcm
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from core.radarpy.algorithms.coarray_music import estimate_doa_coarray_music  # noqa: E402
+from core.radarpy.algorithms.crb import crb_pair_worst_deg  # noqa: E402
+from core.radarpy.signal.doa_sim_core import simulate_snapshots  # noqa: E402
+from core.radarpy.signal.mutual_coupling import generate_mcm  # noqa: E402
 
 
 def get_array_positions(array_type: str, N: int = 7) -> np.ndarray:
@@ -131,6 +130,9 @@ def run_doa_trial(positions: np.ndarray,
                   snapshots: int,
                   coupling_matrix: Optional[np.ndarray] = None,
                   alss_enabled: bool = False,
+                  alss_mode: str = "zero",
+                  alss_tau: float = 1.0,
+                  alss_core_l: int = 3,
                   seed: Optional[int] = None):
     d_phys = 0.5
     positions_meters = positions * d_phys
@@ -153,8 +155,9 @@ def run_doa_trial(positions: np.ndarray,
         K=K,
         scan_deg=(-60, 60, 0.1),
         alss_enabled=alss_enabled,
-        alss_tau=1.0 if alss_enabled else 0.0,
-        alss_mode='zero'
+        alss_tau=alss_tau if alss_enabled else 0.0,
+        alss_mode=alss_mode,
+        alss_coreL=alss_core_l,
     )
     runtime_ms = (time.time() - start) * 1000
     return doas_est, float(runtime_ms)
@@ -162,7 +165,13 @@ def run_doa_trial(positions: np.ndarray,
 
 # For brevity, only implement scenario1 here (pilot). Other scenarios can be
 # ported later following the same pattern.
-def run_scenario1_baseline(arrays: List[str], snr_sweep: List[float], snapshot_sweep: List[int], trials: int, output_dir: str) -> pd.DataFrame:
+def run_scenario1_baseline(
+    arrays: List[str],
+    snr_sweep: List[float],
+    snapshot_sweep: List[int],
+    trials: int,
+    output_dir: str,
+) -> pd.DataFrame:
     wavelength = 1.0
     true_doas = np.array([15.0, -20.0])
     N = 7
@@ -175,7 +184,16 @@ def run_scenario1_baseline(arrays: List[str], snr_sweep: List[float], snapshot_s
             trials_data = []
             for trial in range(trials):
                 seed = 42 + trial
-                est_doas, runtime = run_doa_trial(positions, true_doas, wavelength, snr, 64, coupling_matrix=None, alss_enabled=False, seed=seed)
+                est_doas, runtime = run_doa_trial(
+                    positions,
+                    true_doas,
+                    wavelength,
+                    snr,
+                    64,
+                    coupling_matrix=None,
+                    alss_enabled=False,
+                    seed=seed,
+                )
                 rmse_list.append(compute_rmse(est_doas, true_doas))
                 runtime_list.append(runtime)
                 trials_data.append((est_doas, runtime))
@@ -208,7 +226,10 @@ def run_scenario3_alss_effectiveness(arrays: List[str],
                                     snr_sweep: List[float],
                                     snapshot_sweep: List[int],
                                     trials: int,
-                                    output_dir: str) -> pd.DataFrame:
+                                    output_dir: str,
+                                    alss_mode: str = "zero",
+                                    alss_tau: float = 1.0,
+                                    alss_core_l: int = 3) -> pd.DataFrame:
     """
     SCENARIO 3: ALSS regularization effectiveness.
     """
@@ -220,6 +241,9 @@ def run_scenario3_alss_effectiveness(arrays: List[str],
     print(f"SNR sweep: {snr_sweep} dB")
     print(f"Snapshot sweep: {snapshot_sweep}")
     print(f"Trials per configuration: {trials}")
+    print(f"ALSS mode: {alss_mode}")
+    print(f"ALSS tau: {alss_tau}")
+    print(f"ALSS coreL: {alss_core_l}")
     print()
 
     # Fixed parameters
@@ -251,9 +275,11 @@ def run_scenario3_alss_effectiveness(arrays: List[str],
                 for trial in range(trials):
                     seed = 42 + trial
                     est_doas, _ = run_doa_trial(
-                        positions, true_doas, wavelength, snr, 64,
-                        coupling_matrix=C, alss_enabled=False, seed=seed
-                    )
+                            positions, true_doas, wavelength, snr, 64,
+                            coupling_matrix=C,
+                            alss_enabled=False,
+                            seed=seed,
+                        )
                     rmse_baseline.append(compute_rmse(est_doas, true_doas))
 
                 # ALSS enabled
@@ -261,8 +287,17 @@ def run_scenario3_alss_effectiveness(arrays: List[str],
                 for trial in range(trials):
                     seed = 42 + trial
                     est_doas, _ = run_doa_trial(
-                        positions, true_doas, wavelength, snr, 64,
-                        coupling_matrix=C, alss_enabled=True, seed=seed
+                        positions,
+                        true_doas,
+                        wavelength,
+                        snr,
+                        64,
+                        coupling_matrix=C,
+                        alss_enabled=True,
+                        alss_mode=alss_mode,
+                        alss_tau=alss_tau,
+                        alss_core_l=alss_core_l,
+                        seed=seed,
                     )
                     rmse_alss.append(compute_rmse(est_doas, true_doas))
 
@@ -325,7 +360,12 @@ def run_scenario3_alss_effectiveness(arrays: List[str],
                     seed = 42 + trial
                     est_doas, _ = run_doa_trial(
                         positions, true_doas, wavelength, 5.0, M,
-                        coupling_matrix=C, alss_enabled=True, seed=seed
+                        coupling_matrix=C,
+                        alss_enabled=True,
+                        alss_mode=alss_mode,
+                        alss_tau=alss_tau,
+                        alss_core_l=alss_core_l,
+                        seed=seed,
                     )
                     rmse_alss.append(compute_rmse(est_doas, true_doas))
 
@@ -380,7 +420,10 @@ def run_scenario3_alss_effectiveness(arrays: List[str],
 def run_scenario4_cross_array(arrays: List[str],
                               coupling_strength: float,
                               trials: int,
-                              output_dir: str) -> pd.DataFrame:
+                              output_dir: str,
+                              alss_mode: str = "zero",
+                              alss_tau: float = 1.0,
+                              alss_core_l: int = 3) -> pd.DataFrame:
     """
     SCENARIO 4: Cross-array consistency validation.
     """
@@ -389,8 +432,11 @@ def run_scenario4_cross_array(arrays: List[str],
     print("="*70)
     print(f"Arrays: {', '.join(arrays)}")
     print(f"Coupling strength: c1={coupling_strength:.1f}")
-    print(f"Fixed: SNR=5dB, Snapshots=64")
+    print("Fixed: SNR=5dB, Snapshots=64")
     print(f"Trials: {trials}")
+    print(f"ALSS mode: {alss_mode}")
+    print(f"ALSS tau: {alss_tau}")
+    print(f"ALSS coreL: {alss_core_l}")
     print()
 
     # Fixed parameters
@@ -424,8 +470,14 @@ def run_scenario4_cross_array(arrays: List[str],
             for trial in range(trials):
                 seed = 42 + trial
                 est_doas, runtime = run_doa_trial(
-                    positions, true_doas, wavelength, snr, M,
-                    coupling_matrix=C, alss_enabled=False, seed=seed
+                    positions,
+                    true_doas,
+                    wavelength,
+                    snr,
+                    M,
+                    coupling_matrix=C,
+                    alss_enabled=False,
+                    seed=seed,
                 )
                 rmse = compute_rmse(est_doas, true_doas)
                 rmse_baseline.append(rmse)
@@ -437,8 +489,17 @@ def run_scenario4_cross_array(arrays: List[str],
             for trial in range(trials):
                 seed = 42 + trial
                 est_doas, runtime = run_doa_trial(
-                    positions, true_doas, wavelength, snr, M,
-                    coupling_matrix=C, alss_enabled=True, seed=seed
+                    positions,
+                    true_doas,
+                    wavelength,
+                    snr,
+                    M,
+                    coupling_matrix=C,
+                    alss_enabled=True,
+                    alss_mode=alss_mode,
+                    alss_tau=alss_tau,
+                    alss_core_l=alss_core_l,
+                    seed=seed,
                 )
                 rmse = compute_rmse(est_doas, true_doas)
                 rmse_alss.append(rmse)
@@ -495,6 +556,9 @@ def run_paper_experiments(argv: Optional[List[str]] = None) -> str:
     ap.add_argument('--trials', type=int, default=500)
     ap.add_argument('--arrays', nargs='+', default=['ULA', 'Nested', 'Z1', 'Z4', 'Z5', 'Z6'])
     ap.add_argument('--output-dir', type=str, default='results/paper_experiments')
+    ap.add_argument('--alss-mode', type=str, default='zero', choices=['zero', 'ar1'])
+    ap.add_argument('--alss-tau', type=float, default=1.0)
+    ap.add_argument('--alss-core-l', type=int, default=3)
     ap.add_argument('--test', action='store_true')
     args = ap.parse_args(args=argv)
     if args.test:
@@ -505,7 +569,13 @@ def run_paper_experiments(argv: Optional[List[str]] = None) -> str:
         snr_sweep = [-5, 0, 5, 10, 15]
         snapshot_sweep = [32, 64, 128]
     if args.scenario == '1' or args.scenario == 'all':
-        run_scenario1_baseline(arrays=args.arrays, snr_sweep=snr_sweep, snapshot_sweep=snapshot_sweep, trials=args.trials, output_dir=args.output_dir)
+        run_scenario1_baseline(
+            arrays=args.arrays,
+            snr_sweep=snr_sweep,
+            snapshot_sweep=snapshot_sweep,
+            trials=args.trials,
+            output_dir=args.output_dir,
+        )
     if args.scenario == '3' or args.scenario == 'all':
         # Focus on Z5 for ALSS effectiveness by default
         alss_arrays = ['Z5'] if 'Z5' in args.arrays else [args.arrays[0]]
@@ -515,14 +585,20 @@ def run_paper_experiments(argv: Optional[List[str]] = None) -> str:
             snr_sweep=snr_sweep,
             snapshot_sweep=snapshot_sweep,
             trials=args.trials,
-            output_dir=args.output_dir
+            output_dir=args.output_dir,
+            alss_mode=args.alss_mode,
+            alss_tau=args.alss_tau,
+            alss_core_l=args.alss_core_l,
         )
     if args.scenario == '4' or args.scenario == 'all':
         run_scenario4_cross_array(
             arrays=args.arrays,
             coupling_strength=0.3,
             trials=args.trials,
-            output_dir=args.output_dir
+            output_dir=args.output_dir,
+            alss_mode=args.alss_mode,
+            alss_tau=args.alss_tau,
+            alss_core_l=args.alss_core_l,
         )
     return args.output_dir
 
