@@ -73,7 +73,7 @@ def parse_args() -> argparse.Namespace:
         "--worst-degradation-threshold",
         type=float,
         default=-20.0,
-        help="Reject candidates whose worst-case Improvement_%% is below this value.",
+        help="Reject candidates whose worst-case Improvement_% is below this value.",
     )
 
     parser.add_argument(
