@@ -413,12 +413,76 @@ Because the project uses a `src/` package layout, the following PowerShell comma
 
 ```powershell
 $env:PYTHONPATH = "$(Get-Location)\src;$(Get-Location)"
-
 ```
 
 Verified pilot commands passed for Scenario 1, Scenario 3, and Scenario 4 using 5 trials with output directories under `$env:TEMP`.
 Observed row counts: Scenario 1 = 30 rows, Scenario 3 = 16 rows, Scenario 4 = 12 rows.
 These pilot outputs are execution checks only, not paper-ready scientific results, and should not be committed as final results.
+
+---
+
+## ALSS Diagnostic Sweep Notes
+
+After the initial 5-trial and 50-trial pilot runs, the ALSS behavior appeared sensitive to the fixed setting used by the paper experiment runner:
+
+```text
+alss_mode = "zero"
+alss_tau = 1.0
+alss_coreL = 3
+```
+
+A diagnostic tool was added to sweep ALSS mode and shrinkage strength:
+
+```text
+tools/diagnose_alss_sweep.py
+```
+
+The diagnostic tool tests:
+
+```text
+modes = zero, ar1
+tau values = 0.1, 0.25, 0.5, 1.0
+array = Z5
+coupling = 0.0, 0.3
+SNR = 5, 10, 15 dB
+snapshots = 64
+```
+
+Example diagnostic command:
+
+```powershell
+python tools\diagnose_alss_sweep.py --trials 10 --output-dir "$env:TEMP\mimo_alss_diag_trial10"
+```
+
+Observed diagnostic result:
+
+```text
+The fixed paper setting `mode=zero, tau=1.0` is not consistently optimal.
+Some configurations improve with smaller tau values or with `ar1` mode.
+Some configurations degrade significantly when tau/mode is not appropriate.
+```
+
+Important interpretation:
+
+```text
+ALSS should not be treated as a single fixed-parameter method for final paper results.
+A parameter-selection or tuning protocol is required before running 500-trial or 1000-trial final experiments.
+```
+
+Current diagnostic conclusion:
+
+```text
+Do not run final high-trial paper experiments using fixed `mode=zero, tau=1.0` without further validation.
+First define a defensible ALSS parameter-selection rule.
+```
+
+Status:
+
+```text
+Diagnostic tool added.
+Initial 10-trial diagnostic run completed.
+Results are exploratory only and not paper-ready.
+```
 
 ---
 
