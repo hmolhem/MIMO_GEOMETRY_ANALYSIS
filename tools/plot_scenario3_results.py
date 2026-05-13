@@ -104,7 +104,9 @@ def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def safe_coupling_label(coupling_value: float) -> str:
-    return f"c1={coupling_value:g}"
+    if abs(coupling_value) < 1e-12:
+        return "No coupling (c1=0)"
+    return f"Mutual coupling (c1={coupling_value:g})"
 
 
 def safe_filename_coupling(coupling_value: float) -> str:
