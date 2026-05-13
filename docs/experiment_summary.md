@@ -601,3 +601,107 @@ alss_mode  = ar1
 alss_tau   = 0.25
 alss_coreL = 3
 ```
+
+---
+
+## Scenario 3 Z5 Trial-1000 Confirmation
+
+The Scenario 3 Z5 ALSS result has now been confirmed with a controlled 1000-trial run.
+
+### Configuration
+
+```text
+Scenario: 3
+Array: Z5
+Trials: 1000
+ALSS mode: ar1
+ALSS tau: 0.25
+ALSS coreL: 3
+Coupling levels: c1=0.0 and c1=0.3
+```
+
+Coupling interpretation:
+
+```text
+c1 = 0.0 means no mutual coupling.
+c1 = 0.3 means mutual coupling is enabled.
+```
+
+### Archived Result
+
+```text
+results/paper_experiments/scenario3_z5_ar1_tau025_trial1000.csv
+```
+
+### Archived Figures
+
+```text
+results/figures/scenario3_trial1000/
+```
+
+### Figure Index
+
+```text
+docs/scenario3_trial1000_figure_index.md
+```
+
+### Main Numerical Summary
+
+```text
+Reported rows: 16
+Unique conditions: 14
+Mean improvement over reported rows: approximately +9.85%
+Mean improvement over unique conditions: approximately +9.76%
+Worst improvement: approximately -0.50%
+Best improvement: approximately +33.79%
+Positive reported rows: 15 / 16
+Positive unique conditions: 13 / 14
+```
+
+Coupling-level summary:
+
+```text
+No coupling mean improvement: approximately +5.60%
+Mutual coupling mean improvement: approximately +13.92%
+```
+
+### Interpretation
+
+The trial-1000 result confirms the same trend observed in the trial-500 result. The result is slightly more conservative than trial-500, but the scientific trend remains stable:
+
+```text
+ALSS provides positive average RMSE improvement for Z5 in most Scenario 3 conditions.
+The improvement is stronger under mutual coupling than under no-coupling conditions.
+The worst-case degradation remains small.
+```
+
+### Paper-Facing Status
+
+The trial-1000 result should now be treated as the primary paper-facing Scenario 3 Z5 result.
+
+The trial-500 result remains useful as intermediate validation and reproducibility history.
+
+Recommended primary figures for the first IEEE-style paper draft:
+
+```text
+results/figures/scenario3_trial1000/scenario3_improvement_vs_snr.png
+results/figures/scenario3_trial1000/scenario3_rmse_vs_snr_c1_0p3.png
+results/figures/scenario3_trial1000/scenario3_improvement_vs_snapshots.png
+```
+
+### Conservative Claim
+
+Recommended claim:
+
+```text
+For the Z5 sparse array, ALSS with ar1/tau=0.25/coreL=3 consistently improves Scenario 3 coarray-MUSIC RMSE in most tested conditions, with stronger gains under mutual coupling than under no-coupling conditions.
+```
+
+Avoid claiming:
+
+```text
+ALSS always improves performance.
+ALSS is universally optimal for all arrays.
+ALSS is harmless in every trial.
+The Z5 Scenario 3 result proves paper-wide performance across all geometries.
+```
