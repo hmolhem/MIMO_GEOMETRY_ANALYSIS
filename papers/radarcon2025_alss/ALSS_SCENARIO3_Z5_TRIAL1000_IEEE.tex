@@ -31,11 +31,11 @@ Direction-of-arrival estimation, sparse arrays, coarray MUSIC, mutual coupling, 
 
 \section{Introduction}
 
-Sparse sensor arrays are widely used in direction-of-arrival (DOA) estimation because they can provide enhanced virtual-aperture degrees of freedom through difference coarray processing. Weight-constrained sparse arrays are particularly attractive in mutual-coupling-sensitive applications because their geometries reduce or eliminate sensor-pair contributions at critical small lags.
+Sparse sensor arrays are widely used in direction-of-arrival (DOA) estimation because they can provide enhanced virtual-aperture degrees of freedom through difference coarray processing~\cite{pal2010nested,vaidyanathan2011coprime,pal2011coprimeMusic}. Weight-constrained sparse arrays are particularly attractive in mutual-coupling-sensitive applications because their geometries reduce or eliminate sensor-pair contributions at critical small lags~\cite{kulkarni2024wcsa}.
 
 A geometry-based design, however, does not fully remove finite-snapshot statistical error. When a sample covariance matrix is estimated from a limited number of snapshots, coarray lag estimates are affected by both the number of available sensor-pair averages and the noise level. Lags with small coarray weights can have higher estimation variance and may degrade the virtual covariance matrix used by Coarray MUSIC.
 
-This paper focuses on a conservative and reproducible evaluation of Adaptive Lag-Selective Shrinkage (ALSS) for the Z5 sparse array. The goal is not to claim universal ALSS optimality across all geometries. Instead, the goal is to verify whether a selected ALSS configuration provides stable RMSE improvement for the Z5 array under Scenario 3 conditions with and without mutual coupling.
+Mutual coupling is a known source of steering-vector distortion and DOA-estimation bias in practical arrays~\cite{friedlander1991mutualCoupling,vantrees2002optimum}. The goal is not to claim universal ALSS optimality across all geometries. Instead, the goal is to verify whether a selected ALSS configuration provides stable RMSE improvement for the Z5 array under Scenario 3 conditions with and without mutual coupling.
 
 The main contributions of this paper are:
 \begin{itemize}
@@ -49,7 +49,7 @@ The main contributions of this paper are:
 
 \subsection{Coarray MUSIC}
 
-For an $N$-sensor array with sensor locations $\{n_i\}_{i=1}^{N}$, the narrowband received signal can be written as
+For an $N$-sensor array with sensor locations $\{n_i\}_{i=1}^{N}$, the narrowband received signal can be written using the standard narrowband array-processing model~\cite{vantrees2002optimum} as
 \begin{equation}
     \mathbf{x}[k] = \mathbf{A}(\boldsymbol{\theta})\mathbf{s}[k] + \mathbf{n}[k],
 \end{equation}
@@ -76,7 +76,7 @@ For each lag $\ell$, the coarray weight $w[\ell]$ is the number of sensor pairs 
     [\hat{\mathbf{R}}_x]_{i,j}.
 \end{equation}
 
-The lag sequence is then used to form a virtual Toeplitz covariance matrix for Coarray MUSIC.
+The lag sequence is then used to form a virtual Toeplitz covariance matrix for Coarray MUSIC, which builds on the subspace principle of the MUSIC algorithm~\cite{schmidt1986music}.
 
 \subsection{Finite-Snapshot Variance Issue}
 
@@ -103,7 +103,7 @@ ALSS is applied after sample covariance estimation and lag averaging, but before
     \text{Coarray MUSIC}.
 \end{equation}
 
-The general shrinkage form is
+Motivated by covariance regularization and shrinkage estimation principles~\cite{ledoit2004wellconditioned}, the general ALSS shrinkage form is
 \begin{equation}
     \hat{r}_{\mathrm{ALSS}}[\ell]
     =
