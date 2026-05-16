@@ -338,10 +338,11 @@ Future work should extend the validation to additional geometries such as Z1, Z3
 
 \section{Conclusion}
 
-This paper presented a focused trial-1000 validation of Adaptive Lag-Selective Shrinkage for the Z5 sparse array under Scenario 3 conditions. ALSS improved RMSE in 15 of 16 reported rows, with mean improvement of approximately $9.85\%$ over reported rows and $9.76\%$ over unique conditions. The improvement was stronger under mutual coupling, with approximately $13.92\%$ mean improvement compared with approximately $5.60\%$ in the no-coupling case.
+This paper presented a focused trial-1000 validation of Adaptive Lag-Selective Shrinkage for the canonical Z5 sparse array under Scenario 3 conditions. The results show that ALSS improves Coarray MUSIC RMSE in 15 of 16 reported rows and 13 of 14 unique operating conditions, with mean improvement of approximately $9.85\%$ over reported rows and $9.76\%$ over unique conditions.
 
-The results support ALSS as a promising post-geometry coarray denoising layer for Z5 under the tested conditions. Future work will extend the validation to additional sparse-array geometries, compare ALSS parameter choices more broadly, and evaluate hardware-friendly implementations of the covariance and coarray-processing pipeline.
+The strongest observation is the coupling-dependent trend. Under no mutual coupling, ALSS achieves approximately $5.60\%$ mean improvement across unique conditions. Under mutual coupling with $c_1=0.3$, the mean improvement increases to approximately $13.92\%$. This supports the central interpretation of the paper: Z5 geometry reduces sensitivity to coupling-related short-spacing effects, while ALSS provides a complementary statistical regularization layer for finite-snapshot coarray lag estimates.
 
+The paper does not claim universal ALSS optimality or full multi-geometry validation. Instead, it establishes a compact and reproducible Z5-focused conference result. Future work will extend the study to additional weight-constrained sparse arrays, evaluate ALSS parameter sensitivity, and investigate hardware-friendly acceleration of the covariance and coarray-processing pipeline using FPGA/HLS methods.
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
