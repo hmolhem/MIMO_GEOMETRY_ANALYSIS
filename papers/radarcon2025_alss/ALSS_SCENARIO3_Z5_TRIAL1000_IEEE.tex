@@ -326,9 +326,15 @@ The snapshot sweep confirms that the selected ALSS configuration remains useful 
 
 \section{Discussion and Limitations}
 
-The trial-1000 result supports a conservative claim: for the Z5 sparse array under Scenario 3, ALSS with \texttt{ar1}, $\tau=0.25$, and $L_c=3$ improves Coarray MUSIC RMSE in most tested conditions. The improvement is stronger when mutual coupling is enabled.
+The trial-1000 result supports a conservative claim: for the canonical Z5 sparse array under Scenario 3, ALSS with \texttt{ar1}, $\tau=0.25$, and $L_c=3$ improves Coarray MUSIC RMSE in most tested conditions. The improvement is stronger when mutual coupling is enabled, which supports the interpretation that geometry-level coupling robustness and post-geometry lag regularization can be complementary.
 
-This result should not be overgeneralized. It does not prove that ALSS is universally optimal across all sparse arrays, nor does it prove that ALSS is harmless in every trial. The result is strongest as a Z5-specific Scenario 3 validation. Broader validation across additional geometries and scenarios is required before making a paper-wide universality claim.
+The role of Z5 is important in this interpretation. The array suppresses the most coupling-sensitive small lags, with $w(1)=0$ and $w(2)=0$, but its coarray-weight distribution is still uneven. Therefore, Z5 is a useful test case for the ALSS hypothesis: a geometry can be favorable for coupling robustness while still leaving finite-snapshot variance in low-confidence coarray lag estimates. ALSS targets this second effect.
+
+This paper does not claim that ALSS changes the physical antenna pattern, modifies the sensor geometry, or directly estimates the mutual-coupling matrix. ALSS is applied only after sample covariance estimation and coarray lag averaging. Its effect is estimator-level: it regularizes the lag estimates used to form the virtual covariance matrix for Coarray MUSIC.
+
+Several limitations remain. First, this paper is Z5-focused and does not yet establish performance across the full family of weight-constrained sparse arrays. Second, the MUSIC pseudospectrum example is representative and explanatory; it is not the primary statistical proof. Third, the mutual-coupling model is simulation-based and should not be interpreted as a complete electromagnetic antenna model. Fourth, only one fixed ALSS configuration is evaluated in the main trial-1000 result. A broader parameter-sensitivity study is required before making general tuning recommendations.
+
+Future work should extend the validation to additional geometries such as Z1, Z3, Z4, and Z6, evaluate a wider range of SNR and snapshot regimes, and compare multiple ALSS parameter choices. A hardware-oriented extension is also natural because the processing chain contains FPGA-friendly kernels, including sample covariance formation, coarray lag averaging, virtual Toeplitz covariance reconstruction, and MUSIC spectrum scanning.
 
 \section{Conclusion}
 
