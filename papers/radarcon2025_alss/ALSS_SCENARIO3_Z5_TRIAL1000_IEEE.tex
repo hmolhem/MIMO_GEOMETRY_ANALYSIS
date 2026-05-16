@@ -241,7 +241,7 @@ Positive cases & 15/16 & 13/14 \\
 \end{tabular}
 \end{table}
 
-The trial-1000 result confirms the trial-500 trend. The average improvement is slightly more conservative than trial-500, but the same scientific pattern remains: ALSS improves the Z5 Scenario 3 result in most tested conditions, and the worst-case degradation is small.
+The trial-1000 result confirms the trend observed in the earlier trial-500 validation. ALSS improves most reported cases, with positive improvement in 15 of 16 reported rows and 13 of 14 unique operating conditions. The worst case shows only a small degradation of $-0.50\%$, while the best case reaches $33.79\%$ improvement. This supports the interpretation that the selected ALSS configuration is generally beneficial for the tested Z5 Scenario 3 setting, but it also confirms that ALSS should not be described as universally harmless.
 
 \subsection{Coupling-Level Comparison}
 
@@ -266,7 +266,7 @@ Positive cases & 7/7 & 6/7 \\
 \end{tabular}
 \end{table}
 
-The improvement is stronger under mutual coupling. This supports the interpretation that ALSS is complementary to the Z5 geometry: the geometry reduces coupling-related bias, while ALSS reduces finite-snapshot lag-estimation variance.
+The coupling-level comparison is the central numerical evidence of the paper. Without mutual coupling, ALSS improves all seven unique conditions with a mean improvement of $5.60\%$. With mutual coupling enabled, ALSS improves six of seven unique conditions and increases the mean improvement to $13.92\%$. This does not prove that ALSS compensates mutual coupling directly. Rather, it supports the more conservative interpretation that Z5 geometry and ALSS act through complementary mechanisms: the geometry reduces sensitivity to short-spacing coupling effects, while ALSS reduces finite-snapshot lag-estimation variance before virtual covariance reconstruction.
 
 \subsection{Representative MUSIC Pseudospectrum}
 
@@ -275,7 +275,6 @@ The figure compares a representative no-coupling baseline, a coupled baseline, a
 For this realization, the no-coupling baseline localizes the two sources at $-20^\circ$ and $15^\circ$.
 Under mutual coupling, the baseline estimate exhibits a small peak-location shift near the positive-angle source.
 After ALSS regularization, the estimated peak returns to the true $15^\circ$ location.
-This example is not used as the primary statistical proof of performance; rather, it illustrates the mechanism behind the aggregate trial-1000 RMSE and improvement trends reported in the following subsections.
 
 \begin{figure}[t]
 \centering
@@ -284,6 +283,7 @@ This example is not used as the primary statistical proof of performance; rather
 \label{fig:music_pseudospectrum}
 \end{figure}
 
+This pseudospectrum is included as explanatory evidence, not as the primary statistical proof. A single realization cannot establish Monte Carlo performance. Its role is to connect the aggregate RMSE trends to the estimator mechanism: ALSS changes the coarray-domain correlation estimates used by the virtual covariance matrix, which can alter the MUSIC peak structure in a favorable way for some coupled realizations.
 
 \subsection{Improvement Versus SNR}
 
@@ -296,7 +296,7 @@ Fig.~\ref{fig:improvement_snr} shows the percentage RMSE improvement versus SNR 
 \label{fig:improvement_snr}
 \end{figure}
 
-The figure shows that the strongest improvement occurs under mutual coupling and moderate-to-high SNR.
+The SNR sweep shows that ALSS improvement is consistently positive in the no-coupling case and generally stronger in the coupled case as SNR increases. At very low SNR, noise dominates the covariance estimate and limits the benefit of lag-selective regularization. At moderate-to-high SNR, the lag-estimation structure becomes more informative, and shrinkage of low-confidence lags produces larger relative gains, especially under mutual coupling.
 
 \subsection{RMSE Under Mutual Coupling}
 
@@ -309,7 +309,7 @@ Fig.~\ref{fig:rmse_coupled} compares baseline and ALSS RMSE versus SNR when mutu
 \label{fig:rmse_coupled}
 \end{figure}
 
-The RMSE curve confirms that ALSS provides the strongest reduction in the coupled case, especially as SNR increases.
+The coupled RMSE curve provides the most direct performance view for the challenging condition. ALSS reduces RMSE relative to baseline Coarray MUSIC for most tested SNR values under $c_1=0.3$. The reduction is most visible at moderate-to-high SNR, consistent with the improvement summary in Table~\ref{tab:coupling_summary}. The single weak case at the lowest SNR is consistent with the conservative conclusion that ALSS is beneficial in most, but not all, tested conditions.
 
 \subsection{Improvement Versus Snapshots}
 
@@ -322,7 +322,7 @@ Fig.~\ref{fig:improvement_snapshots} shows the improvement versus snapshot count
 \label{fig:improvement_snapshots}
 \end{figure}
 
-The result indicates that ALSS remains beneficial across the tested snapshot counts, with stronger improvement under mutual coupling.
+The snapshot sweep confirms that the selected ALSS configuration remains useful across the tested finite-snapshot range. The improvement remains positive for both $M=32$ and $M=128$, with the $M=64$ point appearing in both the SNR and snapshot sweeps. This supports the use of the trial-1000 result as the primary conference-paper evidence while leaving broader snapshot regimes for future validation.
 
 \section{Discussion and Limitations}
 
