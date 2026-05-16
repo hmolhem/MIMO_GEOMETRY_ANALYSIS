@@ -88,7 +88,7 @@ Thus, lags with small $w[\ell]$ and limited $M$ may have larger estimation varia
 
 \section{Adaptive Lag-Selective Shrinkage}
 
-ALSS is applied after sample covariance estimation and lag averaging, but before virtual covariance reconstruction. The processing chain is
+ALSS is a coarray-domain regularization step applied after sample covariance estimation and lag averaging, but before virtual covariance reconstruction. The processing chain is
 \begin{equation}
     \mathbf{X}
     \rightarrow
@@ -102,22 +102,53 @@ ALSS is applied after sample covariance estimation and lag averaging, but before
     \rightarrow
     \text{Coarray MUSIC}.
 \end{equation}
+Thus, ALSS does not modify the physical sensor geometry, the antenna pattern, or the mutual-coupling mechanism itself. It only modifies the estimated coarray correlations used to construct the virtual covariance matrix.
 
-Motivated by covariance regularization and shrinkage estimation principles~\cite{ledoit2004wellconditioned}, the general ALSS shrinkage form is
+The motivation is that not all lag estimates have equal confidence. For lag $\ell$, the empirical correlation $\hat{r}[\ell]$ is obtained by averaging $w[\ell]$ physical covariance entries. A low-weight lag has fewer sensor-pair contributions and is therefore more sensitive to finite-snapshot noise. ALSS uses this observation to shrink low-confidence lag estimates while protecting the most reliable core lags.
+
+The implemented ALSS form used in this paper is
 \begin{equation}
     \hat{r}_{\mathrm{ALSS}}[\ell]
     =
-    \alpha[\ell]\hat{r}[\ell]
+    \left(1-\alpha[\ell]\right)\hat{r}[\ell]
     +
-    \left(1-\alpha[\ell]\right)r_{\mathrm{prior}}[\ell],
+    \alpha[\ell] r_{\mathrm{prior}}[\ell],
 \end{equation}
-where $\alpha[\ell] \in [0,1]$ is a lag-dependent retention factor.
+where $\alpha[\ell]\in[0,1]$ is the shrinkage weight. A larger value of $\alpha[\ell]$ moves the lag estimate more strongly toward the prior. For the AR(1) mode used in this experiment, the prior is fitted from protected low-lag correlations and then extrapolated to less reliable lags. The shrinkage weight is scheduled using a variance proxy of the form
+\begin{equation}
+    \widehat{V}[\ell]
+    =
+    \frac{\hat{\sigma}^{2}}{M w[\ell]},
+\end{equation}
+where $M$ is the number of snapshots and $w[\ell]$ is the coarray weight.
 
-In this experiment, the selected ALSS configuration is
+The AR(1)-mode shrinkage weight used by the implementation can be summarized as
+\begin{equation}
+    \alpha[\ell]
+    =
+    \frac{\widehat{V}[\ell]}
+    {\widehat{V}[\ell]
+    +
+    \tau
+    \left|
+        \hat{r}[\ell]-r_{\mathrm{prior}}[\ell]
+    \right|^2
+    +
+    \epsilon},
+\end{equation}
+where $\tau$ controls the shrinkage strength and $\epsilon$ is a small numerical-stability constant. In this convention, $\alpha[\ell]$ is not a retention factor; it is the amount of movement toward the prior.
+
+In the reported experiment, the selected ALSS configuration is
 \begin{equation}
     \text{mode}=\texttt{ar1}, \qquad \tau=0.25, \qquad L_c=3.
 \end{equation}
-Core lags up to $L_c$ are protected, while shrinkage is applied to lower-confidence lags beyond the protected region. Hermitian symmetry is enforced after shrinkage to preserve the structure required for virtual covariance reconstruction.
+Core lags $0\leq \ell \leq L_c$ are protected from shrinkage. After shrinkage, Hermitian symmetry is enforced so that
+\begin{equation}
+    \hat{r}_{\mathrm{ALSS}}[-\ell]
+    =
+    \hat{r}^{*}_{\mathrm{ALSS}}[\ell],
+\end{equation}
+which preserves the structure required for virtual covariance reconstruction and Coarray MUSIC processing.
 
 \section{Experimental Setup}
 
