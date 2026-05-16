@@ -125,6 +125,25 @@ Core lags up to $L_c$ are protected, while shrinkage is applied to lower-confide
 
 This paper evaluates Scenario 3 for the Z5 sparse array. The trial-1000 result is treated as the primary paper-facing validation result. The trial-500 result is retained as intermediate validation history.
 
+The Z5 sparse array used in this study is shown in Fig.~\ref{fig:z5_geometry}.
+Its difference-coarray weight distribution is shown in Fig.~\ref{fig:z5_coarray_weights}.
+The geometry suppresses the most coupling-sensitive small lags, with $w(1)=0$ and $w(2)=0$, while retaining nonzero weights at later lags.
+This structure motivates the use of ALSS as a post-geometry coarray-domain regularization method.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{../../results/figures/paper1_conceptual/z5_sensor_geometry.png}
+\caption{Canonical Z5 sparse-array geometry used in the Scenario 3 trial-1000 experiment. Sensor positions are shown on the half-wavelength grid.}
+\label{fig:z5_geometry}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{../../results/figures/paper1_conceptual/z5_coarray_weights.png}
+\caption{Difference-coarray weight distribution of the canonical Z5 array. The missing critical small lags $w(1)=0$ and $w(2)=0$ reduce sensitivity to closely spaced sensor-pair coupling, while the uneven lag weights motivate finite-snapshot coarray regularization.}
+\label{fig:z5_coarray_weights}
+\end{figure}
+
 \subsection{ALSS Configuration}
 
 The fixed ALSS configuration is:
