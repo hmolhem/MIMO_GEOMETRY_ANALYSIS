@@ -158,12 +158,15 @@ which preserves the structure required for virtual covariance reconstruction and
 
 \subsection{Scenario and Array}
 
-This paper evaluates Scenario 3 for the Z5 sparse array. The trial-1000 result is treated as the primary paper-facing validation result. The trial-500 result is retained as intermediate validation history.
+This paper evaluates Scenario 3 for the canonical Z5 sparse array. The physical sensor locations, expressed on the half-wavelength grid, are
+\begin{equation}
+    \mathbf{z}_{5} = [0,\;5,\;8,\;11,\;14,\;17,\;21].
+\end{equation}
+The trial-1000 result is treated as the primary paper-facing validation result. The earlier trial-500 result is retained only as intermediate validation history and is not used as the main quantitative evidence in this paper.
 
 The Z5 sparse array used in this study is shown in Fig.~\ref{fig:z5_geometry}.
 Its difference-coarray weight distribution is shown in Fig.~\ref{fig:z5_coarray_weights}.
-The geometry suppresses the most coupling-sensitive small lags, with $w(1)=0$ and $w(2)=0$, while retaining nonzero weights at later lags.
-This structure motivates the use of ALSS as a post-geometry coarray-domain regularization method.
+The geometry suppresses the most coupling-sensitive small lags, with $w(1)=0$ and $w(2)=0$, while retaining nonzero weights at later lags. This structure is useful for reducing short-spacing coupling sensitivity, but it also creates an uneven coarray-weight profile. The uneven lag support motivates the use of ALSS as a post-geometry coarray-domain regularization method.
 
 \begin{figure}[t]
 \centering
@@ -181,7 +184,7 @@ This structure motivates the use of ALSS as a post-geometry coarray-domain regul
 
 \subsection{ALSS Configuration}
 
-The fixed ALSS configuration is:
+The fixed ALSS configuration used throughout the trial-1000 experiment is
 \begin{equation}
     \texttt{alss\_mode} = \texttt{ar1},
     \qquad
@@ -189,6 +192,7 @@ The fixed ALSS configuration is:
     \qquad
     \texttt{alss\_coreL} = 3.
 \end{equation}
+These parameters are not tuned separately for each SNR, snapshot count, or coupling condition. This fixed-parameter design is intentionally conservative because the goal is to test whether one selected ALSS configuration gives stable improvement across the reported Scenario 3 sweep.
 
 \subsection{Coupling Conditions}
 
@@ -197,10 +201,21 @@ Two coupling conditions are evaluated:
     \item $c_1=0.0$: no mutual coupling,
     \item $c_1=0.3$: mutual coupling enabled.
 \end{itemize}
+The no-coupling case provides a baseline for finite-snapshot behavior, while the coupled case tests whether ALSS remains beneficial when the array output is also affected by mutual coupling. The coupling experiment is used for estimator-level performance comparison; ALSS is not presented as an antenna-pattern correction or as an explicit mutual-coupling matrix estimator.
 
-\subsection{Monte Carlo Trials}
+\subsection{Monte Carlo Trials and Sweeps}
 
-The confirmation experiment uses 1000 Monte Carlo trials per reported condition. The output contains 16 reported rows and 14 unique conditions because the Scenario 3 sweep includes an overlap point at SNR $=5$ dB and $M=64$ snapshots.
+Each reported condition uses 1000 Monte Carlo trials. The Scenario 3 sweep contains two parts. First, an SNR sweep is performed at a fixed snapshot count of $M=64$ using
+\begin{equation}
+    \mathrm{SNR} \in \{-5,\;0,\;5,\;10,\;15\}\ \mathrm{dB}.
+\end{equation}
+Second, a snapshot-count sweep is performed at fixed $\mathrm{SNR}=5$ dB using
+\begin{equation}
+    M \in \{32,\;64,\;128\}.
+\end{equation}
+Both sweeps are repeated for $c_1=0.0$ and $c_1=0.3$. Because the point $\mathrm{SNR}=5$ dB and $M=64$ belongs to both sweeps, the output contains 16 reported rows but 14 unique operating conditions.
+
+The performance metric is DOA RMSE. Percentage improvement is computed by comparing the baseline Coarray MUSIC RMSE with the ALSS-enhanced Coarray MUSIC RMSE under the same operating condition.
 
 \section{Results}
 
