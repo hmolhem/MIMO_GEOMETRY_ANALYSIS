@@ -31,18 +31,22 @@ Direction-of-arrival estimation, sparse arrays, coarray MUSIC, mutual coupling, 
 
 \section{Introduction}
 
-Sparse sensor arrays are widely used in direction-of-arrival (DOA) estimation because they can provide enhanced virtual-aperture degrees of freedom through difference coarray processing~\cite{pal2010nested,vaidyanathan2011coprime,pal2011coprimeMusic}. Weight-constrained sparse arrays are particularly attractive in mutual-coupling-sensitive applications because their geometries reduce or eliminate sensor-pair contributions at critical small lags~\cite{kulkarni2024wcsa}.
+Sparse sensor arrays are widely used in direction-of-arrival (DOA) estimation because they can synthesize a virtual aperture through difference-coarray processing while using fewer physical sensors than a fully populated uniform linear array~\cite{pal2010nested,vaidyanathan2011coprime,pal2011coprimeMusic}. This virtual-aperture advantage is especially useful in subspace-based methods such as MUSIC, where additional coarray degrees of freedom can improve source resolvability when the required statistical assumptions are satisfied~\cite{schmidt1986music,vantrees2002optimum}.
 
-A geometry-based design, however, does not fully remove finite-snapshot statistical error. When a sample covariance matrix is estimated from a limited number of snapshots, coarray lag estimates are affected by both the number of available sensor-pair averages and the noise level. Lags with small coarray weights can have higher estimation variance and may degrade the virtual covariance matrix used by Coarray MUSIC.
+In practical arrays, however, mutual coupling can distort the received spatial data and degrade DOA estimation accuracy. Weight-constrained sparse arrays address this issue at the geometry level by suppressing or eliminating sensor-pair contributions at critical small lags, such as $w(1)=0$ or $w(1)=w(2)=0$~\cite{kulkarni2024wcsa}. The Z5 geometry considered in this paper follows this design philosophy: it reduces the most coupling-sensitive short-spacing contributions while preserving a useful one-sided coarray segment for Coarray MUSIC processing.
 
-Mutual coupling is a known source of steering-vector distortion and DOA-estimation bias in practical arrays~\cite{friedlander1991mutualCoupling,vantrees2002optimum}. The goal is not to claim universal ALSS optimality across all geometries. Instead, the goal is to verify whether a selected ALSS configuration provides stable RMSE improvement for the Z5 array under Scenario 3 conditions with and without mutual coupling.
+Geometry alone does not remove all estimation error. In finite-snapshot regimes, the sample covariance matrix is noisy, and the resulting coarray lag estimates do not have equal reliability. A lag with a small coarray weight $w[\ell]$ is estimated from fewer physical covariance entries than a high-weight lag. Therefore, even when the geometry is favorable for mutual-coupling robustness, low-weight and long-lag estimates may inject variance into the virtual covariance matrix used by Coarray MUSIC.
 
-The main contributions of this paper are:
+This paper evaluates Adaptive Lag-Selective Shrinkage (ALSS) as a post-geometry statistical denoising layer for this problem. ALSS is applied after sample covariance estimation and coarray lag averaging, but before virtual covariance reconstruction. It does not change the physical Z5 sensor geometry or the antenna coupling mechanism. Instead, it regularizes the estimated coarray correlations so that low-confidence lags have reduced influence on the reconstructed virtual covariance matrix.
+
+The goal of this paper is deliberately focused. We do not claim universal ALSS optimality across all sparse arrays or all operating regimes. Instead, we test whether a fixed ALSS configuration provides stable RMSE improvement for the Z5 array under Scenario 3 conditions with and without mutual coupling.
+
+The main contributions are:
 \begin{itemize}
     \item A focused evaluation of ALSS as a post-geometry coarray-domain denoising layer for the Z5 sparse array.
-    \item A controlled 1000-trial Scenario 3 validation using fixed ALSS parameters: \texttt{ar1}, $\tau=0.25$, and $L_c=3$.
-    \item A coupling-aware comparison showing that ALSS provides stronger average RMSE improvement under mutual coupling than under no-coupling conditions.
-    \item A reproducible paper-facing result set with archived CSV files, figures, and figure-index documentation.
+    \item A 1000-trial Scenario 3 validation using fixed ALSS parameters: \texttt{ar1}, $\tau=0.25$, and $L_c=3$.
+    \item A coupling-aware comparison showing that ALSS gives stronger average RMSE improvement under mutual coupling than under no-coupling conditions.
+    \item A compact conference-paper result set connecting Z5 coarray geometry, finite-snapshot lag variance, representative MUSIC spectra, and trial-1000 RMSE trends.
 \end{itemize}
 
 \section{Background}
@@ -88,7 +92,7 @@ Thus, lags with small $w[\ell]$ and limited $M$ may have larger estimation varia
 
 \section{Adaptive Lag-Selective Shrinkage}
 
-ALSS is applied after sample covariance estimation and lag averaging, but before virtual covariance reconstruction. The processing chain is
+ALSS is a coarray-domain regularization step applied after sample covariance estimation and lag averaging, but before virtual covariance reconstruction. The processing chain is
 \begin{equation}
     \mathbf{X}
     \rightarrow
@@ -102,33 +106,67 @@ ALSS is applied after sample covariance estimation and lag averaging, but before
     \rightarrow
     \text{Coarray MUSIC}.
 \end{equation}
+Thus, ALSS does not modify the physical sensor geometry, the antenna pattern, or the mutual-coupling mechanism itself. It only modifies the estimated coarray correlations used to construct the virtual covariance matrix.
 
-Motivated by covariance regularization and shrinkage estimation principles~\cite{ledoit2004wellconditioned}, the general ALSS shrinkage form is
+The motivation is that not all lag estimates have equal confidence. For lag $\ell$, the empirical correlation $\hat{r}[\ell]$ is obtained by averaging $w[\ell]$ physical covariance entries. A low-weight lag has fewer sensor-pair contributions and is therefore more sensitive to finite-snapshot noise. ALSS uses this observation to shrink low-confidence lag estimates while protecting the most reliable core lags.
+
+The implemented ALSS form used in this paper is
 \begin{equation}
     \hat{r}_{\mathrm{ALSS}}[\ell]
     =
-    \alpha[\ell]\hat{r}[\ell]
+    \left(1-\alpha[\ell]\right)\hat{r}[\ell]
     +
-    \left(1-\alpha[\ell]\right)r_{\mathrm{prior}}[\ell],
+    \alpha[\ell] r_{\mathrm{prior}}[\ell],
 \end{equation}
-where $\alpha[\ell] \in [0,1]$ is a lag-dependent retention factor.
+where $\alpha[\ell]\in[0,1]$ is the shrinkage weight. A larger value of $\alpha[\ell]$ moves the lag estimate more strongly toward the prior. For the AR(1) mode used in this experiment, the prior is fitted from protected low-lag correlations and then extrapolated to less reliable lags. The shrinkage weight is scheduled using a variance proxy of the form
+\begin{equation}
+    \widehat{V}[\ell]
+    =
+    \frac{\hat{\sigma}^{2}}{M w[\ell]},
+\end{equation}
+where $M$ is the number of snapshots and $w[\ell]$ is the coarray weight.
 
-In this experiment, the selected ALSS configuration is
+The AR(1)-mode shrinkage weight used by the implementation can be summarized as
+\begin{equation}
+    \alpha[\ell]
+    =
+    \frac{\widehat{V}[\ell]}
+    {\widehat{V}[\ell]
+    +
+    \tau
+    \left|
+        \hat{r}[\ell]-r_{\mathrm{prior}}[\ell]
+    \right|^2
+    +
+    \epsilon},
+\end{equation}
+where $\tau$ controls the shrinkage strength and $\epsilon$ is a small numerical-stability constant. In this convention, $\alpha[\ell]$ is not a retention factor; it is the amount of movement toward the prior.
+
+In the reported experiment, the selected ALSS configuration is
 \begin{equation}
     \text{mode}=\texttt{ar1}, \qquad \tau=0.25, \qquad L_c=3.
 \end{equation}
-Core lags up to $L_c$ are protected, while shrinkage is applied to lower-confidence lags beyond the protected region. Hermitian symmetry is enforced after shrinkage to preserve the structure required for virtual covariance reconstruction.
+Core lags $0\leq \ell \leq L_c$ are protected from shrinkage. After shrinkage, Hermitian symmetry is enforced so that
+\begin{equation}
+    \hat{r}_{\mathrm{ALSS}}[-\ell]
+    =
+    \hat{r}^{*}_{\mathrm{ALSS}}[\ell],
+\end{equation}
+which preserves the structure required for virtual covariance reconstruction and Coarray MUSIC processing.
 
 \section{Experimental Setup}
 
 \subsection{Scenario and Array}
 
-This paper evaluates Scenario 3 for the Z5 sparse array. The trial-1000 result is treated as the primary paper-facing validation result. The trial-500 result is retained as intermediate validation history.
+This paper evaluates Scenario 3 for the canonical Z5 sparse array. The physical sensor locations, expressed on the half-wavelength grid, are
+\begin{equation}
+    \mathbf{z}_{5} = [0,\;5,\;8,\;11,\;14,\;17,\;21].
+\end{equation}
+The trial-1000 result is treated as the primary paper-facing validation result. The earlier trial-500 result is retained only as intermediate validation history and is not used as the main quantitative evidence in this paper.
 
 The Z5 sparse array used in this study is shown in Fig.~\ref{fig:z5_geometry}.
 Its difference-coarray weight distribution is shown in Fig.~\ref{fig:z5_coarray_weights}.
-The geometry suppresses the most coupling-sensitive small lags, with $w(1)=0$ and $w(2)=0$, while retaining nonzero weights at later lags.
-This structure motivates the use of ALSS as a post-geometry coarray-domain regularization method.
+The geometry suppresses the most coupling-sensitive small lags, with $w(1)=0$ and $w(2)=0$, while retaining nonzero weights at later lags. This structure is useful for reducing short-spacing coupling sensitivity, but it also creates an uneven coarray-weight profile. The uneven lag support motivates the use of ALSS as a post-geometry coarray-domain regularization method.
 
 \begin{figure}[t]
 \centering
@@ -146,7 +184,7 @@ This structure motivates the use of ALSS as a post-geometry coarray-domain regul
 
 \subsection{ALSS Configuration}
 
-The fixed ALSS configuration is:
+The fixed ALSS configuration used throughout the trial-1000 experiment is
 \begin{equation}
     \texttt{alss\_mode} = \texttt{ar1},
     \qquad
@@ -154,6 +192,7 @@ The fixed ALSS configuration is:
     \qquad
     \texttt{alss\_coreL} = 3.
 \end{equation}
+These parameters are not tuned separately for each SNR, snapshot count, or coupling condition. This fixed-parameter design is intentionally conservative because the goal is to test whether one selected ALSS configuration gives stable improvement across the reported Scenario 3 sweep.
 
 \subsection{Coupling Conditions}
 
@@ -162,10 +201,21 @@ Two coupling conditions are evaluated:
     \item $c_1=0.0$: no mutual coupling,
     \item $c_1=0.3$: mutual coupling enabled.
 \end{itemize}
+The no-coupling case provides a baseline for finite-snapshot behavior, while the coupled case tests whether ALSS remains beneficial when the array output is also affected by mutual coupling. The coupling experiment is used for estimator-level performance comparison; ALSS is not presented as an antenna-pattern correction or as an explicit mutual-coupling matrix estimator.
 
-\subsection{Monte Carlo Trials}
+\subsection{Monte Carlo Trials and Sweeps}
 
-The confirmation experiment uses 1000 Monte Carlo trials per reported condition. The output contains 16 reported rows and 14 unique conditions because the Scenario 3 sweep includes an overlap point at SNR $=5$ dB and $M=64$ snapshots.
+Each reported condition uses 1000 Monte Carlo trials. The Scenario 3 sweep contains two parts. First, an SNR sweep is performed at a fixed snapshot count of $M=64$ using
+\begin{equation}
+    \mathrm{SNR} \in \{-5,\;0,\;5,\;10,\;15\}\ \mathrm{dB}.
+\end{equation}
+Second, a snapshot-count sweep is performed at fixed $\mathrm{SNR}=5$ dB using
+\begin{equation}
+    M \in \{32,\;64,\;128\}.
+\end{equation}
+Both sweeps are repeated for $c_1=0.0$ and $c_1=0.3$. Because the point $\mathrm{SNR}=5$ dB and $M=64$ belongs to both sweeps, the output contains 16 reported rows but 14 unique operating conditions.
+
+The performance metric is DOA RMSE. Percentage improvement is computed by comparing the baseline Coarray MUSIC RMSE with the ALSS-enhanced Coarray MUSIC RMSE under the same operating condition.
 
 \section{Results}
 
@@ -191,7 +241,7 @@ Positive cases & 15/16 & 13/14 \\
 \end{tabular}
 \end{table}
 
-The trial-1000 result confirms the trial-500 trend. The average improvement is slightly more conservative than trial-500, but the same scientific pattern remains: ALSS improves the Z5 Scenario 3 result in most tested conditions, and the worst-case degradation is small.
+The trial-1000 result confirms the trend observed in the earlier trial-500 validation. ALSS improves most reported cases, with positive improvement in 15 of 16 reported rows and 13 of 14 unique operating conditions. The worst case shows only a small degradation of $-0.50\%$, while the best case reaches $33.79\%$ improvement. This supports the interpretation that the selected ALSS configuration is generally beneficial for the tested Z5 Scenario 3 setting, but it also confirms that ALSS should not be described as universally harmless.
 
 \subsection{Coupling-Level Comparison}
 
@@ -216,7 +266,7 @@ Positive cases & 7/7 & 6/7 \\
 \end{tabular}
 \end{table}
 
-The improvement is stronger under mutual coupling. This supports the interpretation that ALSS is complementary to the Z5 geometry: the geometry reduces coupling-related bias, while ALSS reduces finite-snapshot lag-estimation variance.
+The coupling-level comparison is the central numerical evidence of the paper. Without mutual coupling, ALSS improves all seven unique conditions with a mean improvement of $5.60\%$. With mutual coupling enabled, ALSS improves six of seven unique conditions and increases the mean improvement to $13.92\%$. This does not prove that ALSS compensates mutual coupling directly. Rather, it supports the more conservative interpretation that Z5 geometry and ALSS act through complementary mechanisms: the geometry reduces sensitivity to short-spacing coupling effects, while ALSS reduces finite-snapshot lag-estimation variance before virtual covariance reconstruction.
 
 \subsection{Representative MUSIC Pseudospectrum}
 
@@ -225,7 +275,6 @@ The figure compares a representative no-coupling baseline, a coupled baseline, a
 For this realization, the no-coupling baseline localizes the two sources at $-20^\circ$ and $15^\circ$.
 Under mutual coupling, the baseline estimate exhibits a small peak-location shift near the positive-angle source.
 After ALSS regularization, the estimated peak returns to the true $15^\circ$ location.
-This example is not used as the primary statistical proof of performance; rather, it illustrates the mechanism behind the aggregate trial-1000 RMSE and improvement trends reported in the following subsections.
 
 \begin{figure}[t]
 \centering
@@ -234,6 +283,7 @@ This example is not used as the primary statistical proof of performance; rather
 \label{fig:music_pseudospectrum}
 \end{figure}
 
+This pseudospectrum is included as explanatory evidence, not as the primary statistical proof. A single realization cannot establish Monte Carlo performance. Its role is to connect the aggregate RMSE trends to the estimator mechanism: ALSS changes the coarray-domain correlation estimates used by the virtual covariance matrix, which can alter the MUSIC peak structure in a favorable way for some coupled realizations.
 
 \subsection{Improvement Versus SNR}
 
@@ -246,7 +296,7 @@ Fig.~\ref{fig:improvement_snr} shows the percentage RMSE improvement versus SNR 
 \label{fig:improvement_snr}
 \end{figure}
 
-The figure shows that the strongest improvement occurs under mutual coupling and moderate-to-high SNR.
+The SNR sweep shows that ALSS improvement is consistently positive in the no-coupling case and generally stronger in the coupled case as SNR increases. At very low SNR, noise dominates the covariance estimate and limits the benefit of lag-selective regularization. At moderate-to-high SNR, the lag-estimation structure becomes more informative, and shrinkage of low-confidence lags produces larger relative gains, especially under mutual coupling.
 
 \subsection{RMSE Under Mutual Coupling}
 
@@ -259,7 +309,7 @@ Fig.~\ref{fig:rmse_coupled} compares baseline and ALSS RMSE versus SNR when mutu
 \label{fig:rmse_coupled}
 \end{figure}
 
-The RMSE curve confirms that ALSS provides the strongest reduction in the coupled case, especially as SNR increases.
+The coupled RMSE curve provides the most direct performance view for the challenging condition. ALSS reduces RMSE relative to baseline Coarray MUSIC for most tested SNR values under $c_1=0.3$. The reduction is most visible at moderate-to-high SNR, consistent with the improvement summary in Table~\ref{tab:coupling_summary}. The single weak case at the lowest SNR is consistent with the conservative conclusion that ALSS is beneficial in most, but not all, tested conditions.
 
 \subsection{Improvement Versus Snapshots}
 
@@ -272,20 +322,27 @@ Fig.~\ref{fig:improvement_snapshots} shows the improvement versus snapshot count
 \label{fig:improvement_snapshots}
 \end{figure}
 
-The result indicates that ALSS remains beneficial across the tested snapshot counts, with stronger improvement under mutual coupling.
+The snapshot sweep confirms that the selected ALSS configuration remains useful across the tested finite-snapshot range. The improvement remains positive for both $M=32$ and $M=128$, with the $M=64$ point appearing in both the SNR and snapshot sweeps. This supports the use of the trial-1000 result as the primary conference-paper evidence while leaving broader snapshot regimes for future validation.
 
 \section{Discussion and Limitations}
 
-The trial-1000 result supports a conservative claim: for the Z5 sparse array under Scenario 3, ALSS with \texttt{ar1}, $\tau=0.25$, and $L_c=3$ improves Coarray MUSIC RMSE in most tested conditions. The improvement is stronger when mutual coupling is enabled.
+The trial-1000 result supports a conservative claim: for the canonical Z5 sparse array under Scenario 3, ALSS with \texttt{ar1}, $\tau=0.25$, and $L_c=3$ improves Coarray MUSIC RMSE in most tested conditions. The improvement is stronger when mutual coupling is enabled, which supports the interpretation that geometry-level coupling robustness and post-geometry lag regularization can be complementary.
 
-This result should not be overgeneralized. It does not prove that ALSS is universally optimal across all sparse arrays, nor does it prove that ALSS is harmless in every trial. The result is strongest as a Z5-specific Scenario 3 validation. Broader validation across additional geometries and scenarios is required before making a paper-wide universality claim.
+The role of Z5 is important in this interpretation. The array suppresses the most coupling-sensitive small lags, with $w(1)=0$ and $w(2)=0$, but its coarray-weight distribution is still uneven. Therefore, Z5 is a useful test case for the ALSS hypothesis: a geometry can be favorable for coupling robustness while still leaving finite-snapshot variance in low-confidence coarray lag estimates. ALSS targets this second effect.
+
+This paper does not claim that ALSS changes the physical antenna pattern, modifies the sensor geometry, or directly estimates the mutual-coupling matrix. ALSS is applied only after sample covariance estimation and coarray lag averaging. Its effect is estimator-level: it regularizes the lag estimates used to form the virtual covariance matrix for Coarray MUSIC.
+
+Several limitations remain. First, this paper is Z5-focused and does not yet establish performance across the full family of weight-constrained sparse arrays. Second, the MUSIC pseudospectrum example is representative and explanatory; it is not the primary statistical proof. Third, the mutual-coupling model is simulation-based and should not be interpreted as a complete electromagnetic antenna model. Fourth, only one fixed ALSS configuration is evaluated in the main trial-1000 result. A broader parameter-sensitivity study is required before making general tuning recommendations.
+
+Future work should extend the validation to additional geometries such as Z1, Z3, Z4, and Z6, evaluate a wider range of SNR and snapshot regimes, and compare multiple ALSS parameter choices. A hardware-oriented extension is also natural because the processing chain contains FPGA-friendly kernels, including sample covariance formation, coarray lag averaging, virtual Toeplitz covariance reconstruction, and MUSIC spectrum scanning.
 
 \section{Conclusion}
 
-This paper presented a focused trial-1000 validation of Adaptive Lag-Selective Shrinkage for the Z5 sparse array under Scenario 3 conditions. ALSS improved RMSE in 15 of 16 reported rows, with mean improvement of approximately $9.85\%$ over reported rows and $9.76\%$ over unique conditions. The improvement was stronger under mutual coupling, with approximately $13.92\%$ mean improvement compared with approximately $5.60\%$ in the no-coupling case.
+This paper presented a focused trial-1000 validation of Adaptive Lag-Selective Shrinkage for the canonical Z5 sparse array under Scenario 3 conditions. The results show that ALSS improves Coarray MUSIC RMSE in 15 of 16 reported rows and 13 of 14 unique operating conditions, with mean improvement of approximately $9.85\%$ over reported rows and $9.76\%$ over unique conditions.
 
-The results support ALSS as a promising post-geometry coarray denoising layer for Z5 under the tested conditions. Future work will extend the validation to additional sparse-array geometries, compare ALSS parameter choices more broadly, and evaluate hardware-friendly implementations of the covariance and coarray-processing pipeline.
+The strongest observation is the coupling-dependent trend. Under no mutual coupling, ALSS achieves approximately $5.60\%$ mean improvement across unique conditions. Under mutual coupling with $c_1=0.3$, the mean improvement increases to approximately $13.92\%$. This supports the central interpretation of the paper: Z5 geometry reduces sensitivity to coupling-related short-spacing effects, while ALSS provides a complementary statistical regularization layer for finite-snapshot coarray lag estimates.
 
+The paper does not claim universal ALSS optimality or full multi-geometry validation. Instead, it establishes a compact and reproducible Z5-focused conference result. Future work will extend the study to additional weight-constrained sparse arrays, evaluate ALSS parameter sensitivity, and investigate hardware-friendly acceleration of the covariance and coarray-processing pipeline using FPGA/HLS methods.
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
