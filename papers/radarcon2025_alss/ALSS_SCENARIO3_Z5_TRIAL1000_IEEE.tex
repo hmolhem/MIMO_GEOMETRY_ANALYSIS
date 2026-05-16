@@ -186,12 +186,13 @@ The geometry suppresses the most coupling-sensitive small lags, with $w(1)=0$ an
 
 The fixed ALSS configuration used throughout the trial-1000 experiment is
 \begin{equation}
-    \texttt{alss\_mode} = \texttt{ar1},
-    \qquad
-    \texttt{alss\_tau} = 0.25,
-    \qquad
-    \texttt{alss\_coreL} = 3.
+\begin{aligned}
+    \texttt{alss\_mode}  &= \texttt{ar1},\\
+    \texttt{alss\_tau}   &= 0.25,\\
+    \texttt{alss\_coreL} &= 3.
+\end{aligned}
 \end{equation}
+
 These parameters are not tuned separately for each SNR, snapshot count, or coupling condition. This fixed-parameter design is intentionally conservative because the goal is to test whether one selected ALSS configuration gives stable improvement across the reported Scenario 3 sweep.
 
 \subsection{Coupling Conditions}
