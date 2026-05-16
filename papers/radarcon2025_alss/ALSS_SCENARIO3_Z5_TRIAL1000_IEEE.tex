@@ -218,6 +218,23 @@ Positive cases & 7/7 & 6/7 \\
 
 The improvement is stronger under mutual coupling. This supports the interpretation that ALSS is complementary to the Z5 geometry: the geometry reduces coupling-related bias, while ALSS reduces finite-snapshot lag-estimation variance.
 
+\subsection{Representative MUSIC Pseudospectrum}
+
+Fig.~\ref{fig:music_pseudospectrum} provides an estimator-level view of the Scenario 3 Z5 behavior.
+The figure compares a representative no-coupling baseline, a coupled baseline, and a coupled ALSS-enhanced Coarray MUSIC spectrum.
+For this realization, the no-coupling baseline localizes the two sources at $-20^\circ$ and $15^\circ$.
+Under mutual coupling, the baseline estimate exhibits a small peak-location shift near the positive-angle source.
+After ALSS regularization, the estimated peak returns to the true $15^\circ$ location.
+This example is not used as the primary statistical proof of performance; rather, it illustrates the mechanism behind the aggregate trial-1000 RMSE and improvement trends reported in the following subsections.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{../../results/figures/paper1_conceptual/z5_music_pseudospectrum_comparison.png}
+\caption{Representative Z5 Coarray MUSIC pseudospectrum comparison for no coupling, mutual coupling, and mutual coupling with ALSS. The example illustrates how ALSS regularization of coarray lag estimates can stabilize the MUSIC peak location in a coupled realization.}
+\label{fig:music_pseudospectrum}
+\end{figure}
+
+
 \subsection{Improvement Versus SNR}
 
 Fig.~\ref{fig:improvement_snr} shows the percentage RMSE improvement versus SNR for both coupling conditions.
