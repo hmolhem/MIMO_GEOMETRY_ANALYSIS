@@ -503,6 +503,26 @@ python core\analysis_scripts\run_benchmarks.py `
   --alss-coreL 3
 ```
 
+### ALSS Parameter Meaning
+
+The Paper 1 ALSS configuration uses three fixed parameters:
+
+```text
+alss-mode  = ar1
+alss-tau   = 0.25
+alss-coreL = 3
+```
+
+| Parameter | Value | Meaning |
+|---|---:|---|
+| `alss-mode` | `ar1` | Uses an AR(1)-style lag prior instead of shrinking unreliable lags directly toward zero. This provides a smoother and less aggressive regularization target. |
+| `alss-tau` | `0.25` | Controls the shrinkage strength. In this project, `0.25` is used as a conservative fixed value across the reported Scenario 3 sweeps. |
+| `alss-coreL` | `3` | Protects the core lags from shrinkage. In this configuration, lags from `0` through `3` are preserved, while lower-confidence lags beyond the protected region may be regularized. |
+
+In simple terms, the selected configuration applies a conservative AR(1)-based ALSS correction to low-confidence coarray lags while preserving the most important core-lag structure used by Coarray MUSIC.
+
+The same fixed ALSS parameters are used across the reported Scenario 3 sweeps. They are not tuned separately for each SNR, snapshot count, or coupling condition.
+
 ### Generate Paper-Facing Figures
 
 ```powershell
