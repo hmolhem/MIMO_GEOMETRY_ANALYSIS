@@ -1,7 +1,7 @@
 # MIMO Geometry Analysis Framework
 
 [![CI](https://github.com/hmolhem/MIMO_GEOMETRY_ANALYSIS/actions/workflows/ci.yml/badge.svg)](https://github.com/hmolhem/MIMO_GEOMETRY_ANALYSIS/actions/workflows/ci.yml)
-[![Python Version](https://img.shields.io/badge/python-3.13.0-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## Overview
@@ -406,17 +406,41 @@ MIMO_GEOMETRY_ANALYSIS/
 
 ### Prerequisites
 
-Recommended environment:
+Recommended local environment:
 
 ```text
-Python 3.13
-Windows PowerShell
+Conda environment: DS
+Python version: 3.12.x
+Tested locally with: Python 3.12.12
+Operating system: Windows / PowerShell
+```
+
+Core scientific packages:
+
+```text
 NumPy
 Pandas
 Matplotlib
 SciPy
+```
+
+Development and quality-check tools:
+
+```text
 pytest
 ruff
+```
+
+`pytest` is used to run the project test suite.  
+`ruff` is used for code-style and lint checks.
+
+The environment name `DS` is the local development environment used for this project. Other users may choose a different Conda environment name, but Python 3.12.x is recommended.
+
+Create and activate the Conda environment:
+
+```powershell
+conda create -n DS python=3.12
+conda activate DS
 ```
 
 Install dependencies:
@@ -427,16 +451,12 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-Activate local environment if using a project venv:
+Verify the environment:
 
 ```powershell
-.\activate_venv.bat
-```
-
-or:
-
-```powershell
-.\activate_venv.ps1
+python --version
+python -m pytest --version
+python -m ruff --version
 ```
 
 ---
