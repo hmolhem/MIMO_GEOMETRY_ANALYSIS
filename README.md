@@ -8,6 +8,21 @@
 
 A comprehensive Python framework for analyzing MIMO radar array geometries through **difference coarray analysis**. This toolkit enables researchers to evaluate virtual array properties, weight distributions, and Direction-of-Arrival (DOA) estimation performance across various array configurations including ULA, Nested, and specialized Z1-Z6 arrays.
 
+## Current Research Paper: ALSS for Z5 Coarray MUSIC
+
+This repository currently includes a polished IEEE-style conference draft for Paper 1:
+
+**Adaptive Lag-Selective Shrinkage for Robust Coarray MUSIC in Weight-Constrained Sparse Arrays**
+
+The paper studies Adaptive Lag-Selective Shrinkage (ALSS) as a post-geometry coarray-domain denoising method for the canonical Z5 sparse array under Scenario 3. The paper uses 1000 Monte Carlo trials and evaluates Coarray MUSIC performance with and without mutual coupling.
+
+Paper source:
+
+```text
+papers/radarcon2025_alss/ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
+```
+
+
 ### Key Features
 
 - ✅ **8+ Array Implementations**: ULA, Nested, TCA, ePCA, Z1-Z6 specialized geometries
