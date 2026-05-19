@@ -1,4 +1,4 @@
-# MIMO Array Geometry Analysis Framework
+# MIMO Geometry Analysis Framework
 
 [![CI](https://github.com/hmolhem/MIMO_GEOMETRY_ANALYSIS/actions/workflows/ci.yml/badge.svg)](https://github.com/hmolhem/MIMO_GEOMETRY_ANALYSIS/actions/workflows/ci.yml)
 [![Python Version](https://img.shields.io/badge/python-3.13.0-blue.svg)](https://www.python.org/downloads/)
@@ -6,15 +6,35 @@
 
 ## Overview
 
-A comprehensive Python framework for analyzing MIMO radar array geometries through **difference coarray analysis**. This toolkit enables researchers to evaluate virtual array properties, weight distributions, and Direction-of-Arrival (DOA) estimation performance across various array configurations including ULA, Nested, and specialized Z1-Z6 arrays.
+This repository is a research-grade Python framework for sparse-array direction-of-arrival (DOA) estimation, difference-coarray analysis, mutual-coupling-aware simulation, and Adaptive Lag-Selective Shrinkage (ALSS) regularization.
 
-## Current Research Paper: ALSS for Z5 Coarray MUSIC
+The current research focus is:
+
+```text
+Weight-constrained sparse arrays
+        +
+finite-snapshot coarray lag regularization
+        +
+Coarray MUSIC
+        +
+future FPGA/HLS acceleration path
+```
+
+The project is intended to support:
+
+- reproducible DOA experiments,
+- IEEE-style paper development,
+- sparse-array geometry analysis,
+- ALSS method validation,
+- GitHub portfolio presentation for DSP / FPGA / radar signal-processing roles.
+
+---
+
+## Current Paper 1: ALSS for Z5 Coarray MUSIC
 
 This repository currently includes a polished IEEE-style conference draft for Paper 1:
 
 **Adaptive Lag-Selective Shrinkage for Robust Coarray MUSIC in Weight-Constrained Sparse Arrays**
-
-The paper studies Adaptive Lag-Selective Shrinkage (ALSS) as a post-geometry coarray-domain denoising method for the canonical Z5 sparse array under Scenario 3. The paper uses 1000 Monte Carlo trials and evaluates Coarray MUSIC performance with and without mutual coupling.
 
 Paper source:
 
@@ -22,508 +42,582 @@ Paper source:
 papers/radarcon2025_alss/ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
 ```
 
+References:
 
-### Key Features
+```text
+papers/radarcon2025_alss/references.bib
+```
 
-- ✅ **8+ Array Implementations**: ULA, Nested, TCA, ePCA, Z1-Z6 specialized geometries
-- ✅ **Standardized 7-Step Analysis Pipeline**: Automated difference coarray computation and performance evaluation
-- ✅ **DOA Estimation Module** (NEW): Complete MUSIC implementation with signal simulation and metrics
-- ✅ **Spatial MUSIC Algorithm**: High-resolution angle estimation using signal/noise subspace decomposition
-- ✅ **Mutual Coupling Support**: Optional electromagnetic coupling modeling for realistic hardware scenarios
-- ✅ **Publication-Ready Visualization**: Automated plotting with LaTeX-ready figures (300 DPI)
-- ✅ **Comprehensive Benchmarking**: CLI tools for parameter sweeps and statistical analysis
-- ✅ **100% Test Coverage**: Validated across all 15 array configurations
+### Paper 1 Scope
+
+Paper 1 is deliberately focused:
+
+```text
+Array:              canonical Z5 sparse array
+Scenario:           Scenario 3
+Estimator:          Coarray MUSIC
+Regularization:     ALSS
+Trials:             1000 Monte Carlo trials
+Coupling cases:     c1 = 0.0 and c1 = 0.3
+ALSS mode:          ar1
+ALSS tau:           0.25
+ALSS coreL:         3
+```
+
+This paper does **not** claim that ALSS is universally optimal for all sparse arrays. It establishes a compact, reproducible, Z5-focused conference result.
+
+### Main Scientific Idea
+
+Weight-constrained sparse arrays reduce mutual-coupling sensitivity through geometry. For example, the Z5 geometry suppresses critical small-lag coarray weights such as:
+
+```text
+w(1) = 0
+w(2) = 0
+```
+
+However, the same sparse coarray-weight distribution can produce unequal finite-snapshot estimation variance across lags. ALSS is introduced as a post-geometry coarray-domain regularization step:
+
+```text
+X -> Rhat_x -> rhat[l] -> rhat_ALSS[l] -> Rhat_v -> Coarray MUSIC
+```
+
+Important distinction:
+
+- Z5 geometry helps reduce coupling-related sensitivity.
+- ALSS helps reduce finite-snapshot lag-estimation variance.
+- ALSS does not modify the physical antenna pattern.
+- ALSS does not modify the physical sensor geometry.
+- ALSS does not explicitly estimate or invert the mutual-coupling matrix.
 
 ---
 
-## 🚀 Quick Start
+## Paper 1 Main Result
+
+The Scenario 3 Z5 trial-1000 result shows:
+
+```text
+Reported rows:                         16
+Unique operating conditions:           14
+Mean improvement over reported rows:   approximately +9.85%
+Mean improvement over unique cases:    approximately +9.76%
+Worst improvement:                     approximately -0.50%
+Best improvement:                      approximately +33.79%
+Positive reported rows:                15 / 16
+Positive unique conditions:            13 / 14
+```
+
+Coupling-level summary:
+
+```text
+No coupling, c1 = 0.0:
+  Unique conditions:      7
+  Mean improvement:       approximately +5.60%
+  Positive conditions:    7 / 7
+
+Mutual coupling, c1 = 0.3:
+  Unique conditions:      7
+  Mean improvement:       approximately +13.92%
+  Positive conditions:    6 / 7
+```
+
+Conservative paper claim:
+
+```text
+For the canonical Z5 sparse array under Scenario 3, ALSS with ar1/tau=0.25/coreL=3 improves Coarray MUSIC RMSE in most tested conditions, with stronger average gains under mutual coupling than under no-coupling conditions.
+```
+
+Avoid overclaiming:
+
+```text
+Do not claim ALSS always improves every trial.
+Do not claim universal ALSS optimality across all arrays.
+Do not claim ALSS physically changes the antenna pattern.
+Do not claim full multi-geometry validation from the Z5-only result.
+```
+
+---
+
+## Key Paper 1 Files
+
+### Main Paper
+
+```text
+papers/radarcon2025_alss/ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
+papers/radarcon2025_alss/references.bib
+```
+
+### Trial-1000 Data
+
+```text
+results/paper_experiments/scenario3_z5_ar1_tau025_trial1000.csv
+```
+
+### Trial-1000 Figures
+
+```text
+results/figures/scenario3_trial1000/scenario3_improvement_vs_snr.png
+results/figures/scenario3_trial1000/scenario3_rmse_vs_snr_c1_0p3.png
+results/figures/scenario3_trial1000/scenario3_improvement_vs_snapshots.png
+```
+
+Additional archived figures:
+
+```text
+results/figures/scenario3_trial1000/scenario3_rmse_vs_snr_c1_0p0.png
+results/figures/scenario3_trial1000/scenario3_harmlessness_vs_snr.png
+```
+
+### Conceptual Figures
+
+```text
+results/figures/paper1_conceptual/z5_sensor_geometry.png
+results/figures/paper1_conceptual/z5_coarray_weights.png
+results/figures/paper1_conceptual/z5_music_pseudospectrum_comparison.png
+results/figures/paper1_conceptual/README.md
+```
+
+### Figure and Result Documentation
+
+```text
+docs/scenario3_trial1000_figure_index.md
+docs/paper1_conceptual_figure_plan.md
+docs/paper_to_code_map.md
+docs/experiment_summary.md
+```
+
+### Figure Generation Tools
+
+```text
+tools/plot_paper1_z5_conceptual_figures.py
+tools/plot_paper1_z5_music_pseudospectrum.py
+tools/plot_scenario3_results.py
+```
+
+---
+
+## Reproducing Paper 1 Figures
+
+### Generate Z5 Conceptual Figures
+
+```powershell
+python tools\plot_paper1_z5_conceptual_figures.py
+```
+
+Expected conceptual outputs:
+
+```text
+results/figures/paper1_conceptual/z5_sensor_geometry.png
+results/figures/paper1_conceptual/z5_coarray_weights.png
+```
+
+The canonical Z5 positions used for Paper 1 are:
+
+```text
+[0, 5, 8, 11, 14, 17, 21]
+```
+
+The expected small-lag weights reported by the script are:
+
+```text
+w(1) = 0
+w(2) = 0
+w(3) = 4
+w(4) = 1
+w(5) = 1
+```
+
+### Generate Representative MUSIC Pseudospectrum Figure
+
+```powershell
+python tools\plot_paper1_z5_music_pseudospectrum.py
+```
+
+Expected output:
+
+```text
+results/figures/paper1_conceptual/z5_music_pseudospectrum_comparison.png
+```
+
+Representative pseudospectrum case:
+
+```text
+True DOAs:      [-20.0, 15.0]
+SNR:            15 dB
+Snapshots:      64
+Coupling:       c1 = 0.3
+Selected seed:  0
+ALSS mode:      ar1
+ALSS tau:       0.25
+ALSS coreL:     3
+```
+
+Script-reported estimates:
+
+```text
+No coupling / baseline:  [-20.0, 15.0]
+Coupled / baseline:      [-20.0, 14.9]
+Coupled / ALSS:          [-20.0, 15.0]
+```
+
+Scientific role:
+
+```text
+This figure is explanatory.
+It is not the primary statistical proof.
+The trial-1000 RMSE and improvement plots remain the primary quantitative evidence.
+```
+
+### Generate Scenario 3 Trial-1000 Figures
+
+```powershell
+python tools\plot_scenario3_results.py
+```
+
+Expected output directory:
+
+```text
+results/figures/scenario3_trial1000/
+```
+
+Paper-facing figures:
+
+```text
+scenario3_improvement_vs_snr.png
+scenario3_rmse_vs_snr_c1_0p3.png
+scenario3_improvement_vs_snapshots.png
+```
+
+---
+
+## Compiling the IEEE Paper
+
+Use PowerShell from the repository root.
+
+```powershell
+$tmp = "$env:TEMP\alss_trial1000_compile_readme_check"
+New-Item -ItemType Directory -Force $tmp
+Copy-Item papers\radarcon2025_alss\references.bib $tmp\references.bib
+
+Push-Location papers\radarcon2025_alss
+
+pdflatex `
+    -interaction=nonstopmode `
+    -output-directory $tmp `
+    ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
+
+Pop-Location
+
+Push-Location $tmp
+bibtex ALSS_SCENARIO3_Z5_TRIAL1000_IEEE
+Pop-Location
+
+Push-Location papers\radarcon2025_alss
+
+pdflatex `
+    -interaction=nonstopmode `
+    -output-directory $tmp `
+    ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
+
+pdflatex `
+    -interaction=nonstopmode `
+    -output-directory $tmp `
+    ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
+
+Pop-Location
+```
+
+Check the log:
+
+```powershell
+Select-String -Path "$env:TEMP\alss_trial1000_compile_readme_check\ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.log" -Pattern "Output written|Fatal error|Emergency stop|Citation.*undefined|Reference.*undefined|undefined references|not found|LaTeX Warning"
+```
+
+Open the PDF:
+
+```powershell
+Start-Process msedge "$env:TEMP\alss_trial1000_compile_readme_check\ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.pdf"
+```
+
+---
+
+## Project Structure
+
+```text
+MIMO_GEOMETRY_ANALYSIS/
+├── README.md
+├── requirements.txt
+├── requirements-dev.txt
+├── pyproject.toml
+├── pytest.ini
+│
+├── geometry_processors/
+│   ├── bases_classes.py
+│   ├── ula_processors.py
+│   ├── nested_processor.py
+│   ├── sna_processor.py
+│   └── z*_processor.py
+│
+├── core/
+│   ├── radarpy/
+│   │   ├── algorithms/
+│   │   │   ├── alss.py
+│   │   │   ├── coarray.py
+│   │   │   └── coarray_music.py
+│   │   ├── signal/
+│   │   │   ├── doa_sim_core.py
+│   │   │   └── mutual_coupling.py
+│   │   └── metrics/
+│   │
+│   └── analysis_scripts/
+│
+├── tools/
+│   ├── plot_paper1_z5_conceptual_figures.py
+│   ├── plot_paper1_z5_music_pseudospectrum.py
+│   └── plot_scenario3_results.py
+│
+├── docs/
+│   ├── scenario3_trial1000_figure_index.md
+│   ├── paper1_conceptual_figure_plan.md
+│   ├── paper_to_code_map.md
+│   ├── experiment_summary.md
+│   └── Technical_Proposal_Roadmap.tex
+│
+├── papers/
+│   └── radarcon2025_alss/
+│       ├── ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
+│       └── references.bib
+│
+├── results/
+│   ├── paper_experiments/
+│   └── figures/
+│       ├── scenario3_trial1000/
+│       └── paper1_conceptual/
+│
+├── tests/
+├── scripts/
+├── notebooks/
+├── data/
+└── configs/
+```
+
+---
+
+## Setup
 
 ### Prerequisites
 
-- **Python**: 3.13.0 (managed via pyenv)
-- **OS**: Windows 10/11 with PowerShell
-- **Dependencies**: NumPy, Pandas, Matplotlib (see `requirements.txt`)
+Recommended environment:
 
-### Installation
+```text
+Python 3.13
+Windows PowerShell
+NumPy
+Pandas
+Matplotlib
+SciPy
+pytest
+ruff
+```
+
+Install dependencies:
 
 ```powershell
-# Activate virtual environment (Recommended: Batch file)
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+Activate local environment if using a project venv:
+
+```powershell
 .\activate_venv.bat
+```
 
-# Alternative: PowerShell script (requires RemoteSigned execution policy)
+or:
+
+```powershell
 .\activate_venv.ps1
-
-# Verify installation
-python --version  # Should show Python 3.13.0
-pip list | Select-String "numpy|pandas|matplotlib"
 ```
 
-**Note:** Use the provided activation scripts (`activate_venv.bat` or `activate_venv.ps1`) which include automatic verification. The batch file (`.bat`) is recommended as it works without execution policy restrictions.
+---
 
-### Your First Analysis
+## Running Tests
+
+Run the available test suite:
 
 ```powershell
-# Interactive graphical demo (recommended for beginners)
-python analysis_scripts/graphical_demo.py
-
-# CLI analysis for Z5 array with 7 sensors
-python analysis_scripts/run_z5_demo.py --N 7 --markdown
-
-# Run DOA estimation benchmark (with automatic venv activation)
-.\run_benchmarks_with_venv.ps1 -Arrays Z5 -N 7 -Trials 100
-
-# Alternative: Batch file runner
-run_benchmarks_with_venv.bat Z5 7 100
+python -m pytest -v
 ```
 
-**Expected Output:**
-- **Terminal**: Detailed coarray analysis (positions, weights, holes, performance metrics)
-- **Plots**: 6-panel visualization saved to `results/plots/`
-- **CSV**: Performance summary tables in `results/summaries/`
-
----
-
-## 📐 Core Concept: Difference Coarray
-
-MIMO arrays create **virtual sensors** through pairwise differences of physical sensor positions:
-
-```
-Physical array: [0, 5, 8, 11, 14, 17, 21] (N=7 sensors)
-                          ↓
-Difference coarray: All pairs (nᵢ - nⱼ) → N² = 49 differences
-                          ↓
-Virtual array: 17 unique positions spanning [-21, 21]
-```
-
-**Key Benefit**: Virtual aperture size determines **maximum detectable sources**:
-- **Degrees of Freedom (DOF)**: K_max = floor(L/2)
-- **Z5 Example**: 7 physical sensors → 43 virtual sensors → 21 sources detectable
-
----
-
-## 📊 Project Structure
-
-```
-MIMO_GEOMETRY_ANALYSIS/
-├── README.md                    # This file
-├── CONTRIBUTING.md              # Contribution guidelines
-├── pyproject.toml               # Package configuration & Ruff settings
-├── pytest.ini                   # Test configuration
-├── requirements.txt             # Runtime dependencies
-├── requirements-dev.txt         # Development dependencies
-│
-├── .github/
-│   ├── copilot-instructions.md # AI assistant guidance
-│   └── workflows/
-│       └── ci.yml              # CI/CD pipeline (pytest + ruff)
-│
-├── geometry_processors/         # Array processor implementations
-│   ├── bases_classes.py        # Abstract BaseArrayProcessor framework
-│   ├── ula_processors.py       # Uniform Linear Array
-│   ├── nested_processor.py     # Nested arrays
-│   ├── sna_processor.py        # SNA3 arrays
-│   └── z[1-6]_processor.py     # Z-family weight-constrained arrays
-│
-├── core/radarpy/               # Core radar algorithms
-│   ├── algorithms/             # MUSIC, ALSS, coarray processing
-│   ├── signal/                 # Signal generation & mutual coupling
-│   ├── metrics/                # Performance evaluation
-│   └── analysis_scripts/       # Benchmark runners
-│
-├── doa_estimation/             # DOA estimation module (NEW)
-│   ├── music.py               # MUSIC algorithm implementation
-│   ├── README.md              # DOA documentation
-│   └── QUICK_START.md         # 5-minute DOA guide
-│
-├── analysis_scripts/           # Interactive demos & analysis tools
-│   ├── graphical_demo.py      # Menu-driven analysis
-│   ├── run_*_demo.py          # CLI demos for each array type
-│   ├── methods_demo.py        # Validate all processor methods
-│   ├── core/                  # Wrapper scripts
-│   └── demos/                 # Example usage
-│
-├── scripts/                    # Automation & batch processing
-│   ├── activate_venv.bat/.ps1 # Virtual environment activation
-│   ├── run_benchmarks_with_venv.* # Automated benchmark runners
-│   └── cleanup_*.ps1          # Repository maintenance
-│
-├── tools/                      # Development & analysis utilities
-│   ├── add_docstrings.py      # Docstring audit tool
-│   ├── plot_paper_benchmarks.py # Plotting utilities
-│   └── analyze_svd.py         # Matrix analysis
-│
-├── src/mimo_geom_analysis/     # Package structure (for distribution)
-│   ├── __init__.py
-│   ├── runners.py             # Benchmark execution framework
-│   └── paper_experiments.py   # Paper-ready experiment configs
-│
-├── tests/                      # Test suite
-│   ├── test_geometry_processors_smoke.py
-│   ├── test_coarray_mv.py
-│   ├── test_runners.py
-│   └── test_paper_experiments.py
-│
-├── docs/                       # Comprehensive documentation
-│   ├── guides/                # Usage guides & tutorials
-│   ├── development/           # Development documentation
-│   └── summaries/             # Project summaries
-│
-├── papers/                     # Publication materials
-│   └── radarcon2025_alss/     # RadarCon 2025 ALSS paper
-│
-├── results/                    # Auto-generated outputs (gitignored)
-│   ├── plots/                 # Visualization outputs
-│   ├── bench/                 # Benchmark results
-│   └── summaries/             # Performance tables
-│
-├── archives/                   # Historical backups (gitignored)
-│   ├── garbage_archive_*.zip
-│   └── tests_backup_*/
-│
-├── data/                       # Input datasets
-├── notebooks/                  # Jupyter notebooks
-└── configs/                    # Configuration files
-```
-
----
-
-## 📖 Usage Examples
-
-### Geometry Analysis
+Run Ruff checks if configured:
 
 ```powershell
-# Interactive menu
-python analysis_scripts/graphical_demo.py
-
-# CLI with options
-python analysis_scripts/run_z5_demo.py --N 7 --markdown --save-csv
-python analysis_scripts/run_ula_demo.py --M 4 --save-json
-python analysis_scripts/run_z4_demo_.py --N 7 --assert --show-weights
+python -m ruff check .
 ```
 
-### DOA Estimation Benchmarks
+This repository is under active research development. Test coverage and validation should be interpreted from the current CI and test outputs, not from a fixed coverage claim.
+
+---
+
+## Example Usage
+
+### Run Z5 Geometry Demo
 
 ```powershell
-# Basic benchmark
-python core/analysis_scripts/run_benchmarks.py \
-  --arrays Z5 --N 7 --algs CoarrayMUSIC \
-  --snr 0,5,10,15 --snapshots 64 --delta 13 --trials 200 \
-  --alss on --alss-mode zero --alss-tau 1.0 --alss-coreL 3
-
-# Paper-ready benchmarks with CIs
-python scripts/run_paper_benchmarks.py \
-  --array Z5 --N 7 --trials 400 \
-  --deltas 10,13,20,30,45 --alss-mode zero
-
-# Generate publication plots
-python tools/plot_paper_benchmarks.py results/bench/*.csv --all
+python analysis_scripts\run_z5_demo.py --N 7 --markdown
 ```
 
-### Programmatic Usage
-
-```python
-from geometry_processors.z5_processor_ import Z5ArrayProcessor
-
-# Create and analyze
-processor = Z5ArrayProcessor(N=7, d=1.0)
-results = processor.run_full_analysis()
-
-# Access results
-print(f"Max detectable sources: {results.max_detectable_sources}")
-print(results.performance_summary_table.to_markdown(index=False))
-```
-
-### DOA Estimation with MUSIC (NEW)
-
-```bash
-# Quick start - estimate 3 sources
-python analysis_scripts/run_doa_demo.py --array Z5 --N 7 --K 3
-
-# SNR performance analysis
-python analysis_scripts/run_doa_demo.py --mode snr-comparison --array Z5 --N 7 --K 3
-
-# Compare multiple arrays
-python analysis_scripts/run_doa_demo.py --mode array-comparison --arrays ULA,Z5,Z6 --N 7 --K 3
-
-# Test all array types (100% validation)
-python analysis_scripts/test_all_arrays_doa.py
-```
-
-**Programmatic DOA:**
-```python
-from geometry_processors.z5_processor import Z5ArrayProcessor
-from doa_estimation.music import MUSICEstimator
-
-# Get coarray from geometry
-processor = Z5ArrayProcessor(N=7, d=1.0)
-results = processor.run_full_analysis()
-coarray = results.unique_differences
-
-# Run MUSIC estimation
-estimator = MUSICEstimator(sensor_positions=coarray, wavelength=2.0)
-signals, true_angles = estimator.simulate_signals(K_sources=3, snr_db=20)
-estimated_angles, spectrum = estimator.estimate(signals, K_sources=3)
-
-print(f"True:      {true_angles}")
-print(f"Estimated: {estimated_angles}")
-# Output: Perfect estimation with high SNR!
-```
-
-**Documentation:**
-- Quick Start: `doa_estimation/QUICK_START.md` (5-minute guide)
-- Full Guide: `doa_estimation/README.md` (600+ lines)
-- Technical: `doa_estimation/IMPLEMENTATION_SUMMARY.md`
-
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** | Installation, first analysis, troubleshooting |
-| **[API_REFERENCE.md](docs/API_REFERENCE.md)** | Complete API documentation with examples |
-| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | System design, data flow, component overview |
-| **[BENCHMARKING_GUIDE.md](docs/BENCHMARKING_GUIDE.md)** | Running benchmarks, interpreting results |
-| **[TUTORIAL_01.md](docs/tutorials/TUTORIAL_01_ARRAY_COMPARISON.md)** | Compare ULA, Nested, and Z5 arrays |
-| **[TUTORIAL_02.md](docs/tutorials/TUTORIAL_02_DOA_ESTIMATION.md)** | DOA estimation with MUSIC |
-| **[TUTORIAL_03.md](docs/tutorials/TUTORIAL_03_ALSS_REGULARIZATION.md)** | Using ALSS for improved performance |
-
----
-
-## 🎯 Research Applications
-
-This framework supports cutting-edge research in MIMO radar array design and DOA estimation algorithms.
-
-### Use Cases
-
-**Array Geometry Research:**
-- Novel sparse array topology design and optimization
-- Difference coarray analysis for virtual aperture characterization
-- Weight distribution studies for improved DOF
-- Comparative analysis across array families (ULA, Nested, Coprime, Z-family)
-
-**DOA Estimation Research:**
-- MUSIC algorithm performance evaluation
-- Coarray-based subspace methods
-- Finite-sample regularization techniques (ALSS)
-- Mutual coupling compensation strategies
-- Low-SNR and closely-spaced source scenarios
-
-**Signal Processing Research:**
-- Spatial smoothing on coarray manifolds
-- Subspace decomposition with regularization
-- Performance bounds and theoretical limits
-- Monte Carlo simulation frameworks
-
-### Published Work: RadarCon 2025
-
-**Paper**: *"Adaptive Lag-Selective Shrinkage for MIMO Coarray DOA Estimation"*  
-**Authors**: Hossein Molhem et al.  
-**Status**: Under Review
-
-**Contributions:**
-- Novel ALSS regularization for covariance matrix estimation
-- Lag-selective shrinkage addressing finite-sample effects
-- Comprehensive performance evaluation across array types
-
-**Key Results** (from 1000-trial validation, seed=42):
-- **Z5 Array Performance**: 45% gap reduction under mutual coupling (7.4° → 7.1° RMSE)
-- **Z1 Array Performance**: 30% gap reduction (7.2° → 7.3° baseline)
-- **Z3_2 Array Performance**: 20% gap reduction (11.9° → 12.4° baseline)
-- **Statistical Significance**: p < 0.001 (Z5), p < 0.01 (Z3_2), p < 0.01 (Z1)
-- **Conditioning**: 2.5× better matrix conditioning (κ(Rv) vs κ(Rx))
-- **Dataset**: 3,000 Monte Carlo trials (1000 per array type) across multiple conditions
-- **Test Conditions**: SNR=10dB, M=200 snapshots, MCM (c1=0.3, α=0.5)
-- **Coverage**: 3 Z-family arrays, 4 experimental conditions, mutual coupling modeling
-- **Reproducibility**: Complete code with fixed random seed (42), publication-ready plots
-
-**Paper Materials** (in `papers/radarcon2025_alss/`):
-- LaTeX source and compiled PDF
-- All figures (publication-ready, 300 DPI)
-- Benchmark data and processing scripts
-- Reproduction guide
-
-### Array Performance Summary
-
-Comparative performance for N=7 sensors at d=λ/2 spacing:
-
-| Array | N | Virtual (Mv) | DOF (K_max) | Holes | Aperture | Key Feature |
-|-------|---|--------------|-------------|-------|----------|-------------|
-| **ULA** | 7 | 13 | 6 | Many | 6λ/2 | Baseline reference |
-| **Nested** | 7 | 25 | 12 | 0 | 12λ/2 | Optimal DOF |
-| **Coprime** | 7 | 27 | 13 | 0 | 15λ/2 | Coprime structure |
-| **Z1** | 7 | 25 | 12 | 0 | 12λ/2 | Weight constraints |
-| **Z3_1** | 7 | 33 | 16 | 0 | 16λ/2 | Improved constraints |
-| **Z3_2** | 7 | 33 | 16 | 0 | 16λ/2 | Alternative Z3 |
-| **Z4** | 7 | 39 | 19 | 0 | 19λ/2 | w(1)=w(2)=0 |
-| **Z5** | 7 | 43 | 21 | 0 | 21λ/2 | Advanced w(1)=w(2)=0 |
-| **Z6** | 7 | 43 | 21 | 0 | 21λ/2 | Ultimate constraints |
-
-**Note**: K_max = floor(L/2) where L is the contiguous coarray segment length. All Z-family arrays eliminate unit and two-unit lags for improved small-lag weight distribution.
-
----
-
-## 🛠️ Development
-
-### Documentation standard
-
-All public and private methods across processors implement Google-style docstrings and include the author tag for attribution:
-
-
-- Style: Google-style (Args/Returns/Raises)
-- Author tag: `Author: Hossein Molhem`
-- Coverage: 100% of functions/methods documented; verified by an automated audit tool (`tools/add_docstrings.py`).
-
-
-Example snippet:
-
-```python
-def analyze_coarray(self) -> None:
-  """
-  Analyze the difference coarray and populate derived metrics.
-
-  Author: Hossein Molhem
-
-  Returns:
-    None
-  """
-  ...
-```
-
-### Mutual Coupling Feature (NEW - Nov 2025)
-
-Model electromagnetic interactions between array elements:
-
-```python
-from core.radarpy.signal.mutual_coupling import generate_mcm
-from core.radarpy.signal.doa_sim_core import run_music
-
-# Generate coupling matrix
-C = generate_mcm(7, positions, model="exponential", c1=0.3, alpha=0.5)
-
-# Run DOA estimation with coupling
-result = run_music(positions, 1.0, [10, -15], 2, 10, 100, 
-                   coupling_matrix=C)
-```
-
-**Features:**
-- ✅ Optional (easy on/off control)
-- ✅ Multiple models: exponential, Toeplitz, measured data
-- ✅ Works with all arrays and algorithms
-- ✅ Backward compatible
-
-See **[docs/MUTUAL_COUPLING_GUIDE.md](docs/MUTUAL_COUPLING_GUIDE.md)** for complete documentation.
-
-### Adding New Arrays
-
-1. Create processor in `geometry_processors/`
-2. Implement 8 abstract methods from `BaseArrayProcessor`
-3. Add demo script in `analysis_scripts/`
-4. Update `graphical_demo.py` menu
-
-See **[docs/DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md)** for details.
-
-### Running Tests
+### Run DOA Benchmark
 
 ```powershell
-# Unit tests
-python -m pytest core/tests/ -v
-
-# Validate all processors
-python analysis_scripts/methods_demo.py
-
-# Check results
-type results\method_test_log.txt
+python core\analysis_scripts\run_benchmarks.py `
+  --arrays Z5 `
+  --N 7 `
+  --algs CoarrayMUSIC `
+  --snr 0,5,10,15 `
+  --snapshots 64 `
+  --trials 200 `
+  --alss on `
+  --alss-mode ar1 `
+  --alss-tau 0.25 `
+  --alss-coreL 3
 ```
 
-### Running Benchmarks with Venv
-
-The project provides automated benchmark runners that handle virtual environment activation:
+### Generate Paper-Facing Figures
 
 ```powershell
-# PowerShell runner (with parameters)
-.\run_benchmarks_with_venv.ps1 -Arrays "Z5" -N 7 -Trials 100
-
-# With mutual coupling enabled
-.\run_benchmarks_with_venv.ps1 -Arrays "Z5" -N 7 -Trials 100 -WithCoupling
-
-# Batch runner (positional arguments)
-run_benchmarks_with_venv.bat Z5 7 100
-run_benchmarks_with_venv.bat Z5 7 100 coupling
+python tools\plot_scenario3_results.py
+python tools\plot_paper1_z5_conceptual_figures.py
+python tools\plot_paper1_z5_music_pseudospectrum.py
 ```
 
-**See full guide**: [docs/BENCHMARK_EXECUTION_GUIDE.md](docs/BENCHMARK_EXECUTION_GUIDE.md)
+---
+
+## Research Positioning
+
+The project follows this research chain:
+
+```text
+Weight-constrained sparse-array geometry
+        ↓
+difference-coarray lag estimation
+        ↓
+finite-snapshot variance imbalance
+        ↓
+ALSS coarray-domain regularization
+        ↓
+virtual covariance reconstruction
+        ↓
+Coarray MUSIC
+        ↓
+future FPGA/HLS acceleration
+```
+
+The near-term research objective is to finalize Paper 1 as a conservative, reproducible Z5-focused IEEE-style conference paper.
+
+The longer-term roadmap includes:
+
+1. validation across additional geometries such as Z1, Z3, Z4, and Z6,
+2. ALSS parameter sensitivity studies,
+3. ALSS-II development after independent validation,
+4. FPGA/HLS acceleration of selected kernels:
+   - sample covariance matrix formation,
+   - coarray lag averaging,
+   - virtual Toeplitz covariance reconstruction,
+   - MUSIC pseudospectrum scanning.
 
 ---
 
-## ⚠️ Important Limitations
+## Relationship to FPGA/HLS Work
 
-- **Root-MUSIC on virtual arrays**: Experimental; use grid-based CoarrayMUSIC for published results
-- **Z6 CoarrayMUSIC**: Produces fragmented coarray (Mv=3); unsuitable for virtual array DOA
-- **Spatial aliasing**: Z5/Z6 have wide apertures; ensure λ ≥ 2d to avoid aliasing
+This repository connects naturally to FPGA acceleration because the DOA processing chain contains hardware-friendly kernels.
+
+Candidate acceleration path:
+
+```text
+Sample covariance matrix formation
+        ↓
+coarray lag averaging
+        ↓
+ALSS lag regularization
+        ↓
+Toeplitz covariance reconstruction
+        ↓
+MUSIC spectrum scan
+```
+
+The existing SCM/HLS project provides a foundation for the first stage of this pipeline. Future work should evaluate fixed-point arithmetic, memory partitioning, pipelining, and PS/PL integration for a deployable embedded DOA pipeline.
 
 ---
 
-## 📄 License
+## Limitations
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Current Paper 1 limitations:
+
+- Paper 1 is Z5-focused.
+- The representative MUSIC pseudospectrum is explanatory, not statistical proof.
+- The mutual-coupling model is simulation-based and not a full electromagnetic antenna model.
+- Only one fixed ALSS configuration is used in the primary trial-1000 result.
+- Broader multi-geometry validation is future work.
+- ALSS-II is not part of the current Paper 1 claim.
+
+Repository limitations:
+
+- Some older scripts and documentation may remain from earlier development phases.
+- Result paths and APIs may evolve as the repository is cleaned for publication.
+- Claims should be tied to committed scripts, archived CSVs, generated figures, and paper-to-code documentation.
 
 ---
 
-## 🙏 Acknowledgments
+## Citation
 
-- **Theory**: Difference coarray (Vaidyanathan & Pal, 2010)
-- **ALSS**: Original contribution for finite-sample regularization
-- **Tools**: NumPy, Pandas, Matplotlib, SciPy
+A formal citation will be added after submission or publication.
 
----
-
-## 📞 Citation
+Working citation placeholder:
 
 ```bibtex
-@inproceedings{your2025alss,
-  title={Adaptive Lag-Selective Shrinkage for MIMO Coarray DOA Estimation},
-  author={Your Name},
-  booktitle={IEEE RadarCon},
-  year={2025}
+@misc{molhem2026alss_z5,
+  title  = {Adaptive Lag-Selective Shrinkage for Robust Coarray MUSIC in Weight-Constrained Sparse Arrays},
+  author = {Hossein Molhem},
+  year   = {2026},
+  note   = {Research draft, MIMO_GEOMETRY_ANALYSIS repository}
 }
 ```
 
 ---
 
-## 📚 References
+## License
 
-1. P. Pal and P. P. Vaidyanathan, "Nested arrays," *IEEE Trans. Signal Process.*, 2010.
-2. C.-L. Liu and P. P. Vaidyanathan, "Spatial smoothing in coarray MUSIC," *IEEE Signal Process. Lett.*, 2015.
+This project is released under the MIT License. See:
 
----
-
-**Last Updated:** 2025-11-06  
-**Version:** 1.0.0  
-**Status:** Production-Ready
-
----
-
-## Developer setup (local)
-
-Recommended minimal steps to set up a development environment locally (Windows PowerShell):
-
-```powershell
-# 1) Create a new venv (recommended path: envs/mimo-geom-dev or your own location)
-python -m venv .\envs\mimo-geom-dev
-
-# 2) Activate venv (PowerShell)
-.\envs\mimo-geom-dev\Scripts\Activate.ps1
-
-# 3) Upgrade pip and install dev requirements
-python -m pip install --upgrade pip
-pip install -r requirements-dev.txt
-
-# 4) (Optional) Install package in editable mode when pyproject/setup is present
-# pip install -e .
+```text
+LICENSE
 ```
 
-Notes:
-- Use `requirements-dev.txt` for test/lint/runtime dev deps (pytest, ruff, numpy, pandas).
-- We intentionally do not track virtualenvs in git. If you accidentally committed a venv, remove it from tracking with `git rm -r --cached <venv-path>` and add it to `.gitignore`.
+---
 
+## Acknowledgments
+
+This research builds on foundational work in:
+
+- MUSIC and subspace-based DOA estimation,
+- nested and coprime sparse arrays,
+- difference-coarray processing,
+- mutual-coupling-aware sparse-array design,
+- covariance shrinkage and regularization,
+- FPGA/HLS acceleration for radar signal processing.
+
+The current Paper 1 specifically builds on the idea that weight-constrained sparse-array geometry can reduce mutual-coupling sensitivity, while ALSS adds a complementary finite-snapshot statistical denoising layer.
+
+---
+
+## Current Status
+
+```text
+Status: active research repository
+Current focus: Paper 1 ALSS/Z5 IEEE-style conference draft
+Primary result: Scenario 3 Z5 trial-1000 validation
+Next step: README cleanup, final paper visual review, and reproducibility check
+```
+
+Last updated: May 2026
