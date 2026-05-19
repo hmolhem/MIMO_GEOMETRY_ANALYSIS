@@ -626,13 +626,25 @@ Working citation placeholder:
 
 ---
 
-## License
+## Licensing and Academic Use
 
-This project is released under the MIT License. See:
+The source code in this repository is released under the MIT License, as defined in the root [`LICENSE`](LICENSE) file, unless otherwise stated.
+
+The paper manuscript, LaTeX source, generated paper figures, result tables, academic text, and paper-facing documentation are © Hossein Molhem. All rights reserved unless a separate license is explicitly provided.
+
+You may cite, discuss, and link to this repository. You may not submit the manuscript, figures, paper text, or paper-facing results as your own work. Reuse of paper text, figures, tables, or academic claims requires proper citation and permission where applicable.
+
+The public Git history, commits, pull requests, result files, and archived figures are part of the project provenance and establish the development timeline of this work.
+
+In practical terms:
 
 ```text
-LICENSE
+Code and reusable software utilities: MIT License
+Paper manuscript and LaTeX source:    © Hossein Molhem, all rights reserved
+Generated paper figures/tables:       © Hossein Molhem, all rights reserved
+Academic text and claims:             Cite properly; do not submit as your own work
 ```
+
 
 ---
 
