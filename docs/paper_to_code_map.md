@@ -18,31 +18,67 @@ This file is part of the clean rebuild process for making the repository paper-r
 
 ## 2. Active Paper Version
 
-Current active paper candidate:
+Current active paper source:
 
 ```text
-papers/radarcon2025_alss/ALSS_IEEE_Paper_Complete.tex
+papers/radarcon2025_alss/ALSS_SCENARIO3_Z5_TRIAL1000_IEEE.tex
+```
+
+Current bibliography file:
+
+```text
+papers/radarcon2025_alss/references.bib
+```
+
+Paper-facing result file:
+
+```text
+results/paper_experiments/scenario3_z5_ar1_tau025_trial1000.csv
+```
+
+Paper-facing figure directory:
+
+```text
+results/figures/scenario3_trial1000/
 ```
 
 Status:
 
 ```text
-Needs verification
+Scenario 3 Z5 trial-1000 result is confirmed and paper-facing.
 ```
 
-Important consistency issue:
+The current Paper 1 scope is deliberately limited:
 
 ```text
-The paper mentions 1000 Monte Carlo trials, but some comments/results may still correspond to 100-trial runs.
-This must be resolved before the paper is treated as final.
+Array:              canonical Z5 sparse array
+Scenario:           Scenario 3
+Estimator:          Coarray MUSIC
+Regularization:     ALSS
+Trials:             1000 Monte Carlo trials
+Coupling cases:     c1 = 0.0 and c1 = 0.3
+ALSS mode:          ar1
+ALSS tau:           0.25
+ALSS coreL:         3
 ```
 
-Required action:
+Main conservative claim:
 
-- identify which figures/tables were generated using 1000 trials
-- identify which figures/tables were generated using 100 trials
-- regenerate results if needed
-- update paper claims if regeneration is not performed
+```text
+For the canonical Z5 sparse array under Scenario 3, ALSS with ar1/tau=0.25/coreL=3 improves Coarray MUSIC RMSE in most tested conditions, with stronger average gains under mutual coupling than under no-coupling conditions.
+```
+
+Important limitation:
+
+```text
+This paper does not claim universal ALSS optimality, full multi-geometry validation, or physical antenna-pattern correction.
+```
+
+Historical note:
+
+```text
+Earlier audit notes in this repository mentioned unresolved 100-trial, 500-trial, and 1000-trial consistency checks. For the current Paper 1 draft, the paper-facing Scenario 3 Z5 result is the archived 1000-trial CSV listed above.
+```
 
 ---
 
