@@ -45,7 +45,9 @@ Author: Hossein Molhem
 Date: May 2026
 """
 from __future__ import annotations
+
 from typing import Dict
+
 import numpy as np
 
 
@@ -140,7 +142,8 @@ def apply_alss(
     if mode == "ar1":
         _, r_prior = _fit_ar1_prior(r_lag, coreL=coreL, eps=eps)
     else:
-        r_prior = (lambda ell: 0.0)
+        def r_prior(ell: int) -> complex:
+            return 0.0
 
     r_out: Dict[int, complex] = {}
     # work on nonnegative lags and reflect to negative to preserve Hermitian structure
